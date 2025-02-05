@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const FRICTION_FREE = 0.995;
     const ZOOM_SPEED = 0.15;
     const MIN_SCALE = 0.01;
-    const MAX_SCALE = 1.2;
+    const MAX_SCALE = 5;
     const PAN_FRICTION = 0.95;
 
     // Function to add a new interactive object
@@ -345,6 +345,97 @@ document.addEventListener('DOMContentLoaded', () => {
     container.appendChild(uiContainer);
     document.body.appendChild(container);
 
-    // Add initial earth object
-    addInteractiveObject('earth.png');
+    // Add initial earth object and moon object
+    const earthImage = addInteractiveObject('earth.png');
+    
+    // Moon is about 27% the size of Earth
+    const MOON_SIZE_MULTIPLIER = 0.27;
+    
+    const moonImage = addInteractiveObject('moon.png', {
+        maxWidth: `${80 * MOON_SIZE_MULTIPLIER}%`,  // Moon size relative to Earth
+        maxHeight: `${80 * MOON_SIZE_MULTIPLIER}%`
+    });
+    
+    // Position moon to the right of Earth
+    moonImage.style.transform = `translateX(${17000}px)`; // Initial position
+
+    // Create and add the select earth button
+    function createSelectionButton(text, color, position, onClick) {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.className = 'ui-element';
+        button.style.position = 'absolute';
+        button.style.left = '20px';
+        button.style.top = position;
+        button.style.padding = '10px 20px';
+        button.style.backgroundColor = color;
+        button.style.border = 'none';
+        button.style.borderRadius = '5px';
+        button.style.cursor = 'pointer';
+        button.style.color = 'white';
+        button.style.fontWeight = 'bold';
+        button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+
+        // Add hover effect
+        const darkenColor = (color) => {
+            const r = parseInt(color.substr(1,2), 16) * 0.9;
+            const g = parseInt(color.substr(3,2), 16) * 0.9;
+            const b = parseInt(color.substr(5,2), 16) * 0.9;
+            return `#${Math.round(r).toString(16).padStart(2,'0')}${Math.round(g).toString(16).padStart(2,'0')}${Math.round(b).toString(16).padStart(2,'0')}`;
+        };
+        
+        const darkerColor = darkenColor(color);
+        button.addEventListener('mouseover', () => {
+            button.style.backgroundColor = darkerColor;
+        });
+        button.addEventListener('mouseout', () => {
+            button.style.backgroundColor = color;
+        });
+
+        button.addEventListener('click', onClick);
+        return button;
+    }
+
+    // Create Earth button
+    const selectEarthButton = createSelectionButton(
+        'Select Earth', 
+        '#87CEEB', 
+        '20px',
+        () => {
+            // Reset all transform-related state
+            state.rotation = 0;
+            state.currentScale = 1;
+            state.offsetX = 0;
+            state.offsetY = 0;
+            state.rotationSpeed = 0;
+            state.zoomVelocity = 0;
+            state.zoomMomentum = 0;
+            state.panSpeedX = 0;
+            state.panSpeedY = 0;
+            updateTransform();
+        }
+    );
+
+    // Create Moon button
+    const selectMoonButton = createSelectionButton(
+        'Select Moon', 
+        '#87CEEB', 
+        '70px',  // Position below Earth button
+        () => {
+            // Calculate position to center on moon
+            state.rotation = 0;
+            state.currentScale = 1;
+            state.offsetX = -17000;  // Negative of the moon's X translation to center it
+            state.offsetY = 0;
+            state.rotationSpeed = 0;
+            state.zoomVelocity = 0;
+            state.zoomMomentum = 0;
+            state.panSpeedX = 0;
+            state.panSpeedY = 0;
+            updateTransform();
+        }
+    );
+
+    addUIElement(selectEarthButton);
+    addUIElement(selectMoonButton);
 });
