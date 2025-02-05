@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     container.style.height = '100vh';
     container.style.overflow = 'hidden';
     container.style.position = 'relative';
+    container.style.backgroundColor = 'black';
 
     // Create background container
     const backgroundContainer = document.createElement('div');
@@ -58,6 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
     uiContainer.style.width = '100%';
     uiContainer.style.height = '100%';
     uiContainer.style.pointerEvents = 'none'; // Allow clicks to pass through by default
+
+    // Add Elysium logo
+    const elysiumLogo = document.createElement('img');
+    elysiumLogo.src = 'elysium_logo.png';  // Replace with your image path
+    elysiumLogo.style.position = 'fixed';
+    elysiumLogo.style.bottom = '20px';   // Distance from bottom
+    elysiumLogo.style.left = '20px';     // Distance from left
+    elysiumLogo.style.transformOrigin = 'bottom left';
+    elysiumLogo.style.scale = '0.3';
+    elysiumLogo.style.zIndex = '1000';   // Ensure it stays on top
 
     // State variables
     const state = {
@@ -399,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Create Earth button
     const selectEarthButton = createSelectionButton(
         'Select Earth', 
-        '#87CEEB', 
+        '#0080be', 
         '20px',
         () => {
             // Reset all transform-related state
@@ -419,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Create Moon button
     const selectMoonButton = createSelectionButton(
         'Select Moon', 
-        '#87CEEB', 
+        '#0080be', 
         '70px',  // Position below Earth button
         () => {
             // Calculate position to center on moon
@@ -438,4 +449,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addUIElement(selectEarthButton);
     addUIElement(selectMoonButton);
+    addUIElement(elysiumLogo);
 });
