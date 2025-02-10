@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Create main container
+    // create main container
     const container = document.createElement('div');
     container.style.display = 'flex';
     container.style.justifyContent = 'center';
@@ -9,40 +9,40 @@ document.addEventListener('DOMContentLoaded', () => {
     container.style.position = 'relative';
     container.style.backgroundColor = 'black';
 
-    // Create background container
+    // create background container
     const backgroundContainer = document.createElement('div');
     backgroundContainer.style.position = 'absolute';
     backgroundContainer.style.top = '50%';
     backgroundContainer.style.left = '50%';
     backgroundContainer.style.transform = 'translate(-50%, -50%)';
     
-    // Function to update background size
+    // function to update background size
     function updateBackgroundSize() {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        // Make the background 150% of the largest viewport dimension
+        // make background 150% of the viewing dimensions
         const size = Math.max(viewportWidth, viewportHeight) * 1.5;
         backgroundContainer.style.width = `${size}px`;
         backgroundContainer.style.height = `${size}px`;
     }
     
-    // Create background image
+    // create background image
     const backgroundImg = document.createElement('img');
     backgroundImg.src = 'background.jpg';
     backgroundImg.style.width = '100%';
     backgroundImg.style.height = '100%';
     backgroundImg.style.objectFit = 'contain';
     
-    // Add background image to container
+    // add background image to container
     backgroundContainer.appendChild(backgroundImg);
     
-    // Initial size setup
+    // initial size setup
     updateBackgroundSize();
     
-    // Update size when window resizes
+    // update size when window resizes
     window.addEventListener('resize', updateBackgroundSize);
 
-    // Create a container for rotating/zoomable objects
+    // create a container for zoomable objects
     const objectsContainer = document.createElement('div');
     objectsContainer.style.position = 'absolute';
     objectsContainer.style.width = '100%';
@@ -51,32 +51,29 @@ document.addEventListener('DOMContentLoaded', () => {
     objectsContainer.style.justifyContent = 'center';
     objectsContainer.style.alignItems = 'center';
 
-    // Create UI container (immune to transformations)
+    // create UI container (immune to transformations)
     const uiContainer = document.createElement('div');
     uiContainer.style.position = 'absolute';
     uiContainer.style.top = '0';
     uiContainer.style.left = '0';
     uiContainer.style.width = '100%';
     uiContainer.style.height = '100%';
-    uiContainer.style.pointerEvents = 'none'; // Allow clicks to pass through by default
+    uiContainer.style.pointerEvents = 'none';
 
-    // Add Elysium logo
+    // add Elysium logo
     const elysiumLogo = document.createElement('img');
-    elysiumLogo.src = 'elysium_logo.png';  // Replace with your image path
+    elysiumLogo.src = 'elysium_logo.png';
     elysiumLogo.style.position = 'fixed';
-    elysiumLogo.style.bottom = '20px';   // Distance from bottom
-    elysiumLogo.style.left = '20px';     // Distance from left
+    elysiumLogo.style.bottom = '20px';   // distance from bottom
+    elysiumLogo.style.left = '20px';     // distance from left
     elysiumLogo.style.transformOrigin = 'bottom left';
     elysiumLogo.style.scale = '0.3';
-    elysiumLogo.style.zIndex = '1000';   // Ensure it stays on top
+    elysiumLogo.style.zIndex = '1000';   // ensure it stays on top
 
-    // State variables
+    // state variables
     const state = {
-        rotation: 0,
-        isMouseDown: false,      // Tracks if mouse button is currently pressed
-        isDragging: false,       // Tracks if we're in a drag operation
-        lastAngle: 0,
-        rotationSpeed: 0,
+        isMouseDown: false,
+        isDragging: false,
         currentScale: 1,
         targetScale: 1,
         zoomVelocity: 0,
@@ -95,14 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
         panSpeedY: 0
     };
 
-    // Constants
-    const FRICTION_FREE = 0.995;
-    const ZOOM_SPEED = 0.15;
-    const MIN_SCALE = 0.01;
-    const MAX_SCALE = 5;
-    const PAN_FRICTION = 0.95;
+    // constants for zoom scale
+    const MIN_SCALE = 0.0001;
+    const MAX_SCALE = 2500;
 
-    // Function to add a new interactive object
+    // function to add a new interactive object
     function addInteractiveObject(imgSrc, options = {}) {
         const img = document.createElement('img');
         img.src = imgSrc;
@@ -124,41 +118,41 @@ document.addEventListener('DOMContentLoaded', () => {
         return img;
     }
 
-    // Function to add UI element
+    // function to add UI element
     function addUIElement(element) {
-        element.style.pointerEvents = 'auto'; // Enable interactions for this element
+        element.style.pointerEvents = 'auto'; // enable interactions for this element
         uiContainer.appendChild(element);
         return element;
     }
 
-    // Update transform for all objects
+    // update transform for all objects
     function updateTransform() {
-        backgroundContainer.style.transform = `translate(-50%, -50%) rotate(${state.rotation}deg)`;
-        objectsContainer.style.transform = `translate(${state.offsetX}px, ${state.offsetY}px) rotate(${state.rotation}deg) scale(${state.currentScale})`;
+        backgroundContainer.style.transform = `translate(-50%, -50%)`;
+        objectsContainer.style.transform = `translate(${state.offsetX}px, ${state.offsetY}px) scale(${state.currentScale})`;
     }
 
-    // Constants for zoom physics
-    const ZOOM_MOMENTUM_DECAY = 0.92;  // How quickly momentum decreases
-    const ZOOM_VELOCITY_SCALE = 0.004; // How much wheel events affect velocity
-    const ZOOM_MIN_VELOCITY = 0.0001;  // Minimum velocity before stopping
-    const MAX_ZOOM_VELOCITY = 0.1;     // Maximum velocity cap
+    // constants for zoom physics
+    const ZOOM_MOMENTUM_DECAY = 0.92;  // how quickly momentum decreases
+    const ZOOM_VELOCITY_SCALE = 0.004; // how much wheel events affect velocity
+    const ZOOM_MIN_VELOCITY = 0.0001;  // minimum velocity before stopping
+    const MAX_ZOOM_VELOCITY = 0.1;     // maximum velocity cap
 
-    // Smooth zoom animation with momentum
+    // smooth zoom animation with momentum
     function animateZoom() {
         if (!state.isAnimating) return;
 
-        // Apply momentum to velocity
+        // apply momentum to velocity
         state.zoomVelocity += state.zoomMomentum;
         state.zoomMomentum *= ZOOM_MOMENTUM_DECAY;
 
-        // Apply velocity to scale
+        // apply velocity to scale
         const prevScale = state.currentScale;
         state.currentScale *= (1 + state.zoomVelocity);
         
-        // Clamp scale within bounds
+        // clamp scale within bounds
         state.currentScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, state.currentScale));
         
-        // Update position to maintain zoom center
+        // update position to maintain zoom center
         const mouseXRelative = state.zoomOriginX - container.offsetWidth / 2;
         const mouseYRelative = state.zoomOriginY - container.offsetHeight / 2;
         const scaleRatio = state.currentScale / prevScale;
@@ -166,10 +160,10 @@ document.addEventListener('DOMContentLoaded', () => {
         state.offsetX = scaleRatio * (state.offsetX - mouseXRelative) + mouseXRelative;
         state.offsetY = scaleRatio * (state.offsetY - mouseYRelative) + mouseYRelative;
 
-        // Apply decay to velocity
+        // apply decay to velocity
         state.zoomVelocity *= ZOOM_MOMENTUM_DECAY;
 
-        // Stop animation if movement is minimal
+        // stop animation if movement is minimal
         if (Math.abs(state.zoomVelocity) < ZOOM_MIN_VELOCITY && 
             Math.abs(state.zoomMomentum) < ZOOM_MIN_VELOCITY) {
             state.isAnimating = false;
@@ -182,36 +176,32 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(animateZoom);
     }
 
-    function lerp(start, end, t) {
-        return start * (1 - t) + end * t;
-    }
-
-    // Event Listeners
+    // event listeners
     document.addEventListener('wheel', (e) => {
         e.preventDefault();
 
-        // Update zoom origin
+        // update zoom origin
         state.zoomOriginX = e.clientX;
         state.zoomOriginY = e.clientY;
 
-        // Calculate time since last wheel event for momentum
+        // calculate time since last wheel event for momentum
         const currentTime = performance.now();
         const timeDelta = currentTime - state.lastZoomTime;
         state.lastZoomTime = currentTime;
 
-        // Calculate zoom direction and intensity
+        // calculate zoom direction and intensity
         const zoomDirection = e.deltaY > 0 ? -1 : 1;
         let zoomDelta = zoomDirection * ZOOM_VELOCITY_SCALE;
 
-        // Scale zoom delta based on time between events
+        // scale zoom delta based on time between events
         if (timeDelta > 0) {
             zoomDelta *= Math.min(1, 16 / timeDelta);
         }
 
-        // Add to momentum
+        // add to momentum
         state.zoomMomentum += zoomDelta;
 
-        // Clamp momentum to prevent excessive zooming
+        // clamp momentum to prevent excessive zooming
         state.zoomMomentum = Math.max(-MAX_ZOOM_VELOCITY, 
                             Math.min(MAX_ZOOM_VELOCITY, state.zoomMomentum));
 
@@ -221,12 +211,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, { passive: false });
 
-    // Add keyboard event listeners for space bar
+    // add keyboard event listeners for space bar
     document.addEventListener('keydown', (e) => {
         if (e.code === 'Space') {
             state.isSpacePressed = true;
             if (state.isMouseDown) {
-                // Switch to panning mode if mouse is already down
+                // switch to panning mode if mouse is already down
                 state.isPanning = true;
                 state.isDragging = true;
             }
@@ -238,17 +228,17 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keyup', (e) => {
         if (e.code === 'Space') {
             state.isSpacePressed = false;
-            // Always stop panning when space is released
+            // always stop panning when space is released
             state.isPanning = false;
             state.isDragging = false;
-            // Reset any ongoing inertia
+            // reset any ongoing inertia
             state.panSpeedX = 0;
             state.panSpeedY = 0;
             objectsContainer.style.cursor = 'default';
         }
     });
 
-    // Global mousedown handler
+    // global mousedown handler
     document.addEventListener('mousedown', (e) => {
         if (e.target.closest('.ui-element')) return;
         if (e.button !== 0) return;
@@ -261,56 +251,29 @@ document.addEventListener('DOMContentLoaded', () => {
             state.lastMouseX = e.clientX;
             state.lastMouseY = e.clientY;
             objectsContainer.style.cursor = 'grabbing';
-        } else {
-            state.isPanning = false;
-            const rect = container.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            let dx = e.clientX - centerX;
-            let dy = e.clientY - centerY;
-            state.lastAngle = Math.atan2(dy, dx);
         }
         
         e.preventDefault();
     });
 
     document.addEventListener('mousemove', (e) => {
-        // Only handle mouse movement if we're actively dragging
+        // only handle mouse movement if we're actively dragging
         if (!state.isDragging) return;
 
         if (state.isPanning) {
-            // Handle panning
+            // handle panning
             const dx = e.clientX - state.lastMouseX;
             const dy = e.clientY - state.lastMouseY;
 
             state.offsetX += dx;
             state.offsetY += dy;
 
-            // Set pan speed for inertia
+            // set pan speed for inertia
             state.panSpeedX = dx;
             state.panSpeedY = dy;
 
             state.lastMouseX = e.clientX;
             state.lastMouseY = e.clientY;
-        } else {
-            // Handle rotation
-            const rect = container.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            
-            let dx = e.clientX - centerX;
-            let dy = e.clientY - centerY;
-            let newAngle = Math.atan2(dy, dx);
-
-            let deltaAngle = newAngle - state.lastAngle;
-            if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
-            if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
-
-            let scaleFactor = 0.25;
-            state.rotation += (deltaAngle * 180) / Math.PI * scaleFactor;
-            state.rotationSpeed = (deltaAngle * 180) / Math.PI * scaleFactor;
-
-            state.lastAngle = newAngle;
         }
 
         updateTransform();
@@ -321,56 +284,61 @@ document.addEventListener('DOMContentLoaded', () => {
         state.isMouseDown = false;
         
         if (state.isPanning) {
-            // If space is still pressed, keep panning mode active but end the current drag
+            // if space is still pressed, keep panning mode active but end the current drag
             if (state.isSpacePressed) {
                 state.isDragging = false;
                 objectsContainer.style.cursor = 'move';
             } else {
-                // If space is not pressed, stop panning completely
+                // if space is not pressed, stop panning completely
                 state.isPanning = false;
                 state.isDragging = false;
                 objectsContainer.style.cursor = 'default';
             }
-        } else {
-            // Handle rotation inertia
-            function inertiaRotation() {
-                state.rotationSpeed *= FRICTION_FREE;
-                state.rotation += state.rotationSpeed;
-                updateTransform();
-
-                if (Math.abs(state.rotationSpeed) > 0.01) {
-                    requestAnimationFrame(inertiaRotation);
-                }
-            }
-
-            if (Math.abs(state.rotationSpeed) > 0.05) {
-                inertiaRotation();
-            }
-            state.isDragging = false;
         }
     });
 
-    // Append containers
+    // append containers
     container.appendChild(backgroundContainer);
     container.appendChild(objectsContainer);
     container.appendChild(uiContainer);
     document.body.appendChild(container);
 
-    // Add initial earth object and moon object
-    const earthImage = addInteractiveObject('earth.png');
-    
-    // Moon is about 27% the size of Earth
-    const MOON_SIZE_MULTIPLIER = 0.27;
-    
-    const moonImage = addInteractiveObject('moon.png', {
-        maxWidth: `${80 * MOON_SIZE_MULTIPLIER}%`,  // Moon size relative to Earth
-        maxHeight: `${80 * MOON_SIZE_MULTIPLIER}%`
+    // celestial scale constants
+    const KM_TO_PIXELS = 1/1000;
+
+    const SUN_DIAMETER = 1392000;
+    const EARTH_DIAMETER = 12742;
+    const MOON_DIAMETER = 3474;
+    const SUN_SIZE_PX = SUN_DIAMETER * KM_TO_PIXELS;
+    const EARTH_SIZE_PX = EARTH_DIAMETER * KM_TO_PIXELS;
+    const MOON_SIZE_PX = MOON_DIAMETER * KM_TO_PIXELS;
+
+    const EARTH_SUN_DISTANCE = 147600000;
+    const EARTH_MOON_DISTANCE = 384400;
+    const EARTH_DISTANCE_PX = EARTH_SUN_DISTANCE * KM_TO_PIXELS;
+    const MOON_DISTANCE_PX = EARTH_MOON_DISTANCE * KM_TO_PIXELS;
+
+    // sun
+    const sunImage = addInteractiveObject('sun.png', {
+        maxWidth: `${SUN_SIZE_PX}px`,
+        maxHeight: `${SUN_SIZE_PX}px`
     });
     
-    // Position moon to the right of Earth
-    moonImage.style.transform = `translateX(${17000}px)`; // Initial position
+    // earth
+    const earthImage = addInteractiveObject('earth.png', {
+        maxWidth: `${EARTH_SIZE_PX}px`,
+        maxHeight: `${EARTH_SIZE_PX}px`
+    });
+    earthImage.style.transform = `translateX(${EARTH_DISTANCE_PX}px)`;
 
-    // Create and add the select earth button
+    // moon
+    const moonImage = addInteractiveObject('moon.png', {
+        maxWidth: `${MOON_SIZE_PX}px`,
+        maxHeight: `${MOON_SIZE_PX}px`
+    });
+    moonImage.style.transform = `translateX(${EARTH_DISTANCE_PX + MOON_DISTANCE_PX}px)`;
+
+    // adding planet selection button
     function createSelectionButton(text, color, position, onClick) {
         const button = document.createElement('button');
         button.textContent = text;
@@ -387,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
         button.style.fontWeight = 'bold';
         button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
 
-        // Add hover effect
+        // hover effect
         const darkenColor = (color) => {
             const r = parseInt(color.substr(1,2), 16) * 0.9;
             const g = parseInt(color.substr(3,2), 16) * 0.9;
@@ -407,18 +375,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return button;
     }
 
-    // Create Earth button
-    const selectEarthButton = createSelectionButton(
-        'Select Earth', 
+    // sun button
+    const selectSunButton = createSelectionButton(
+        'Sun', 
         '#0080be', 
         '20px',
         () => {
-            // Reset all transform-related state
-            state.rotation = 0;
-            state.currentScale = 1;
+            state.currentScale = 1.7;
             state.offsetX = 0;
             state.offsetY = 0;
-            state.rotationSpeed = 0;
             state.zoomVelocity = 0;
             state.zoomMomentum = 0;
             state.panSpeedX = 0;
@@ -426,19 +391,15 @@ document.addEventListener('DOMContentLoaded', () => {
             updateTransform();
         }
     );
-
-    // Create Moon button
-    const selectMoonButton = createSelectionButton(
-        'Select Moon', 
+    
+    // earth button
+    const selectEarthButton = createSelectionButton(
+        'Earth', 
         '#0080be', 
-        '70px',  // Position below Earth button
+        '70px',
         () => {
-            // Calculate position to center on moon
-            state.rotation = 0;
-            state.currentScale = 1;
-            state.offsetX = -17000;  // Negative of the moon's X translation to center it
-            state.offsetY = 0;
-            state.rotationSpeed = 0;
+            state.currentScale = 80;
+            state.offsetX = -EARTH_DISTANCE_PX * state.currentScale;
             state.zoomVelocity = 0;
             state.zoomMomentum = 0;
             state.panSpeedX = 0;
@@ -447,6 +408,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     );
 
+    // moon button
+    const selectMoonButton = createSelectionButton(
+        'Moon', 
+        '#0080be', 
+        '120px',
+        () => {
+            state.currentScale = 250;
+            state.offsetX = -(EARTH_DISTANCE_PX + MOON_DISTANCE_PX) * state.currentScale;
+            state.zoomVelocity = 0;
+            state.zoomMomentum = 0;
+            state.panSpeedX = 0;
+            state.panSpeedY = 0;
+            updateTransform();
+        }
+    );
+
+    addUIElement(selectSunButton);
     addUIElement(selectEarthButton);
     addUIElement(selectMoonButton);
     addUIElement(elysiumLogo);
