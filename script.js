@@ -20,8 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateBackgroundSize() {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        // make background 150% of the viewing dimensions
-        const size = Math.max(viewportWidth, viewportHeight) * 1.5;
+        const size = Math.max(viewportWidth, viewportHeight) * 1;
         backgroundContainer.style.width = `${size}px`;
         backgroundContainer.style.height = `${size}px`;
     }
@@ -42,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // update size when window resizes
     window.addEventListener('resize', updateBackgroundSize);
 
-    // create a container for zoomable objects
+    // create a container for objects
     const objectsContainer = document.createElement('div');
     objectsContainer.style.position = 'absolute';
     objectsContainer.style.width = '100%';
@@ -50,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     objectsContainer.style.display = 'flex';
     objectsContainer.style.justifyContent = 'center';
     objectsContainer.style.alignItems = 'center';
+    objectsContainer.style.transition = 'transform 0.2s ease-out'; // smooth transition
 
     // create UI container (immune to transformations)
     const uiContainer = document.createElement('div');
@@ -64,37 +64,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const elysiumLogo = document.createElement('img');
     elysiumLogo.src = 'elysium_logo.png';
     elysiumLogo.style.position = 'fixed';
-    elysiumLogo.style.bottom = '20px';   // distance from bottom
-    elysiumLogo.style.left = '20px';     // distance from left
+    elysiumLogo.style.bottom = '20px';
+    elysiumLogo.style.left = '20px';
     elysiumLogo.style.transformOrigin = 'bottom left';
     elysiumLogo.style.scale = '0.3';
-    elysiumLogo.style.zIndex = '1000';   // ensure it stays on top
+    elysiumLogo.style.zIndex = '1000';
 
     // state variables
     const state = {
         isMouseDown: false,
         isDragging: false,
-        currentScale: 1,
-        targetScale: 1,
-        zoomVelocity: 0,
-        zoomMomentum: 0,
-        lastZoomTime: 0,
         offsetX: 0,
         offsetY: 0,
-        isAnimating: false,
-        zoomOriginX: 0,
-        zoomOriginY: 0,
-        isPanning: false,
-        isSpacePressed: false,
         lastMouseX: 0,
         lastMouseY: 0,
-        panSpeedX: 0,
-        panSpeedY: 0
+        scale: 1,
+        targetScale: 1
     };
-
-    // constants for zoom scale
-    const MIN_SCALE = 0.0001;
-    const MAX_SCALE = 2500;
 
     // function to add a new interactive object
     function addInteractiveObject(imgSrc, options = {}) {
@@ -120,123 +106,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // function to add UI element
     function addUIElement(element) {
-        element.style.pointerEvents = 'auto'; // enable interactions for this element
+        element.style.pointerEvents = 'auto';
         uiContainer.appendChild(element);
         return element;
     }
 
-    // update transform for all objects
+    // update transform for all objects with scale
     function updateTransform() {
         backgroundContainer.style.transform = `translate(-50%, -50%)`;
-        objectsContainer.style.transform = `translate(${state.offsetX}px, ${state.offsetY}px) scale(${state.currentScale})`;
+        objectsContainer.style.transform = `translate(${state.offsetX}px, ${state.offsetY}px) scale(${state.scale})`;
     }
 
-    // constants for zoom physics
-    const ZOOM_MOMENTUM_DECAY = 0.92;  // how quickly momentum decreases
-    const ZOOM_VELOCITY_SCALE = 0.004; // how much wheel events affect velocity
-    const ZOOM_MIN_VELOCITY = 0.0001;  // minimum velocity before stopping
-    const MAX_ZOOM_VELOCITY = 0.1;     // maximum velocity cap
-
-    // smooth zoom animation with momentum
-    function animateZoom() {
-        if (!state.isAnimating) return;
-
-        // apply momentum to velocity
-        state.zoomVelocity += state.zoomMomentum;
-        state.zoomMomentum *= ZOOM_MOMENTUM_DECAY;
-
-        // apply velocity to scale
-        const prevScale = state.currentScale;
-        state.currentScale *= (1 + state.zoomVelocity);
-        
-        // clamp scale within bounds
-        state.currentScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, state.currentScale));
-        
-        // update position to maintain zoom center
-        const mouseXRelative = state.zoomOriginX - container.offsetWidth / 2;
-        const mouseYRelative = state.zoomOriginY - container.offsetHeight / 2;
-        const scaleRatio = state.currentScale / prevScale;
-        
-        state.offsetX = scaleRatio * (state.offsetX - mouseXRelative) + mouseXRelative;
-        state.offsetY = scaleRatio * (state.offsetY - mouseYRelative) + mouseYRelative;
-
-        // apply decay to velocity
-        state.zoomVelocity *= ZOOM_MOMENTUM_DECAY;
-
-        // stop animation if movement is minimal
-        if (Math.abs(state.zoomVelocity) < ZOOM_MIN_VELOCITY && 
-            Math.abs(state.zoomMomentum) < ZOOM_MIN_VELOCITY) {
-            state.isAnimating = false;
-            state.zoomVelocity = 0;
-            state.zoomMomentum = 0;
-            return;
-        }
-
-        updateTransform();
-        requestAnimationFrame(animateZoom);
-    }
-
-    // event listeners
-    document.addEventListener('wheel', (e) => {
+    // zoom handling function
+    function handleZoom(e) {
         e.preventDefault();
-
-        // update zoom origin
-        state.zoomOriginX = e.clientX;
-        state.zoomOriginY = e.clientY;
-
-        // calculate time since last wheel event for momentum
-        const currentTime = performance.now();
-        const timeDelta = currentTime - state.lastZoomTime;
-        state.lastZoomTime = currentTime;
-
-        // calculate zoom direction and intensity
-        const zoomDirection = e.deltaY > 0 ? -1 : 1;
-        let zoomDelta = zoomDirection * ZOOM_VELOCITY_SCALE;
-
-        // scale zoom delta based on time between events
-        if (timeDelta > 0) {
-            zoomDelta *= Math.min(1, 16 / timeDelta);
-        }
-
-        // add to momentum
-        state.zoomMomentum += zoomDelta;
-
-        // clamp momentum to prevent excessive zooming
-        state.zoomMomentum = Math.max(-MAX_ZOOM_VELOCITY, 
-                            Math.min(MAX_ZOOM_VELOCITY, state.zoomMomentum));
-
-        if (!state.isAnimating) {
-            state.isAnimating = true;
-            animateZoom();
-        }
-    }, { passive: false });
-
-    // add keyboard event listeners for space bar
-    document.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') {
-            state.isSpacePressed = true;
-            if (state.isMouseDown) {
-                // switch to panning mode if mouse is already down
-                state.isPanning = true;
-                state.isDragging = true;
-            }
-            objectsContainer.style.cursor = 'move';
-            e.preventDefault();
-        }
-    });
-
-    document.addEventListener('keyup', (e) => {
-        if (e.code === 'Space') {
-            state.isSpacePressed = false;
-            // always stop panning when space is released
-            state.isPanning = false;
-            state.isDragging = false;
-            // reset any ongoing inertia
-            state.panSpeedX = 0;
-            state.panSpeedY = 0;
-            objectsContainer.style.cursor = 'default';
-        }
-    });
+    
+        const rect = container.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+    
+        // calculate position relative to center
+        const containerCenterX = rect.width / 2;
+        const containerCenterY = rect.height / 2;
+    
+        // calculate point to zoom around
+        const pointX = (mouseX - containerCenterX - state.offsetX) / state.scale;
+        const pointY = (mouseY - containerCenterY - state.offsetY) / state.scale;
+    
+        // calculate new scale
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        const newScale = Math.min(Math.max(state.scale * delta, 0.001), 1000);
+    
+        // calculate new offsets to maintain zoom point
+        state.offsetX = mouseX - containerCenterX - (pointX * newScale);
+        state.offsetY = mouseY - containerCenterY - (pointY * newScale);
+        
+        // update scale
+        state.scale = newScale;
+        state.targetScale = newScale;
+    
+        // update transform immediately
+        updateTransform();
+    }
+    container.addEventListener('wheel', handleZoom, { passive: false });
 
     // global mousedown handler
     document.addEventListener('mousedown', (e) => {
@@ -245,36 +157,23 @@ document.addEventListener('DOMContentLoaded', () => {
         
         state.isMouseDown = true;
         state.isDragging = true;
-        
-        if (state.isSpacePressed) {
-            state.isPanning = true;
-            state.lastMouseX = e.clientX;
-            state.lastMouseY = e.clientY;
-            objectsContainer.style.cursor = 'grabbing';
-        }
-        
+        state.lastMouseX = e.clientX;
+        state.lastMouseY = e.clientY;
+        objectsContainer.style.cursor = 'grabbing';
         e.preventDefault();
     });
 
     document.addEventListener('mousemove', (e) => {
-        // only handle mouse movement if we're actively dragging
         if (!state.isDragging) return;
 
-        if (state.isPanning) {
-            // handle panning
-            const dx = e.clientX - state.lastMouseX;
-            const dy = e.clientY - state.lastMouseY;
+        const dx = e.clientX - state.lastMouseX;
+        const dy = e.clientY - state.lastMouseY;
 
-            state.offsetX += dx;
-            state.offsetY += dy;
+        state.offsetX += dx;
+        state.offsetY += dy;
 
-            // set pan speed for inertia
-            state.panSpeedX = dx;
-            state.panSpeedY = dy;
-
-            state.lastMouseX = e.clientX;
-            state.lastMouseY = e.clientY;
-        }
+        state.lastMouseX = e.clientX;
+        state.lastMouseY = e.clientY;
 
         updateTransform();
     });
@@ -282,19 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mouseup', (e) => {
         if (!state.isMouseDown) return;
         state.isMouseDown = false;
-        
-        if (state.isPanning) {
-            // if space is still pressed, keep panning mode active but end the current drag
-            if (state.isSpacePressed) {
-                state.isDragging = false;
-                objectsContainer.style.cursor = 'move';
-            } else {
-                // if space is not pressed, stop panning completely
-                state.isPanning = false;
-                state.isDragging = false;
-                objectsContainer.style.cursor = 'default';
-            }
-        }
+        state.isDragging = false;
+        objectsContainer.style.cursor = 'default';
     });
 
     // append containers
@@ -306,23 +194,70 @@ document.addEventListener('DOMContentLoaded', () => {
     // celestial scale constants
     const KM_TO_PIXELS = 1/1000;
 
+    // zeroes added in some places to resize for smoothing (planets scales are not accurate)
     const SUN_DIAMETER = 1392000;
-    const EARTH_DIAMETER = 12742;
-    const MOON_DIAMETER = 3474;
+    const MERCURY_DIAMETER = 48790; // added a zero
+    const VENUS_DIAMETER = 121040; // added a zero
+    const EARTH_DIAMETER = 127420; // added a zero
+    const MOON_DIAMETER = 34740; // added a zero
+    const MARS_DIAMETER = 67790; // added a zero
+    const JUPITER_DIAMETER = 142984;
+    const SATURN_DIAMETER = 120536;
+    const URANUS_DIAMETER = 511180; // added a zero
+    const NEPTUNE_DIAMETER = 492440; // added a zero
+    const PLUTO_DIAMETER = 2377000; // added three zeroes
     const SUN_SIZE_PX = SUN_DIAMETER * KM_TO_PIXELS;
+    const MERCURY_SIZE_PX = MERCURY_DIAMETER * KM_TO_PIXELS;
+    const VENUS_SIZE_PX = VENUS_DIAMETER * KM_TO_PIXELS;
     const EARTH_SIZE_PX = EARTH_DIAMETER * KM_TO_PIXELS;
     const MOON_SIZE_PX = MOON_DIAMETER * KM_TO_PIXELS;
+    const MARS_SIZE_PX = MARS_DIAMETER * KM_TO_PIXELS;
+    const JUPITER_SIZE_PX = JUPITER_DIAMETER * KM_TO_PIXELS;
+    const SATURN_SIZE_PX = SATURN_DIAMETER * KM_TO_PIXELS;
+    const URANUS_SIZE_PX = URANUS_DIAMETER * KM_TO_PIXELS;
+    const NEPTUNE_SIZE_PX = NEPTUNE_DIAMETER * KM_TO_PIXELS;
+    const PLUTO_SIZE_PX = PLUTO_DIAMETER * KM_TO_PIXELS;
 
+    const MERCURY_SUN_DISTANCE = 57900000;
+    const VENUS_SUN_DISTANCE = 108000000;
     const EARTH_SUN_DISTANCE = 147600000;
-    const EARTH_MOON_DISTANCE = 384400;
+    const EARTH_MOON_DISTANCE = 3844000; // added a zero
+    const MARS_SUN_DISTANCE = 229000000;
+    const JUPITER_SUN_DISTANCE = 778000000;
+    const SATURN_SUN_DISTANCE = 1427000000;
+    const URANUS_SUN_DISTANCE = 2871000000;
+    const NEPTUNE_SUN_DISTANCE = 4497000000;
+    const PLUTO_SUN_DISTANCE = 5913000000;
+    const MERCURY_DISTANCE_PX = MERCURY_SUN_DISTANCE * KM_TO_PIXELS;
+    const VENUS_DISTANCE_PX = VENUS_SUN_DISTANCE * KM_TO_PIXELS;
     const EARTH_DISTANCE_PX = EARTH_SUN_DISTANCE * KM_TO_PIXELS;
     const MOON_DISTANCE_PX = EARTH_MOON_DISTANCE * KM_TO_PIXELS;
+    const MARS_DISTANCE_PX = MARS_SUN_DISTANCE * KM_TO_PIXELS;
+    const JUPITER_DISTANCE_PX = JUPITER_SUN_DISTANCE * KM_TO_PIXELS;
+    const SATURN_DISTANCE_PX = SATURN_SUN_DISTANCE * KM_TO_PIXELS;
+    const URANUS_DISTANCE_PX = URANUS_SUN_DISTANCE * KM_TO_PIXELS;
+    const NEPTUNE_DISTANCE_PX = NEPTUNE_SUN_DISTANCE * KM_TO_PIXELS;
+    const PLUTO_DISTANCE_PX = PLUTO_SUN_DISTANCE * KM_TO_PIXELS;
 
     // sun
     const sunImage = addInteractiveObject('sun.png', {
         maxWidth: `${SUN_SIZE_PX}px`,
         maxHeight: `${SUN_SIZE_PX}px`
     });
+
+    // mercury
+    const mercuryImage = addInteractiveObject('mercury.png', {
+        maxWidth: `${MERCURY_SIZE_PX}px`,
+        maxHeight: `${MERCURY_SIZE_PX}px`
+    });
+    mercuryImage.style.transform = `translateX(${MERCURY_DISTANCE_PX}px)`;
+
+    // venus
+    const venusImage = addInteractiveObject('venus.png', {
+        maxWidth: `${VENUS_SIZE_PX}px`,
+        maxHeight: `${VENUS_SIZE_PX}px`
+    });
+    venusImage.style.transform = `translateX(${VENUS_DISTANCE_PX}px)`;
     
     // earth
     const earthImage = addInteractiveObject('earth.png', {
@@ -337,6 +272,48 @@ document.addEventListener('DOMContentLoaded', () => {
         maxHeight: `${MOON_SIZE_PX}px`
     });
     moonImage.style.transform = `translateX(${EARTH_DISTANCE_PX + MOON_DISTANCE_PX}px)`;
+
+    // mars
+    const marsImage = addInteractiveObject('mars.png', {
+        maxWidth: `${MARS_SIZE_PX}px`,
+        maxHeight: `${MARS_SIZE_PX}px`
+    });
+    marsImage.style.transform = `translateX(${MARS_DISTANCE_PX}px)`;
+
+    // jupiter
+    const jupiterImage = addInteractiveObject('jupiter.png', {
+        maxWidth: `${JUPITER_SIZE_PX}px`,
+        maxHeight: `${JUPITER_SIZE_PX}px`
+    });
+    jupiterImage.style.transform = `translateX(${JUPITER_DISTANCE_PX}px)`;
+
+    // saturn
+    const saturnImage = addInteractiveObject('saturn.jpg', {
+        maxWidth: `${SATURN_SIZE_PX}px`,
+        maxHeight: `${SATURN_SIZE_PX}px`
+    });
+    saturnImage.style.transform = `translateX(${SATURN_DISTANCE_PX}px)`;
+
+    // uranus
+    const uranusImage = addInteractiveObject('uranus.jpg', {
+        maxWidth: `${URANUS_SIZE_PX}px`,
+        maxHeight: `${URANUS_SIZE_PX}px`
+    });
+    uranusImage.style.transform = `translateX(${URANUS_DISTANCE_PX}px)`;
+
+    // neptune
+    const neptuneImage = addInteractiveObject('neptune.jpg', {
+        maxWidth: `${NEPTUNE_SIZE_PX}px`,
+        maxHeight: `${NEPTUNE_SIZE_PX}px`
+    });
+    neptuneImage.style.transform = `translateX(${NEPTUNE_DISTANCE_PX}px)`;
+
+    // pluto
+    const plutoImage = addInteractiveObject('pluto.png', {
+        maxWidth: `${PLUTO_SIZE_PX}px`,
+        maxHeight: `${PLUTO_SIZE_PX}px`
+    });
+    plutoImage.style.transform = `translateX(${PLUTO_DISTANCE_PX}px)`;
 
     // adding planet selection button
     function createSelectionButton(text, color, position, onClick) {
@@ -355,7 +332,6 @@ document.addEventListener('DOMContentLoaded', () => {
         button.style.fontWeight = 'bold';
         button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
 
-        // hover effect
         const darkenColor = (color) => {
             const r = parseInt(color.substr(1,2), 16) * 0.9;
             const g = parseInt(color.substr(3,2), 16) * 0.9;
@@ -371,7 +347,12 @@ document.addEventListener('DOMContentLoaded', () => {
             button.style.backgroundColor = color;
         });
 
-        button.addEventListener('click', onClick);
+        button.addEventListener('click', () => {
+            // Reset scale when selecting a new object
+            state.scale = 1;
+            state.targetScale = 1;
+            onClick();
+        });
         return button;
     }
 
@@ -381,13 +362,35 @@ document.addEventListener('DOMContentLoaded', () => {
         '#0080be', 
         '20px',
         () => {
-            state.currentScale = 1.7;
+            state.scale = 0.8;
             state.offsetX = 0;
             state.offsetY = 0;
-            state.zoomVelocity = 0;
-            state.zoomMomentum = 0;
-            state.panSpeedX = 0;
-            state.panSpeedY = 0;
+            updateTransform();
+        }
+    );
+
+    // mercury button
+    const selectMercuryButton = createSelectionButton(
+        'Mercury', 
+        '#0080be', 
+        '70px',
+        () => {
+            state.scale = 9;
+            state.offsetX = -MERCURY_DISTANCE_PX * state.scale;
+            state.offsetY = 0;
+            updateTransform();
+        }
+    );
+
+    // venus button
+    const selectVenusButton = createSelectionButton(
+        'Venus', 
+        '#0080be', 
+        '120px',
+        () => {
+            state.scale = 5;
+            state.offsetX = -VENUS_DISTANCE_PX * state.scale;
+            state.offsetY = 0;
             updateTransform();
         }
     );
@@ -396,14 +399,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectEarthButton = createSelectionButton(
         'Earth', 
         '#0080be', 
-        '70px',
+        '170px',
         () => {
-            state.currentScale = 80;
-            state.offsetX = -EARTH_DISTANCE_PX * state.currentScale;
-            state.zoomVelocity = 0;
-            state.zoomMomentum = 0;
-            state.panSpeedX = 0;
-            state.panSpeedY = 0;
+            state.scale = 5.5;
+            state.offsetX = -EARTH_DISTANCE_PX * state.scale;
+            state.offsetY = 0;
             updateTransform();
         }
     );
@@ -412,20 +412,102 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectMoonButton = createSelectionButton(
         'Moon', 
         '#0080be', 
-        '120px',
+        '220px',
         () => {
-            state.currentScale = 250;
-            state.offsetX = -(EARTH_DISTANCE_PX + MOON_DISTANCE_PX) * state.currentScale;
-            state.zoomVelocity = 0;
-            state.zoomMomentum = 0;
-            state.panSpeedX = 0;
-            state.panSpeedY = 0;
+            state.scale = 13;
+            state.offsetX = -(EARTH_DISTANCE_PX + MOON_DISTANCE_PX) * state.scale;
+            state.offsetY;
+            updateTransform();
+        }
+    );
+
+    // mars button
+    const selectMarsButton = createSelectionButton(
+        'Mars', 
+        '#0080be', 
+        '270px',
+        () => {
+            state.scale = 10;
+            state.offsetX = -MARS_DISTANCE_PX * state.scale;
+            state.offsetY = 0;
+            updateTransform();
+        }
+    );
+
+    // jupiter button
+    const selectJupiterButton = createSelectionButton(
+        'Jupiter', 
+        '#0080be', 
+        '320px',
+        () => {
+            state.scale = 7;
+            state.offsetX = -JUPITER_DISTANCE_PX * state.scale;
+            updateTransform();
+        }
+    );
+
+    // saturn button
+    const selectSaturnButton = createSelectionButton(
+        'Saturn', 
+        '#0080be', 
+        '370px',
+        () => {
+            state.scale = 10;
+            state.offsetX = -SATURN_DISTANCE_PX * state.scale;
+            state.offsetY = 0;
+            updateTransform();
+        }
+    );
+
+    // uranus button
+    const selectUranusButton = createSelectionButton(
+        'Uranus', 
+        '#0080be', 
+        '420px',
+        () => {
+            state.scale = 1.2;
+            state.offsetX = -URANUS_DISTANCE_PX * state.scale;
+            state.offsetY = 0;
+            updateTransform();
+        }
+    );
+
+    // neptune button
+    const selectNeptuneButton = createSelectionButton(
+        'Neptune', 
+        '#0080be', 
+        '470px',
+        () => {
+            state.scale = 1.2;
+            state.offsetX = -NEPTUNE_DISTANCE_PX * state.scale;
+            state.offsetY = 0;
+            updateTransform();
+        }
+    );
+
+    // pluto button
+    const selectPlutoButton = createSelectionButton(
+        'Pluto', 
+        '#0080be', 
+        '520px',
+        () => {
+            state.scale = 0.15;
+            state.offsetX = -PLUTO_DISTANCE_PX * state.scale;
+            state.offsetY = 0;
             updateTransform();
         }
     );
 
     addUIElement(selectSunButton);
+    addUIElement(selectMercuryButton);
+    addUIElement(selectVenusButton);
     addUIElement(selectEarthButton);
     addUIElement(selectMoonButton);
+    addUIElement(selectMarsButton);
+    addUIElement(selectJupiterButton);
+    addUIElement(selectSaturnButton);
+    addUIElement(selectUranusButton);
+    addUIElement(selectNeptuneButton);
+    addUIElement(selectPlutoButton);
     addUIElement(elysiumLogo);
 });
