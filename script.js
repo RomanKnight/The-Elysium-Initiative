@@ -288,21 +288,21 @@ document.addEventListener('DOMContentLoaded', () => {
     jupiterImage.style.transform = `translateX(${JUPITER_DISTANCE_PX}px)`;
 
     // saturn
-    const saturnImage = addInteractiveObject('saturn.jpg', {
+    const saturnImage = addInteractiveObject('saturn.png', {
         maxWidth: `${SATURN_SIZE_PX}px`,
         maxHeight: `${SATURN_SIZE_PX}px`
     });
     saturnImage.style.transform = `translateX(${SATURN_DISTANCE_PX}px)`;
 
     // uranus
-    const uranusImage = addInteractiveObject('uranus.jpg', {
+    const uranusImage = addInteractiveObject('uranus.png', {
         maxWidth: `${URANUS_SIZE_PX}px`,
         maxHeight: `${URANUS_SIZE_PX}px`
     });
     uranusImage.style.transform = `translateX(${URANUS_DISTANCE_PX}px)`;
 
     // neptune
-    const neptuneImage = addInteractiveObject('neptune.jpg', {
+    const neptuneImage = addInteractiveObject('neptune.png', {
         maxWidth: `${NEPTUNE_SIZE_PX}px`,
         maxHeight: `${NEPTUNE_SIZE_PX}px`
     });
