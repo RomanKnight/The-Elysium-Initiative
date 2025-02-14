@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // zeroes added in some places to resize for smoothing (planets scales are not accurate)
     const SUN_DIAMETER = 1392000;
-    const MERCURY_DIAMETER = 48790; // added a zero
+    const MERCURY_DIAMETER = 48780; // added a zero
     const VENUS_DIAMETER = 121040; // added a zero
     const EARTH_DIAMETER = 127420; // added a zero
     const MOON_DIAMETER = 34740; // added a zero

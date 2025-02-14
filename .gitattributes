@@ -1,2 +1,0 @@
-sun.png filter=lfs diff=lfs merge=lfs -text
-pluto.png filter=lfs diff=lfs merge=lfs -text
