@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     objectsContainer.style.display = 'flex';
     objectsContainer.style.justifyContent = 'center';
     objectsContainer.style.alignItems = 'center';
-    objectsContainer.style.transition = 'transform 0.2s ease-out'; // smooth transition
+    objectsContainer.style.transition = 'transform 0.8s cubic-bezier(0.17, 0.47, 0.4, 1)'; // smooth transition
 
     // create UI container (immune to transformations)
     const uiContainer = document.createElement('div');
@@ -79,7 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
         lastMouseX: 0,
         lastMouseY: 0,
         scale: 1,
-        targetScale: 1
+        targetScale: 1,
+        strokeWidth: 2
     };
 
     // function to add a new interactive object
@@ -115,6 +116,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateTransform() {
         backgroundContainer.style.transform = `translate(-50%, -50%)`;
         objectsContainer.style.transform = `translate(${state.offsetX}px, ${state.offsetY}px) scale(${state.scale})`;
+        
+        const orbits = orbitsSvg.getElementsByTagName('circle');
+        for (let orbit of orbits) {
+            orbit.setAttribute('stroke-width', state.strokeWidth / state.scale);
+            
+            // start fading at scale 4, completely fade out by scale 8
+            const opacity = Math.max(0, Math.min(1, (0.5 - state.scale) / 0.1));
+            orbit.style.opacity = opacity;
+        }
     }
 
     // zoom handling function
@@ -135,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
         // calculate new scale
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        const newScale = Math.min(Math.max(state.scale * delta, 0.001), 1000);
+        const newScale = Math.min(Math.max(state.scale * delta, 0.00005), 150);
     
         // calculate new offsets to maintain zoom point
         state.offsetX = mouseX - containerCenterX - (pointX * newScale);
@@ -314,6 +324,51 @@ document.addEventListener('DOMContentLoaded', () => {
         maxHeight: `${PLUTO_SIZE_PX}px`
     });
     plutoImage.style.transform = `translateX(${PLUTO_DISTANCE_PX}px)`;
+
+    // Create SVG container for orbits
+    const orbitsSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    orbitsSvg.style.position = 'absolute';
+    orbitsSvg.style.width = '100%';
+    orbitsSvg.style.height = '100%';
+    orbitsSvg.style.pointerEvents = 'none';
+    orbitsSvg.style.overflow = 'visible';
+    orbitsSvg.style.zIndex = '-1';
+    objectsContainer.appendChild(orbitsSvg);
+
+    // function to create orbit circle
+    function createOrbitCircle(radius) {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '50%');
+        circle.setAttribute('cy', '50%');
+        circle.setAttribute('r', radius);
+        circle.setAttribute('fill', 'none');
+        circle.setAttribute('stroke', 'rgba(255, 255, 255, 0.5)');
+        circle.setAttribute('stroke-width', state.strokeWidth);
+        circle.style.transition = 'opacity 0.3s ease';
+        return circle;
+    }
+
+    // Add orbit circles for each planet
+    const mercuryOrbit = createOrbitCircle(MERCURY_DISTANCE_PX);
+    const venusOrbit = createOrbitCircle(VENUS_DISTANCE_PX);
+    const earthOrbit = createOrbitCircle(EARTH_DISTANCE_PX);
+    const marsOrbit = createOrbitCircle(MARS_DISTANCE_PX);
+    const jupiterOrbit = createOrbitCircle(JUPITER_DISTANCE_PX);
+    const saturnOrbit = createOrbitCircle(SATURN_DISTANCE_PX);
+    const uranusOrbit = createOrbitCircle(URANUS_DISTANCE_PX);
+    const neptuneOrbit = createOrbitCircle(NEPTUNE_DISTANCE_PX);
+    const plutoOrbit = createOrbitCircle(PLUTO_DISTANCE_PX);
+
+    // Add all orbits to the SVG
+    orbitsSvg.appendChild(mercuryOrbit);
+    orbitsSvg.appendChild(venusOrbit);
+    orbitsSvg.appendChild(earthOrbit);
+    orbitsSvg.appendChild(marsOrbit);
+    orbitsSvg.appendChild(jupiterOrbit);
+    orbitsSvg.appendChild(saturnOrbit);
+    orbitsSvg.appendChild(uranusOrbit);
+    orbitsSvg.appendChild(neptuneOrbit);
+    orbitsSvg.appendChild(plutoOrbit);
 
     // adding planet selection button
     function createSelectionButton(text, color, position, onClick) {
