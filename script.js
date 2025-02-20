@@ -1,4 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Add custom font
+    const fontStyle = document.createElement('style');
+    fontStyle.textContent = `
+        @font-face {
+            font-family: 'Havelock Titling Medium';
+            src: url('havelock-titling-medium.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+    `;
+    document.head.appendChild(fontStyle);
+
     // create main container
     const container = document.createElement('div');
     container.style.display = 'flex';
@@ -49,7 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
     objectsContainer.style.display = 'flex';
     objectsContainer.style.justifyContent = 'center';
     objectsContainer.style.alignItems = 'center';
-    objectsContainer.style.transition = 'transform 0.8s cubic-bezier(0.17, 0.47, 0.4, 1)'; // smooth transition
+    objectsContainer.style.transformOrigin = 'center center';
+    objectsContainer.style.transition = 'transform 0.8s cubic-bezier(0.17, 0.47, 0.4, 1)';
 
     // create UI container (immune to transformations)
     const uiContainer = document.createElement('div');
@@ -60,6 +73,20 @@ document.addEventListener('DOMContentLoaded', () => {
     uiContainer.style.height = '100%';
     uiContainer.style.pointerEvents = 'none';
 
+    // create zoom level display
+    const zoomDisplay = document.createElement('div');
+    zoomDisplay.className = 'ui-element';
+    zoomDisplay.style.position = 'fixed';
+    zoomDisplay.style.top = '20px';
+    zoomDisplay.style.right = '20px';
+    zoomDisplay.style.padding = '8px 12px';
+    zoomDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    zoomDisplay.style.color = 'white';
+    zoomDisplay.style.borderRadius = '5px';
+    zoomDisplay.style.fontFamily = 'Arial, sans-serif';
+    zoomDisplay.style.fontSize = '14px';
+    zoomDisplay.style.fontWeight = 'bold';
+
     // add Elysium logo
     const elysiumLogo = document.createElement('img');
     elysiumLogo.src = 'elysium_logo.png';
@@ -68,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
     elysiumLogo.style.left = '20px';
     elysiumLogo.style.transformOrigin = 'bottom left';
     elysiumLogo.style.scale = '0.3';
-    elysiumLogo.style.zIndex = '1000';
 
     // state variables
     const state = {
@@ -112,6 +138,25 @@ document.addEventListener('DOMContentLoaded', () => {
         return element;
     }
 
+    // function to create planet label
+    function createPlanetLabel(name, x, y) {
+        const label = document.createElement('div');
+        label.textContent = name;
+        label.style.position = 'absolute';
+        label.style.color = 'white';
+        label.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        label.style.padding = '4px 8px';
+        label.style.borderRadius = '4px';
+        label.style.fontSize = '14px';
+        label.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+        label.style.pointerEvents = 'none';
+        label.style.left = '50%';
+        label.style.top = '50%';
+        label.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(1)`;
+        label.style.transformOrigin = 'center center';
+        return label;
+    }
+
     // update transform for all objects with scale
     function updateTransform() {
         backgroundContainer.style.transform = `translate(-50%, -50%)`;
@@ -121,10 +166,19 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let orbit of orbits) {
             orbit.setAttribute('stroke-width', state.strokeWidth / state.scale);
             
-            // start fading at scale 4, completely fade out by scale 8
-            const opacity = Math.max(0, Math.min(1, (0.5 - state.scale) / 0.1));
+            // start fading at scale 0.01, completely fade out by scale 0.1
+            const opacity = Math.max(0, Math.min(1, (state.scale - 0.1) / (0.001 - 0.1)));
             orbit.style.opacity = opacity;
         }
+
+        // In the updateTransform function, replace the current label scaling code with:
+        const labels = objectsContainer.getElementsByTagName('div');
+        for (let label of labels) {
+            const labelOpacity = Math.max(0, Math.min(1, (state.scale - 0.6) / (0.3 - 0.6)));
+            label.style.opacity = labelOpacity;
+            label.style.transform = label.style.transform.replace(/scale\([^\)]+\)/, `scale(${1 / state.scale})`);
+        }
+        zoomDisplay.textContent = `Zoom: ${(state.scale).toFixed(5)}`;
     }
 
     // zoom handling function
@@ -259,73 +313,149 @@ document.addEventListener('DOMContentLoaded', () => {
     const mercuryImage = addInteractiveObject('mercury.png', {
         maxWidth: `${MERCURY_SIZE_PX}px`,
         maxHeight: `${MERCURY_SIZE_PX}px`
-    });
-    mercuryImage.style.transform = `translateX(${MERCURY_DISTANCE_PX}px)`;
+        });
+        const mercuryDegrees = 150;
+        const mercuryX = MERCURY_DISTANCE_PX * Math.cos(mercuryDegrees * Math.PI / 180);
+        const mercuryY = MERCURY_DISTANCE_PX * Math.sin(mercuryDegrees * Math.PI / 180);
+        mercuryImage.style.transform = `
+            translate(${mercuryX}px, ${mercuryY}px)
+            rotate(${mercuryDegrees}deg)`;
 
     // venus
     const venusImage = addInteractiveObject('venus.png', {
         maxWidth: `${VENUS_SIZE_PX}px`,
         maxHeight: `${VENUS_SIZE_PX}px`
-    });
-    venusImage.style.transform = `translateX(${VENUS_DISTANCE_PX}px)`;
-    
+        });
+        const venusDegrees = 30;
+        const venusX = VENUS_DISTANCE_PX * Math.cos(venusDegrees * Math.PI / 180);
+        const venusY = VENUS_DISTANCE_PX * Math.sin(venusDegrees * Math.PI / 180);
+        venusImage.style.transform = `
+            translate(${venusX}px, ${venusY}px)
+            rotate(${venusDegrees}deg)`;
+
     // earth
     const earthImage = addInteractiveObject('earth.png', {
         maxWidth: `${EARTH_SIZE_PX}px`,
         maxHeight: `${EARTH_SIZE_PX}px`
-    });
-    earthImage.style.transform = `translateX(${EARTH_DISTANCE_PX}px)`;
+        });
+        const earthDegrees = 0;
+        const earthX = EARTH_DISTANCE_PX * Math.cos(earthDegrees * Math.PI / 180);
+        const earthY = EARTH_DISTANCE_PX * Math.sin(earthDegrees * Math.PI / 180);
+        earthImage.style.transform = `
+            translate(${earthX}px, ${earthY}px)
+            rotate(${earthDegrees}deg)`;
 
     // moon
     const moonImage = addInteractiveObject('moon.png', {
         maxWidth: `${MOON_SIZE_PX}px`,
         maxHeight: `${MOON_SIZE_PX}px`
-    });
-    moonImage.style.transform = `translateX(${EARTH_DISTANCE_PX + MOON_DISTANCE_PX}px)`;
+        });
+        const moonDegrees = earthDegrees + 0;
+        const moonX = (EARTH_DISTANCE_PX + MOON_DISTANCE_PX) * Math.cos(moonDegrees * Math.PI / 180);
+        const moonY = (EARTH_DISTANCE_PX + MOON_DISTANCE_PX) * Math.sin(moonDegrees * Math.PI / 180);
+        moonImage.style.transform = `
+            translate(${moonX}px, ${moonY}px)
+            rotate(${moonDegrees}deg)`;
 
     // mars
     const marsImage = addInteractiveObject('mars.png', {
         maxWidth: `${MARS_SIZE_PX}px`,
         maxHeight: `${MARS_SIZE_PX}px`
-    });
-    marsImage.style.transform = `translateX(${MARS_DISTANCE_PX}px)`;
+        });
+        const marsDegrees = 240;
+        const marsX = MARS_DISTANCE_PX * Math.cos(marsDegrees * Math.PI / 180);
+        const marsY = MARS_DISTANCE_PX * Math.sin(marsDegrees * Math.PI / 180);
+        marsImage.style.transform = `
+            translate(${marsX}px, ${marsY}px)
+            rotate(${marsDegrees}deg)`;
 
     // jupiter
     const jupiterImage = addInteractiveObject('jupiter.png', {
         maxWidth: `${JUPITER_SIZE_PX}px`,
         maxHeight: `${JUPITER_SIZE_PX}px`
-    });
-    jupiterImage.style.transform = `translateX(${JUPITER_DISTANCE_PX}px)`;
+        });
+        const jupiterDegrees = 80;
+        const jupiterX = JUPITER_DISTANCE_PX * Math.cos(jupiterDegrees * Math.PI / 180);
+        const jupiterY = JUPITER_DISTANCE_PX * Math.sin(jupiterDegrees * Math.PI / 180);
+        jupiterImage.style.transform = `
+            translate(${jupiterX}px, ${jupiterY}px)
+            rotate(${jupiterDegrees}deg)`;
 
     // saturn
     const saturnImage = addInteractiveObject('saturn.png', {
         maxWidth: `${SATURN_SIZE_PX}px`,
         maxHeight: `${SATURN_SIZE_PX}px`
-    });
-    saturnImage.style.transform = `translateX(${SATURN_DISTANCE_PX}px)`;
+        });
+        const saturnDegrees = 0;
+        const saturnX = SATURN_DISTANCE_PX * Math.cos(saturnDegrees * Math.PI / 180);
+        const saturnY = SATURN_DISTANCE_PX * Math.sin(saturnDegrees * Math.PI / 180);
+        saturnImage.style.transform = `
+            translate(${saturnX}px, ${saturnY}px)
+            rotate(${saturnDegrees}deg)`;
 
     // uranus
     const uranusImage = addInteractiveObject('uranus.png', {
         maxWidth: `${URANUS_SIZE_PX}px`,
         maxHeight: `${URANUS_SIZE_PX}px`
-    });
-    uranusImage.style.transform = `translateX(${URANUS_DISTANCE_PX}px)`;
+        });
+        const uranusDegrees = 290;
+        const uranusX = URANUS_DISTANCE_PX * Math.cos(uranusDegrees * Math.PI / 180);
+        const uranusY = URANUS_DISTANCE_PX * Math.sin(uranusDegrees * Math.PI / 180);
+        uranusImage.style.transform = `
+            translate(${uranusX}px, ${uranusY}px)
+            rotate(${uranusDegrees}deg)`;
 
     // neptune
     const neptuneImage = addInteractiveObject('neptune.png', {
         maxWidth: `${NEPTUNE_SIZE_PX}px`,
         maxHeight: `${NEPTUNE_SIZE_PX}px`
-    });
-    neptuneImage.style.transform = `translateX(${NEPTUNE_DISTANCE_PX}px)`;
+        });
+        const neptuneDegrees = 100;
+        const neptuneX = NEPTUNE_DISTANCE_PX * Math.cos(neptuneDegrees * Math.PI / 180);
+        const neptuneY = NEPTUNE_DISTANCE_PX * Math.sin(neptuneDegrees * Math.PI / 180);
+        neptuneImage.style.transform = `
+            translate(${neptuneX}px, ${neptuneY}px)
+            rotate(${neptuneDegrees}deg)`;
 
     // pluto
     const plutoImage = addInteractiveObject('pluto.png', {
         maxWidth: `${PLUTO_SIZE_PX}px`,
         maxHeight: `${PLUTO_SIZE_PX}px`
-    });
-    plutoImage.style.transform = `translateX(${PLUTO_DISTANCE_PX}px)`;
+        });
+        const plutoDegrees = 200;
+        const plutoX = PLUTO_DISTANCE_PX * Math.cos(plutoDegrees * Math.PI / 180);
+        const plutoY = PLUTO_DISTANCE_PX * Math.sin(plutoDegrees * Math.PI / 180);
+        plutoImage.style.transform = `
+            translate(${plutoX}px, ${plutoY}px)
+            rotate(${plutoDegrees}deg)`;
 
-    // Create SVG container for orbits
+    // Create labels for each planet
+    const sunLabel = createPlanetLabel('Sun', 0, 0);
+    const mercuryLabel = createPlanetLabel('Mercury', mercuryX, mercuryY);
+    const venusLabel = createPlanetLabel('Venus', venusX, venusY);
+    const earthLabel = createPlanetLabel('Earth', earthX, earthY);
+    const moonLabel = createPlanetLabel('Moon', moonX, moonY);
+    const marsLabel = createPlanetLabel('Mars', marsX, marsY);
+    const jupiterLabel = createPlanetLabel('Jupiter', jupiterX, jupiterY);
+    const saturnLabel = createPlanetLabel('Saturn', saturnX, saturnY);
+    const uranusLabel = createPlanetLabel('Uranus', uranusX, uranusY);
+    const neptuneLabel = createPlanetLabel('Neptune', neptuneX, neptuneY);
+    const plutoLabel = createPlanetLabel('Pluto', plutoX, plutoY);
+
+    // Add labels to the objects container
+    objectsContainer.appendChild(sunLabel);
+    objectsContainer.appendChild(mercuryLabel);
+    objectsContainer.appendChild(venusLabel);
+    objectsContainer.appendChild(earthLabel);
+    objectsContainer.appendChild(moonLabel);
+    objectsContainer.appendChild(marsLabel);
+    objectsContainer.appendChild(jupiterLabel);
+    objectsContainer.appendChild(saturnLabel);
+    objectsContainer.appendChild(uranusLabel);
+    objectsContainer.appendChild(neptuneLabel);
+    objectsContainer.appendChild(plutoLabel);
+
+    // SVG container for orbits
     const orbitsSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     orbitsSvg.style.position = 'absolute';
     orbitsSvg.style.width = '100%';
@@ -348,7 +478,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return circle;
     }
 
-    // Add orbit circles for each planet
     const mercuryOrbit = createOrbitCircle(MERCURY_DISTANCE_PX);
     const venusOrbit = createOrbitCircle(VENUS_DISTANCE_PX);
     const earthOrbit = createOrbitCircle(EARTH_DISTANCE_PX);
@@ -359,7 +488,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const neptuneOrbit = createOrbitCircle(NEPTUNE_DISTANCE_PX);
     const plutoOrbit = createOrbitCircle(PLUTO_DISTANCE_PX);
 
-    // Add all orbits to the SVG
     orbitsSvg.appendChild(mercuryOrbit);
     orbitsSvg.appendChild(venusOrbit);
     orbitsSvg.appendChild(earthOrbit);
@@ -403,7 +531,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         button.addEventListener('click', () => {
-            // Reset scale when selecting a new object
             state.scale = 1;
             state.targetScale = 1;
             onClick();
@@ -431,8 +558,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '70px',
         () => {
             state.scale = 9;
-            state.offsetX = -MERCURY_DISTANCE_PX * state.scale;
-            state.offsetY = 0;
+            state.offsetX = -mercuryX * state.scale;
+            state.offsetY = -mercuryY * state.scale;
             updateTransform();
         }
     );
@@ -444,8 +571,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '120px',
         () => {
             state.scale = 5;
-            state.offsetX = -VENUS_DISTANCE_PX * state.scale;
-            state.offsetY = 0;
+            state.offsetX = -venusX * state.scale;
+            state.offsetY = -venusY * state.scale;
             updateTransform();
         }
     );
@@ -457,8 +584,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '170px',
         () => {
             state.scale = 5.5;
-            state.offsetX = -EARTH_DISTANCE_PX * state.scale;
-            state.offsetY = 0;
+            state.offsetX = -earthX * state.scale;
+            state.offsetY = -earthY * state.scale;
             updateTransform();
         }
     );
@@ -483,8 +610,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '270px',
         () => {
             state.scale = 10;
-            state.offsetX = -MARS_DISTANCE_PX * state.scale;
-            state.offsetY = 0;
+            state.offsetX = -marsX * state.scale;
+            state.offsetY = -marsY * state.scale;
             updateTransform();
         }
     );
@@ -496,7 +623,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '320px',
         () => {
             state.scale = 7;
-            state.offsetX = -JUPITER_DISTANCE_PX * state.scale;
+            state.offsetX = -jupiterX * state.scale;
+            state.offsetY = -jupiterY * state.scale;
             updateTransform();
         }
     );
@@ -508,8 +636,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '370px',
         () => {
             state.scale = 10;
-            state.offsetX = -SATURN_DISTANCE_PX * state.scale;
-            state.offsetY = 0;
+            state.offsetX = -saturnX * state.scale;
+            state.offsetY = -saturnY * state.scale;
             updateTransform();
         }
     );
@@ -521,8 +649,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '420px',
         () => {
             state.scale = 1.2;
-            state.offsetX = -URANUS_DISTANCE_PX * state.scale;
-            state.offsetY = 0;
+            state.offsetX = -uranusX * state.scale;
+            state.offsetY = -uranusY * state.scale;
             updateTransform();
         }
     );
@@ -534,8 +662,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '470px',
         () => {
             state.scale = 1.2;
-            state.offsetX = -NEPTUNE_DISTANCE_PX * state.scale;
-            state.offsetY = 0;
+            state.offsetX = -neptuneX * state.scale;
+            state.offsetY = -neptuneY * state.scale;
             updateTransform();
         }
     );
@@ -547,8 +675,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '520px',
         () => {
             state.scale = 0.15;
-            state.offsetX = -PLUTO_DISTANCE_PX * state.scale;
-            state.offsetY = 0;
+            state.offsetX = -plutoX * state.scale;
+            state.offsetY = -plutoY * state.scale;
             updateTransform();
         }
     );
@@ -564,5 +692,6 @@ document.addEventListener('DOMContentLoaded', () => {
     addUIElement(selectUranusButton);
     addUIElement(selectNeptuneButton);
     addUIElement(selectPlutoButton);
+    addUIElement(zoomDisplay);
     addUIElement(elysiumLogo);
 });
