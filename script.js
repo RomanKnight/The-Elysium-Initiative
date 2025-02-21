@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Add custom font
     const fontStyle = document.createElement('style');
     fontStyle.textContent = `
         @font-face {
@@ -8,10 +7,95 @@ document.addEventListener('DOMContentLoaded', () => {
             font-weight: normal;
             font-style: normal;
         }
+        @font-face {
+            font-family: 'Havelock Titling Bold';
+            src: url('havelock-titling-bold.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
     `;
     document.head.appendChild(fontStyle);
 
-    // create main container
+    const menuStyle = document.createElement('style');
+    menuStyle.textContent = `
+        .menu-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            z-index: 1000;
+        }
+        .menu-item {
+            color: rgb(200, 200, 200);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-family: 'Havelock Titling Medium', sans-serif;
+            font-size: 18px;
+            position: relative;
+        }
+        .menu-item:not(:first-child)::after {
+            content: '';
+            position: absolute;
+            bottom: 35px;
+            left: 20px;
+            width: 0;
+            height: 2px;
+            background-color: rgb(255, 255, 255);
+            transition: width 0.3s ease;
+            transform-origin: left;
+        }
+        .menu-item:not(:first-child):hover::after {
+            width: calc(100% - 40px);
+        }
+        .menu-item:hover {
+            color: rgba(255, 255, 255, 1);
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 100px;
+            background-color: rgba(0, 0, 0, 0.5);
+            min-width: 200px;
+        }
+        .menu-item:hover .dropdown {
+            display: block;
+        }
+        .dropdown-item {
+            color: rgb(200, 200, 200);
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-family: 'Havelock Titling Medium', sans-serif;
+            font-size: 18px;
+            position: relative;
+        }
+        .dropdown-item::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 20px;
+            width: 0;
+            height: 2px;
+            background-color: rgb(255, 255, 255);
+            transition: width 0.3s ease;
+            transform-origin: left;
+        }
+        .dropdown-item:hover::after {
+            width: var(--underline-width);
+        }
+        .dropdown-item:hover {
+            color: rgba(255, 255, 255, 1);
+        }
+    `;
+    document.head.appendChild(menuStyle);
+
+    // main container
     const container = document.createElement('div');
     container.style.display = 'flex';
     container.style.justifyContent = 'center';
@@ -21,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     container.style.position = 'relative';
     container.style.backgroundColor = 'black';
 
-    // create background container
+    // background container
     const backgroundContainer = document.createElement('div');
     backgroundContainer.style.position = 'absolute';
     backgroundContainer.style.top = '50%';
@@ -37,14 +121,12 @@ document.addEventListener('DOMContentLoaded', () => {
         backgroundContainer.style.height = `${size}px`;
     }
     
-    // create background image
+    // background image
     const backgroundImg = document.createElement('img');
     backgroundImg.src = 'background.jpg';
     backgroundImg.style.width = '100%';
     backgroundImg.style.height = '100%';
     backgroundImg.style.objectFit = 'contain';
-    
-    // add background image to container
     backgroundContainer.appendChild(backgroundImg);
     
     // initial size setup
@@ -53,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // update size when window resizes
     window.addEventListener('resize', updateBackgroundSize);
 
-    // create a container for objects
+    // objects container
     const objectsContainer = document.createElement('div');
     objectsContainer.style.position = 'absolute';
     objectsContainer.style.width = '100%';
@@ -64,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     objectsContainer.style.transformOrigin = 'center center';
     objectsContainer.style.transition = 'transform 0.8s cubic-bezier(0.17, 0.47, 0.4, 1)';
 
-    // create UI container (immune to transformations)
+    // UI container (immune to transformations)
     const uiContainer = document.createElement('div');
     uiContainer.style.position = 'absolute';
     uiContainer.style.top = '0';
@@ -73,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
     uiContainer.style.height = '100%';
     uiContainer.style.pointerEvents = 'none';
 
-    // create zoom level display
+    // zoom level display
     const zoomDisplay = document.createElement('div');
     zoomDisplay.className = 'ui-element';
     zoomDisplay.style.position = 'fixed';
@@ -87,15 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
     zoomDisplay.style.fontSize = '14px';
     zoomDisplay.style.fontWeight = 'bold';
 
-    // add Elysium logo
-    const elysiumLogo = document.createElement('img');
-    elysiumLogo.src = 'elysium_logo.png';
-    elysiumLogo.style.position = 'fixed';
-    elysiumLogo.style.bottom = '20px';
-    elysiumLogo.style.left = '20px';
-    elysiumLogo.style.transformOrigin = 'bottom left';
-    elysiumLogo.style.scale = '0.3';
-
     // state variables
     const state = {
         isMouseDown: false,
@@ -106,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastMouseY: 0,
         scale: 1,
         targetScale: 1,
-        strokeWidth: 2
+        strokeWidth: 2.5
     };
 
     // function to add a new interactive object
@@ -166,14 +239,15 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let orbit of orbits) {
             orbit.setAttribute('stroke-width', state.strokeWidth / state.scale);
             
-            // start fading at scale 0.01, completely fade out by scale 0.1
-            const opacity = Math.max(0, Math.min(1, (state.scale - 0.1) / (0.001 - 0.1)));
+            // start fading at scale 0.001, completely fade out by scale 0.01
+            const opacity = Math.max(0, Math.min(1, (state.scale - 0.01) / (0.0001 - 0.01)));
             orbit.style.opacity = opacity;
         }
 
-        // In the updateTransform function, replace the current label scaling code with:
         const labels = objectsContainer.getElementsByTagName('div');
         for (let label of labels) {
+            
+            // start fading at scale 0.001, completely fade out by scale 0.01
             const labelOpacity = Math.max(0, Math.min(1, (state.scale - 0.6) / (0.3 - 0.6)));
             label.style.opacity = labelOpacity;
             label.style.transform = label.style.transform.replace(/scale\([^\)]+\)/, `scale(${1 / state.scale})`);
@@ -193,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const containerCenterX = rect.width / 2;
         const containerCenterY = rect.height / 2;
     
-        // calculate point to zoom around
+        // calculate zoom point
         const pointX = (mouseX - containerCenterX - state.offsetX) / state.scale;
         const pointY = (mouseY - containerCenterY - state.offsetY) / state.scale;
     
@@ -208,8 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // update scale
         state.scale = newScale;
         state.targetScale = newScale;
-    
-        // update transform immediately
+
         updateTransform();
     }
     container.addEventListener('wheel', handleZoom, { passive: false });
@@ -249,11 +322,88 @@ document.addEventListener('DOMContentLoaded', () => {
         objectsContainer.style.cursor = 'default';
     });
 
-    // append containers
     container.appendChild(backgroundContainer);
     container.appendChild(objectsContainer);
     container.appendChild(uiContainer);
     document.body.appendChild(container);
+
+    // menu bar
+    const menuBar = document.createElement('div');
+    menuBar.className = 'menu-bar';
+
+    // menu items
+    const menuItems = [
+        {
+            title: 'The Elysium Initiative',
+            dropdown: [],
+            isImage: true
+        },
+        {
+            title: 'Navigation',
+            dropdown: [
+                { name: 'Sun', action: () => selectSunButton.click() },
+                { name: 'Mercury', action: () => selectMercuryButton.click() },
+                { name: 'Venus', action: () => selectVenusButton.click() },
+                { name: 'Earth', action: () => selectEarthButton.click() },
+                { name: 'Moon', action: () => selectMoonButton.click() },
+                { name: 'Mars', action: () => selectMarsButton.click() },
+                { name: 'Jupiter', action: () => selectJupiterButton.click() },
+                { name: 'Saturn', action: () => selectSaturnButton.click() },
+                { name: 'Uranus', action: () => selectUranusButton.click() },
+                { name: 'Neptune', action: () => selectNeptuneButton.click() },
+                { name: 'Pluto', action: () => selectPlutoButton.click() }
+            ]
+        },
+        {
+            title: 'Prospecting',
+            dropdown: []
+        },
+        {
+            title: 'Travel',
+            dropdown: []
+        },
+        {
+            title: 'About',
+            dropdown: []
+        }
+    ];
+
+    // menu structure
+    menuItems.forEach(item => {
+        const menuItem = document.createElement('div');
+        menuItem.className = 'menu-item';
+
+        if (item.isImage) {
+            const logoImg = document.createElement('img');
+            logoImg.src = 'elysium_logomark.png';
+            logoImg.style.height = '70px';
+            logoImg.style.objectFit = 'contain';
+            logoImg.style.marginTop = '2px';
+            logoImg.style.marginBottom = '10px';
+            menuItem.appendChild(logoImg);
+        } else {
+            menuItem.textContent = item.title;
+        }
+
+        if (item.dropdown.length > 0) {
+            const dropdown = document.createElement('div');
+            dropdown.className = 'dropdown';
+
+            item.dropdown.forEach(dropdownItem => {
+                const dropdownElement = document.createElement('div');
+                dropdownElement.className = 'dropdown-item';
+                dropdownElement.textContent = dropdownItem.name;
+                dropdownElement.style.setProperty('--underline-width', `${dropdownItem.name.length + 1}ch`);
+                dropdownElement.addEventListener('click', dropdownItem.action);
+                dropdown.appendChild(dropdownElement);
+            });
+
+            menuItem.appendChild(dropdown);
+        }
+
+        menuBar.appendChild(menuItem);
+    });
+    document.body.appendChild(menuBar);
 
     // celestial scale constants
     const KM_TO_PIXELS = 1/1000;
@@ -429,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
             translate(${plutoX}px, ${plutoY}px)
             rotate(${plutoDegrees}deg)`;
 
-    // Create labels for each planet
+    // planet labels
     const sunLabel = createPlanetLabel('Sun', 0, 0);
     const mercuryLabel = createPlanetLabel('Mercury', mercuryX, mercuryY);
     const venusLabel = createPlanetLabel('Venus', venusX, venusY);
@@ -442,7 +592,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const neptuneLabel = createPlanetLabel('Neptune', neptuneX, neptuneY);
     const plutoLabel = createPlanetLabel('Pluto', plutoX, plutoY);
 
-    // Add labels to the objects container
     objectsContainer.appendChild(sunLabel);
     objectsContainer.appendChild(mercuryLabel);
     objectsContainer.appendChild(venusLabel);
@@ -466,27 +615,27 @@ document.addEventListener('DOMContentLoaded', () => {
     objectsContainer.appendChild(orbitsSvg);
 
     // function to create orbit circle
-    function createOrbitCircle(radius) {
+    function createOrbitCircle(radius, color = 'rgba(255, 255, 255, 0.5)') {
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         circle.setAttribute('cx', '50%');
         circle.setAttribute('cy', '50%');
         circle.setAttribute('r', radius);
         circle.setAttribute('fill', 'none');
-        circle.setAttribute('stroke', 'rgba(255, 255, 255, 0.5)');
+        circle.setAttribute('stroke', color);
         circle.setAttribute('stroke-width', state.strokeWidth);
         circle.style.transition = 'opacity 0.3s ease';
         return circle;
     }
 
-    const mercuryOrbit = createOrbitCircle(MERCURY_DISTANCE_PX);
-    const venusOrbit = createOrbitCircle(VENUS_DISTANCE_PX);
-    const earthOrbit = createOrbitCircle(EARTH_DISTANCE_PX);
-    const marsOrbit = createOrbitCircle(MARS_DISTANCE_PX);
-    const jupiterOrbit = createOrbitCircle(JUPITER_DISTANCE_PX);
-    const saturnOrbit = createOrbitCircle(SATURN_DISTANCE_PX);
-    const uranusOrbit = createOrbitCircle(URANUS_DISTANCE_PX);
-    const neptuneOrbit = createOrbitCircle(NEPTUNE_DISTANCE_PX);
-    const plutoOrbit = createOrbitCircle(PLUTO_DISTANCE_PX);
+    const mercuryOrbit = createOrbitCircle(MERCURY_DISTANCE_PX, 'rgba(255, 140, 86, 0.5)');
+    const venusOrbit = createOrbitCircle(VENUS_DISTANCE_PX, 'rgba(255, 217, 0, 0.5)');
+    const earthOrbit = createOrbitCircle(EARTH_DISTANCE_PX, 'rgba(0, 255, 55, 0.5)');
+    const marsOrbit = createOrbitCircle(MARS_DISTANCE_PX, 'rgba(255, 72, 0, 0.5)');
+    const jupiterOrbit = createOrbitCircle(JUPITER_DISTANCE_PX, 'rgba(255, 166, 0, 0.5)');
+    const saturnOrbit = createOrbitCircle(SATURN_DISTANCE_PX, 'rgba(255, 230, 0, 0.5)');
+    const uranusOrbit = createOrbitCircle(URANUS_DISTANCE_PX, 'rgba(0, 225, 255, 0.5)');
+    const neptuneOrbit = createOrbitCircle(NEPTUNE_DISTANCE_PX, 'rgba(0, 89, 255, 0.5)');
+    const plutoOrbit = createOrbitCircle(PLUTO_DISTANCE_PX, 'rgba(138, 87, 255, 0.5)');
 
     orbitsSvg.appendChild(mercuryOrbit);
     orbitsSvg.appendChild(venusOrbit);
@@ -681,17 +830,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     );
 
-    addUIElement(selectSunButton);
-    addUIElement(selectMercuryButton);
-    addUIElement(selectVenusButton);
-    addUIElement(selectEarthButton);
-    addUIElement(selectMoonButton);
-    addUIElement(selectMarsButton);
-    addUIElement(selectJupiterButton);
-    addUIElement(selectSaturnButton);
-    addUIElement(selectUranusButton);
-    addUIElement(selectNeptuneButton);
-    addUIElement(selectPlutoButton);
-    addUIElement(zoomDisplay);
-    addUIElement(elysiumLogo);
+    //addUIElement(zoomDisplay);
 });
