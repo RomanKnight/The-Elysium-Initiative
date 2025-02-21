@@ -3,13 +3,19 @@ document.addEventListener('DOMContentLoaded', () => {
     fontStyle.textContent = `
         @font-face {
             font-family: 'Havelock Titling Medium';
-            src: url('havelock-titling-medium.ttf') format('truetype');
+            src: url('havelock_titling_medium.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
         @font-face {
             font-family: 'Havelock Titling Bold';
-            src: url('havelock-titling-bold.ttf') format('truetype');
+            src: url('havelock_titling_bold.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Source Code Pro';
+            src: url('source_code_pro.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
@@ -159,13 +165,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const zoomDisplay = document.createElement('div');
     zoomDisplay.className = 'ui-element';
     zoomDisplay.style.position = 'fixed';
-    zoomDisplay.style.top = '20px';
+    zoomDisplay.style.bottom = '20px';
     zoomDisplay.style.right = '20px';
     zoomDisplay.style.padding = '8px 12px';
     zoomDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
     zoomDisplay.style.color = 'white';
     zoomDisplay.style.borderRadius = '5px';
-    zoomDisplay.style.fontFamily = 'Arial, sans-serif';
+    zoomDisplay.style.fontFamily = 'Source Code Pro, sans-serif';
     zoomDisplay.style.fontSize = '14px';
     zoomDisplay.style.fontWeight = 'bold';
 
@@ -252,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
             label.style.opacity = labelOpacity;
             label.style.transform = label.style.transform.replace(/scale\([^\)]+\)/, `scale(${1 / state.scale})`);
         }
-        zoomDisplay.textContent = `Zoom: ${(state.scale).toFixed(5)}`;
+        zoomDisplay.textContent = `Magnification: ${(state.scale * 10000).toFixed(2)}`;
     }
 
     // zoom handling function
@@ -356,23 +362,127 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
             title: 'Prospecting',
-            dropdown: []
+            dropdown: [
+                { name: 'Index'},
+                { name: 'Assets'}
+            ]
         },
         {
             title: 'Travel',
-            dropdown: []
+            dropdown: [
+                { name: 'Getaways'},
+                { name: 'Expeditions'},
+                { name: 'Charters'}
+            ]
         },
         {
             title: 'About',
-            dropdown: []
+            action: () => {
+                // hide main container
+                container.style.display = 'none';
+        
+                const aboutPageContainer = document.createElement('div');
+                aboutPageContainer.id = 'about-page';
+                aboutPageContainer.style.minHeight = '100vh';
+                aboutPageContainer.style.height = '100%';
+                aboutPageContainer.style.backgroundColor = 'black';
+                aboutPageContainer.style.color = 'white';
+                aboutPageContainer.style.padding = '120px 2rem 2rem 2rem';
+                aboutPageContainer.style.display = 'flex';
+                aboutPageContainer.style.justifyContent = 'center';
+                aboutPageContainer.style.position = 'fixed';
+                aboutPageContainer.style.top = '0';
+                aboutPageContainer.style.left = '0';
+                aboutPageContainer.style.right = '0';
+                aboutPageContainer.style.bottom = '0';
+                aboutPageContainer.style.overflowY = 'scroll';
+        
+                const content = document.createElement('div');
+                content.style.maxWidth = '1060px';
+                content.style.width = '100%';
+        
+                const logo = document.createElement('img');
+                logo.src = 'elysium_logo.png';
+                logo.style.width = '600px';
+                logo.style.height = 'auto';
+                logo.style.objectFit = 'contain';
+                logo.style.display = 'block';
+                logo.style.margin = '0 auto 2rem auto';
+
+                const title = document.createElement('h1');
+                title.textContent = "Prosperity Without Limits ™";
+                title.style.fontSize = '2.5rem';
+                title.style.marginTop = '4rem';
+                title.style.marginBottom = '2rem';
+                title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                title.style.color = 'white';
+                title.style.textAlign = "center";
+        
+                const missionText = document.createElement('p');
+                missionText.style.fontSize = '1.25rem';
+                missionText.style.marginBottom = '2rem';
+                missionText.style.lineHeight = '1.75';
+                missionText.style.fontFamily = 'Source Code Pro, sans-serif';
+                missionText.style.color = 'rgb(209, 213, 219)';
+                missionText.style.whiteSpace = 'pre-wrap'
+                missionText.textContent = "     As the universe's premiere prospecting and colonization agency, \
+The Elysium Initiative is relentlessly committed to fueling humanity's golden age. Through long-distance \
+planetary assessment, efficient extraction, and material reclamation, we ensure that every world is \
+utilized to its fullest, delivering unparalleled returns for our stakeholders.\
+\n\n     With cutting-edge automation, quantum-powered logistics, and interstellar expansion strategies, \
+we transform planets into profit centers. Our mission is not just to create sustainable growth, but to \
+blaze a new frontier for those who dare to dream beyond Earth's constraints. As pioneers of this post-\
+terrestrial economy, we provide exclusive investment opportunities and luxury retreats for our partners, \
+all while spearheading the most ambitious resource development initiative in human history.";
+                
+                const title2 = document.createElement('h2');
+                title2.textContent = "The universe is infinite. We make it valuable.";
+                title2.style.fontSize = '1.5rem';
+                title2.style.marginTop = '4rem';
+                title2.style.marginBottom = '2rem';
+                title2.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                title2.style.color = 'white';
+                title2.style.textAlign = "center";
+                title2.style.paddingBottom = '300px'
+        
+                content.appendChild(logo);
+                content.appendChild(title);
+                content.appendChild(missionText);
+                content.appendChild(title2);
+        
+                aboutPageContainer.appendChild(content);
+                document.body.appendChild(aboutPageContainer);
+        
+                // modify navigation menu items to return to solar system
+                const returnToSolarSystem = () => {
+                    document.body.removeChild(aboutPageContainer);
+                    container.style.display = 'flex';
+                };
+        
+                // add click handlers to navigation items
+                const navigationItems = document.querySelectorAll('.menu-item');
+                navigationItems.forEach(item => {
+                    if (item.textContent !== 'About') {
+                        const originalClick = item.onclick;
+                        item.onclick = (e) => {
+                            if (aboutPageContainer.parentNode) {
+                                returnToSolarSystem();
+                            }
+                            if (originalClick) {
+                                originalClick(e);
+                            }
+                        };
+                    }
+                });
+            }
         }
-    ];
+    ]
 
     // menu structure
     menuItems.forEach(item => {
         const menuItem = document.createElement('div');
         menuItem.className = 'menu-item';
-
+    
         if (item.isImage) {
             const logoImg = document.createElement('img');
             logoImg.src = 'elysium_logomark.png';
@@ -383,12 +493,15 @@ document.addEventListener('DOMContentLoaded', () => {
             menuItem.appendChild(logoImg);
         } else {
             menuItem.textContent = item.title;
+            if (item.action) {
+                menuItem.addEventListener('click', item.action);
+            }
         }
-
-        if (item.dropdown.length > 0) {
+    
+        if (item.dropdown && item.dropdown.length > 0) {
             const dropdown = document.createElement('div');
             dropdown.className = 'dropdown';
-
+    
             item.dropdown.forEach(dropdownItem => {
                 const dropdownElement = document.createElement('div');
                 dropdownElement.className = 'dropdown-item';
@@ -397,10 +510,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 dropdownElement.addEventListener('click', dropdownItem.action);
                 dropdown.appendChild(dropdownElement);
             });
-
+    
             menuItem.appendChild(dropdown);
         }
-
+    
         menuBar.appendChild(menuItem);
     });
     document.body.appendChild(menuBar);
@@ -830,5 +943,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     );
 
-    //addUIElement(zoomDisplay);
+    addUIElement(zoomDisplay);
 });
