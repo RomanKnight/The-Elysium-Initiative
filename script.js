@@ -1,4 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
+    function createHoverSound() {
+        const sound = new Audio('hover.mp3');
+        sound.volume = 0.25;
+        return sound;
+    }
+    function createClickSound() {
+        const sound = new Audio('click.mp3');
+        sound.volume = 0.2;
+        return sound;
+    }
+    function playHoverSound() {
+        const sound = createHoverSound();
+        sound.play();
+    }
+    function playClickSound() {
+        const sound = createClickSound();
+        sound.play();
+    }
     const fontStyle = document.createElement('style');
     fontStyle.textContent = `
         @font-face {
@@ -346,18 +364,79 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
             title: 'Navigation',
+            action: () => {
+                if (document.getElementById('about-page')) {
+                    document.body.removeChild(document.getElementById('about-page'));
+                    container.style.display = 'flex';
+                }
+            },
             dropdown: [
-                { name: 'Sun', action: () => selectSunButton.click() },
-                { name: 'Mercury', action: () => selectMercuryButton.click() },
-                { name: 'Venus', action: () => selectVenusButton.click() },
-                { name: 'Earth', action: () => selectEarthButton.click() },
-                { name: 'Moon', action: () => selectMoonButton.click() },
-                { name: 'Mars', action: () => selectMarsButton.click() },
-                { name: 'Jupiter', action: () => selectJupiterButton.click() },
-                { name: 'Saturn', action: () => selectSaturnButton.click() },
-                { name: 'Uranus', action: () => selectUranusButton.click() },
-                { name: 'Neptune', action: () => selectNeptuneButton.click() },
-                { name: 'Pluto', action: () => selectPlutoButton.click() }
+                { name: 'Sun', action: () => {
+                    state.scale = 0.8;
+                    state.offsetX = 0;
+                    state.offsetY = 0;
+                    updateTransform();
+                }},
+                { name: 'Mercury', action: () => {
+                    state.scale = 9;
+                    state.offsetX = -mercuryX * state.scale;
+                    state.offsetY = -mercuryY * state.scale;
+                    updateTransform();
+                }},
+                { name: 'Venus', action: () => {
+                    state.scale = 5;
+                    state.offsetX = -venusX * state.scale;
+                    state.offsetY = -venusY * state.scale;
+                    updateTransform();
+                }},
+                { name: 'Earth', action: () => {
+                    state.scale = 5.5;
+                    state.offsetX = -earthX * state.scale;
+                    state.offsetY = -earthY * state.scale;
+                    updateTransform();
+                }},
+                { name: 'Moon', action: () => {
+                    state.scale = 13;
+                    state.offsetX = -(EARTH_DISTANCE_PX + MOON_DISTANCE_PX) * state.scale;
+                    state.offsetY = 0;
+                    updateTransform();
+                }},
+                { name: 'Mars', action: () => {
+                    state.scale = 10;
+                    state.offsetX = -marsX * state.scale;
+                    state.offsetY = -marsY * state.scale;
+                    updateTransform();
+                }},
+                { name: 'Jupiter', action: () => {
+                    state.scale = 7;
+                    state.offsetX = -jupiterX * state.scale;
+                    state.offsetY = -jupiterY * state.scale;
+                    updateTransform();
+                }},
+                { name: 'Saturn', action: () => {
+                    state.scale = 10;
+                    state.offsetX = -saturnX * state.scale;
+                    state.offsetY = -saturnY * state.scale;
+                    updateTransform();
+                }},
+                { name: 'Uranus', action: () => {
+                    state.scale = 1.2;
+                    state.offsetX = -uranusX * state.scale;
+                    state.offsetY = -uranusY * state.scale;
+                    updateTransform();
+                }},
+                { name: 'Neptune', action: () => {
+                    state.scale = 1.2;
+                    state.offsetX = -neptuneX * state.scale;
+                    state.offsetY = -neptuneY * state.scale;
+                    updateTransform();
+                }},
+                { name: 'Pluto', action: () => {
+                    state.scale = 0.15;
+                    state.offsetX = -plutoX * state.scale;
+                    state.offsetY = -plutoY * state.scale;
+                    updateTransform();
+                }}
             ]
         },
         {
@@ -452,48 +531,34 @@ all while spearheading the most ambitious resource development initiative in hum
         
                 aboutPageContainer.appendChild(content);
                 document.body.appendChild(aboutPageContainer);
-        
-                // modify navigation menu items to return to solar system
-                const returnToSolarSystem = () => {
-                    document.body.removeChild(aboutPageContainer);
-                    container.style.display = 'flex';
-                };
-        
-                // add click handlers to navigation items
-                const navigationItems = document.querySelectorAll('.menu-item');
-                navigationItems.forEach(item => {
-                    if (item.textContent !== 'About') {
-                        const originalClick = item.onclick;
-                        item.onclick = (e) => {
-                            if (aboutPageContainer.parentNode) {
-                                returnToSolarSystem();
-                            }
-                            if (originalClick) {
-                                originalClick(e);
-                            }
-                        };
-                    }
-                });
             }
         }
-    ]
+    ];
 
     // menu structure
     menuItems.forEach(item => {
         const menuItem = document.createElement('div');
         menuItem.className = 'menu-item';
-    
+        if (!item.isImage){
+            menuItem.addEventListener('mouseenter', playHoverSound);
+        }
+        
         if (item.isImage) {
             const logoImg = document.createElement('img');
             logoImg.src = 'elysium_logomark.png';
-            logoImg.style.height = '70px';
+            logoImg.style.height = '60px';
             logoImg.style.objectFit = 'contain';
-            logoImg.style.marginTop = '2px';
-            logoImg.style.marginBottom = '10px';
+            logoImg.style.marginTop = '0px';
+            logoImg.style.marginBottom = '15px';
             menuItem.appendChild(logoImg);
         } else {
             menuItem.textContent = item.title;
-            if (item.action) {
+            if (item.action && !item.dropdown) {
+                menuItem.addEventListener('click', () => {
+                    playClickSound();
+                    item.action();
+                });
+            } else if (item.action) {
                 menuItem.addEventListener('click', item.action);
             }
         }
@@ -507,7 +572,13 @@ all while spearheading the most ambitious resource development initiative in hum
                 dropdownElement.className = 'dropdown-item';
                 dropdownElement.textContent = dropdownItem.name;
                 dropdownElement.style.setProperty('--underline-width', `${dropdownItem.name.length + 1}ch`);
-                dropdownElement.addEventListener('click', dropdownItem.action);
+                dropdownElement.addEventListener('click', () => {
+                    playClickSound();
+                    if (dropdownItem.action) {
+                        dropdownItem.action();
+                    }
+                });
+                dropdownElement.addEventListener('mouseenter', playHoverSound);
                 dropdown.appendChild(dropdownElement);
             });
     
@@ -759,189 +830,6 @@ all while spearheading the most ambitious resource development initiative in hum
     orbitsSvg.appendChild(uranusOrbit);
     orbitsSvg.appendChild(neptuneOrbit);
     orbitsSvg.appendChild(plutoOrbit);
-
-    // adding planet selection button
-    function createSelectionButton(text, color, position, onClick) {
-        const button = document.createElement('button');
-        button.textContent = text;
-        button.className = 'ui-element';
-        button.style.position = 'absolute';
-        button.style.left = '20px';
-        button.style.top = position;
-        button.style.padding = '10px 20px';
-        button.style.backgroundColor = color;
-        button.style.border = 'none';
-        button.style.borderRadius = '5px';
-        button.style.cursor = 'pointer';
-        button.style.color = 'white';
-        button.style.fontWeight = 'bold';
-        button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-
-        const darkenColor = (color) => {
-            const r = parseInt(color.substr(1,2), 16) * 0.9;
-            const g = parseInt(color.substr(3,2), 16) * 0.9;
-            const b = parseInt(color.substr(5,2), 16) * 0.9;
-            return `#${Math.round(r).toString(16).padStart(2,'0')}${Math.round(g).toString(16).padStart(2,'0')}${Math.round(b).toString(16).padStart(2,'0')}`;
-        };
-        
-        const darkerColor = darkenColor(color);
-        button.addEventListener('mouseover', () => {
-            button.style.backgroundColor = darkerColor;
-        });
-        button.addEventListener('mouseout', () => {
-            button.style.backgroundColor = color;
-        });
-
-        button.addEventListener('click', () => {
-            state.scale = 1;
-            state.targetScale = 1;
-            onClick();
-        });
-        return button;
-    }
-
-    // sun button
-    const selectSunButton = createSelectionButton(
-        'Sun', 
-        '#0080be', 
-        '20px',
-        () => {
-            state.scale = 0.8;
-            state.offsetX = 0;
-            state.offsetY = 0;
-            updateTransform();
-        }
-    );
-
-    // mercury button
-    const selectMercuryButton = createSelectionButton(
-        'Mercury', 
-        '#0080be', 
-        '70px',
-        () => {
-            state.scale = 9;
-            state.offsetX = -mercuryX * state.scale;
-            state.offsetY = -mercuryY * state.scale;
-            updateTransform();
-        }
-    );
-
-    // venus button
-    const selectVenusButton = createSelectionButton(
-        'Venus', 
-        '#0080be', 
-        '120px',
-        () => {
-            state.scale = 5;
-            state.offsetX = -venusX * state.scale;
-            state.offsetY = -venusY * state.scale;
-            updateTransform();
-        }
-    );
-    
-    // earth button
-    const selectEarthButton = createSelectionButton(
-        'Earth', 
-        '#0080be', 
-        '170px',
-        () => {
-            state.scale = 5.5;
-            state.offsetX = -earthX * state.scale;
-            state.offsetY = -earthY * state.scale;
-            updateTransform();
-        }
-    );
-
-    // moon button
-    const selectMoonButton = createSelectionButton(
-        'Moon', 
-        '#0080be', 
-        '220px',
-        () => {
-            state.scale = 13;
-            state.offsetX = -(EARTH_DISTANCE_PX + MOON_DISTANCE_PX) * state.scale;
-            state.offsetY;
-            updateTransform();
-        }
-    );
-
-    // mars button
-    const selectMarsButton = createSelectionButton(
-        'Mars', 
-        '#0080be', 
-        '270px',
-        () => {
-            state.scale = 10;
-            state.offsetX = -marsX * state.scale;
-            state.offsetY = -marsY * state.scale;
-            updateTransform();
-        }
-    );
-
-    // jupiter button
-    const selectJupiterButton = createSelectionButton(
-        'Jupiter', 
-        '#0080be', 
-        '320px',
-        () => {
-            state.scale = 7;
-            state.offsetX = -jupiterX * state.scale;
-            state.offsetY = -jupiterY * state.scale;
-            updateTransform();
-        }
-    );
-
-    // saturn button
-    const selectSaturnButton = createSelectionButton(
-        'Saturn', 
-        '#0080be', 
-        '370px',
-        () => {
-            state.scale = 10;
-            state.offsetX = -saturnX * state.scale;
-            state.offsetY = -saturnY * state.scale;
-            updateTransform();
-        }
-    );
-
-    // uranus button
-    const selectUranusButton = createSelectionButton(
-        'Uranus', 
-        '#0080be', 
-        '420px',
-        () => {
-            state.scale = 1.2;
-            state.offsetX = -uranusX * state.scale;
-            state.offsetY = -uranusY * state.scale;
-            updateTransform();
-        }
-    );
-
-    // neptune button
-    const selectNeptuneButton = createSelectionButton(
-        'Neptune', 
-        '#0080be', 
-        '470px',
-        () => {
-            state.scale = 1.2;
-            state.offsetX = -neptuneX * state.scale;
-            state.offsetY = -neptuneY * state.scale;
-            updateTransform();
-        }
-    );
-
-    // pluto button
-    const selectPlutoButton = createSelectionButton(
-        'Pluto', 
-        '#0080be', 
-        '520px',
-        () => {
-            state.scale = 0.15;
-            state.offsetX = -plutoX * state.scale;
-            state.offsetY = -plutoY * state.scale;
-            updateTransform();
-        }
-    );
 
     addUIElement(zoomDisplay);
 });
