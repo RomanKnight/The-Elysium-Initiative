@@ -91,7 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
             color: rgb(200, 200, 200);
             padding: 15px 20px;
             cursor: pointer;
-            transition: all 0.3s ease;
             font-family: 'Havelock Titling Medium', sans-serif;
             font-size: 18px;
             position: relative;
@@ -99,23 +98,24 @@ document.addEventListener('DOMContentLoaded', () => {
             transform: translateX(-10px);
         }
         .dropdown-item:hover {
-            color: rgb(255, 255, 255)
+            color: rgb(255, 255, 255);
         }
         .menu-item:hover .dropdown-item {
             opacity: 1;
             transform: translateX(0);
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
-        .dropdown-item:nth-child(1) { transition-delay: 0.05s; }
-        .dropdown-item:nth-child(2) { transition-delay: 0.1s; }
-        .dropdown-item:nth-child(3) { transition-delay: 0.15s; }
-        .dropdown-item:nth-child(4) { transition-delay: 0.2s; }
-        .dropdown-item:nth-child(5) { transition-delay: 0.25s; }
-        .dropdown-item:nth-child(6) { transition-delay: 0.3s; }
-        .dropdown-item:nth-child(7) { transition-delay: 0.35s; }
-        .dropdown-item:nth-child(8) { transition-delay: 0.4s; }
-        .dropdown-item:nth-child(9) { transition-delay: 0.45s; }
-        .dropdown-item:nth-child(10) { transition-delay: 0.5s; }
-        .dropdown-item:nth-child(11) { transition-delay: 0.55s; }
+        .menu-item:hover .dropdown-item:nth-child(1) { transition-delay: 0.05s; }
+        .menu-item:hover .dropdown-item:nth-child(2) { transition-delay: 0.1s; }
+        .menu-item:hover .dropdown-item:nth-child(3) { transition-delay: 0.15s; }
+        .menu-item:hover .dropdown-item:nth-child(4) { transition-delay: 0.2s; }
+        .menu-item:hover .dropdown-item:nth-child(5) { transition-delay: 0.25s; }
+        .menu-item:hover .dropdown-item:nth-child(6) { transition-delay: 0.3s; }
+        .menu-item:hover .dropdown-item:nth-child(7) { transition-delay: 0.35s; }
+        .menu-item:hover .dropdown-item:nth-child(8) { transition-delay: 0.4s; }
+        .menu-item:hover .dropdown-item:nth-child(9) { transition-delay: 0.45s; }
+        .menu-item:hover .dropdown-item:nth-child(10) { transition-delay: 0.5s; }
+        .menu-item:hover .dropdown-item:nth-child(11) { transition-delay: 0.55s; }
 
         .dropdown-item::after {
             content: '';
