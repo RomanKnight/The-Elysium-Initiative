@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .menu-item:hover .dropdown-item {
             opacity: 1;
             transform: translateX(0);
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition: opacity 0.31s ease, transform 0.3s ease;
         }
         .menu-item:hover .dropdown-item:nth-child(1) { transition-delay: 0.05s; }
         .menu-item:hover .dropdown-item:nth-child(2) { transition-delay: 0.1s; }
