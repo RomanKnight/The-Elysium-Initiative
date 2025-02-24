@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const ambientSound = new Audio('ambience.mp3');
+    ambientSound.loop = true;
+    ambientSound.volume = 0;
+    ambientSound.play();
+
     function createHoverSound() {
         const sound = new Audio('hover.mp3');
         sound.volume = 0.25;
@@ -40,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(fontStyle);
 
+    // menu style
     const menuStyle = document.createElement('style');
     menuStyle.textContent = `
         .menu-bar {
@@ -48,12 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
             left: 0;
             right: 0;
             height: 100px;
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
             z-index: 1000;
         }
         .menu-item {
-            color: rgb(200, 200, 200);
+            color: rgba(200, 200, 200);
             padding: 0 20px;
             display: flex;
             align-items: center;
@@ -63,42 +69,54 @@ document.addEventListener('DOMContentLoaded', () => {
             font-size: 18px;
             position: relative;
         }
-        .menu-item:not(:first-child)::after {
-            content: '';
-            position: absolute;
-            bottom: 35px;
-            left: 20px;
-            width: 0;
-            height: 2px;
-            background-color: rgb(255, 255, 255);
-            transition: width 0.3s ease;
-            transform-origin: left;
-        }
-        .menu-item:not(:first-child):hover::after {
-            width: calc(100% - 40px);
-        }
         .menu-item:hover {
-            color: rgba(255, 255, 255, 1);
+            color: rgb(255, 255, 255)
         }
         .dropdown {
-            display: none;
             position: absolute;
-            top: 100px;
+            top: 80px;
             background-color: rgba(0, 0, 0, 0.5);
             min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
         }
         .menu-item:hover .dropdown {
-            display: block;
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(20px);
         }
         .dropdown-item {
             color: rgb(200, 200, 200);
             padding: 15px 20px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
             font-family: 'Havelock Titling Medium', sans-serif;
             font-size: 18px;
             position: relative;
+            opacity: 0;
+            transform: translateX(-10px);
         }
+        .dropdown-item:hover {
+            color: rgb(255, 255, 255)
+        }
+        .menu-item:hover .dropdown-item {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .dropdown-item:nth-child(1) { transition-delay: 0.05s; }
+        .dropdown-item:nth-child(2) { transition-delay: 0.1s; }
+        .dropdown-item:nth-child(3) { transition-delay: 0.15s; }
+        .dropdown-item:nth-child(4) { transition-delay: 0.2s; }
+        .dropdown-item:nth-child(5) { transition-delay: 0.25s; }
+        .dropdown-item:nth-child(6) { transition-delay: 0.3s; }
+        .dropdown-item:nth-child(7) { transition-delay: 0.35s; }
+        .dropdown-item:nth-child(8) { transition-delay: 0.4s; }
+        .dropdown-item:nth-child(9) { transition-delay: 0.45s; }
+        .dropdown-item:nth-child(10) { transition-delay: 0.5s; }
+        .dropdown-item:nth-child(11) { transition-delay: 0.55s; }
+
         .dropdown-item::after {
             content: '';
             position: absolute;
@@ -113,11 +131,95 @@ document.addEventListener('DOMContentLoaded', () => {
         .dropdown-item:hover::after {
             width: var(--underline-width);
         }
-        .dropdown-item:hover {
-            color: rgba(255, 255, 255, 1);
+        
+        .control-indicator {
+            position: fixed;
+            bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-family: 'Source Code Pro', sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 2000;
+        }
+        .control-indicator img {
+            width: auto;
+            height: 60px;
+            margin-left: -7px;
         }
     `;
     document.head.appendChild(menuStyle);
+
+    // sidebar style
+    const sidebarStyle = document.createElement('style');
+    sidebarStyle.textContent = `
+        .info-sidebar {
+            position: fixed;
+            right: -400px;
+            top: 100px;
+            width: 400px;
+            height: calc(100vh - 100px);
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: right 0.3s ease-in-out;
+            z-index: 1001;
+            color: white;
+            font-family: 'Source Code Pro', sans-serif;
+            overflow-y: auto;
+        }
+        .info-sidebar.active {
+            right: 0;
+        }
+        .sidebar-content {
+            padding: 2rem;
+        }
+        .sidebar-header {
+            font-family: 'Havelock Titling Medium', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+        .sidebar-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            cursor: pointer;
+            color: white;
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            transition: transform 0.2s ease;
+        }
+        .sidebar-close:hover {
+            transform: scale(1.1);
+        }
+        .planet-stat {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+        .stat-value {
+            color: white;
+            font-size: 1.1rem;
+        }
+        .planet-description {
+            line-height: 1.6;
+            margin: 1.5rem 0;
+            color: rgba(255, 255, 255, 0.9);
+        }
+    `;
+    document.head.appendChild(sidebarStyle);
 
     // main container
     const container = document.createElement('div');
@@ -184,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     zoomDisplay.className = 'ui-element';
     zoomDisplay.style.position = 'fixed';
     zoomDisplay.style.bottom = '20px';
-    zoomDisplay.style.right = '20px';
+    zoomDisplay.style.left = '20px';
     zoomDisplay.style.padding = '8px 12px';
     zoomDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
     zoomDisplay.style.color = 'white';
@@ -192,6 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
     zoomDisplay.style.fontFamily = 'Source Code Pro, sans-serif';
     zoomDisplay.style.fontSize = '14px';
     zoomDisplay.style.fontWeight = 'bold';
+    zoomDisplay.style.zIndex = '2000'
 
     // state variables
     const state = {
@@ -204,6 +307,21 @@ document.addEventListener('DOMContentLoaded', () => {
         scale: 1,
         targetScale: 1,
         strokeWidth: 2.5
+    };
+
+    // planet label fading thresholds (second number should be larger)
+    const labelFadeThresholds = {
+        'Sun': { start: 0.01, end: 0.1 },
+        'Mercury': { start: 0.1, end: 1 },
+        'Venus': { start: 0.05, end: 0.5 },
+        'Earth': { start: 0.05, end: 0.5 },
+        'Moon': { start: 0.1, end: 1 },
+        'Mars': { start: 0.1, end: 1 },
+        'Jupiter': { start: 0.1, end: 1 },
+        'Saturn': { start: 0.15, end: 1.5 },
+        'Uranus': { start: 0.01, end: 0.1 },
+        'Neptune': { start: 0.01, end: 0.1 },
+        'Pluto': { start: 0.001, end: 0.01 }
     };
 
     // function to add a new interactive object
@@ -239,6 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function createPlanetLabel(name, x, y) {
         const label = document.createElement('div');
         label.textContent = name;
+        label.dataset.planetName = name;
         label.style.position = 'absolute';
         label.style.color = 'white';
         label.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
@@ -246,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         label.style.borderRadius = '4px';
         label.style.fontSize = '14px';
         label.style.fontFamily = 'Havelock Titling Medium, sans-serif';
-        label.style.pointerEvents = 'none';
+        label.style.pointerEvents = 'auto';
         label.style.left = '50%';
         label.style.top = '50%';
         label.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(1)`;
@@ -263,19 +382,21 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let orbit of orbits) {
             orbit.setAttribute('stroke-width', state.strokeWidth / state.scale);
             
-            // start fading at scale 0.001, completely fade out by scale 0.01
             const opacity = Math.max(0, Math.min(1, (state.scale - 0.01) / (0.0001 - 0.01)));
             orbit.style.opacity = opacity;
         }
-
+    
         const labels = objectsContainer.getElementsByTagName('div');
         for (let label of labels) {
-            
-            // start fading at scale 0.001, completely fade out by scale 0.01
-            const labelOpacity = Math.max(0, Math.min(1, (state.scale - 0.6) / (0.3 - 0.6)));
-            label.style.opacity = labelOpacity;
+            const planetName = label.dataset.planetName;
+            if (planetName && labelFadeThresholds[planetName]) {
+                const { start, end } = labelFadeThresholds[planetName];
+                const labelOpacity = Math.max(0, Math.min(1, (state.scale - end) / (start - end)));
+                label.style.opacity = labelOpacity;
+            }
             label.style.transform = label.style.transform.replace(/scale\([^\)]+\)/, `scale(${1 / state.scale})`);
         }
+        
         zoomDisplay.textContent = `Magnification: ${(state.scale * 10000).toFixed(2)}`;
     }
 
@@ -297,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
         // calculate new scale
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        const newScale = Math.min(Math.max(state.scale * delta, 0.00005), 150);
+        const newScale = Math.min(Math.max(state.scale * delta, 0.00006), 100);
     
         // calculate new offsets to maintain zoom point
         state.offsetX = mouseX - containerCenterX - (pointX * newScale);
@@ -365,6 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             title: 'Navigation',
             action: () => {
+                playClickSound();
                 if (document.getElementById('about-page')) {
                     document.body.removeChild(document.getElementById('about-page'));
                     container.style.display = 'flex';
@@ -376,66 +498,77 @@ document.addEventListener('DOMContentLoaded', () => {
                     state.offsetX = 0;
                     state.offsetY = 0;
                     updateTransform();
+                    showPlanetInfo('Sun');
                 }},
                 { name: 'Mercury', action: () => {
                     state.scale = 9;
                     state.offsetX = -mercuryX * state.scale;
                     state.offsetY = -mercuryY * state.scale;
                     updateTransform();
+                    showPlanetInfo('Mercury');
                 }},
                 { name: 'Venus', action: () => {
                     state.scale = 5;
                     state.offsetX = -venusX * state.scale;
                     state.offsetY = -venusY * state.scale;
                     updateTransform();
+                    showPlanetInfo('Venus');
                 }},
                 { name: 'Earth', action: () => {
                     state.scale = 5.5;
                     state.offsetX = -earthX * state.scale;
                     state.offsetY = -earthY * state.scale;
                     updateTransform();
+                    showPlanetInfo('Earth');
                 }},
                 { name: 'Moon', action: () => {
                     state.scale = 13;
                     state.offsetX = -(EARTH_DISTANCE_PX + MOON_DISTANCE_PX) * state.scale;
                     state.offsetY = 0;
                     updateTransform();
+                    showPlanetInfo('Moon');
                 }},
                 { name: 'Mars', action: () => {
                     state.scale = 10;
                     state.offsetX = -marsX * state.scale;
                     state.offsetY = -marsY * state.scale;
                     updateTransform();
+                    showPlanetInfo('Mars');
                 }},
                 { name: 'Jupiter', action: () => {
                     state.scale = 7;
                     state.offsetX = -jupiterX * state.scale;
                     state.offsetY = -jupiterY * state.scale;
                     updateTransform();
+                    showPlanetInfo('Jupiter');
                 }},
                 { name: 'Saturn', action: () => {
                     state.scale = 10;
                     state.offsetX = -saturnX * state.scale;
                     state.offsetY = -saturnY * state.scale;
                     updateTransform();
+                    showPlanetInfo('Saturn');
                 }},
                 { name: 'Uranus', action: () => {
                     state.scale = 1.2;
                     state.offsetX = -uranusX * state.scale;
                     state.offsetY = -uranusY * state.scale;
                     updateTransform();
+                    showPlanetInfo('Uranus');
                 }},
                 { name: 'Neptune', action: () => {
                     state.scale = 1.2;
                     state.offsetX = -neptuneX * state.scale;
                     state.offsetY = -neptuneY * state.scale;
                     updateTransform();
+                    showPlanetInfo('Neptune');
                 }},
                 { name: 'Pluto', action: () => {
                     state.scale = 0.15;
                     state.offsetX = -plutoX * state.scale;
                     state.offsetY = -plutoY * state.scale;
                     updateTransform();
+                    showPlanetInfo('Pluto');
                 }}
             ]
         },
@@ -443,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: 'Prospecting',
             dropdown: [
                 { name: 'Index'},
-                { name: 'Assets'}
+                { name: 'Extraction'}
             ]
         },
         {
@@ -457,6 +590,9 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             title: 'About',
             action: () => {
+                // close sidebar
+                sidebar.classList.remove('active');
+                
                 // hide main container
                 container.style.display = 'none';
         
@@ -510,7 +646,7 @@ planetary assessment, efficient extraction, and material reclamation, we ensure 
 utilized to its fullest, delivering unparalleled returns for our stakeholders.\
 \n\n     With cutting-edge automation, quantum-powered logistics, and interstellar expansion strategies, \
 we transform planets into profit centers. Our mission is not just to create sustainable growth, but to \
-blaze a new frontier for those who dare to dream beyond Earth's constraints. As pioneers of this post-\
+blaze a new path for those who dare to dream beyond Earth's constraints. As pioneers of the post-\
 terrestrial economy, we provide exclusive investment opportunities and luxury retreats for our partners, \
 all while spearheading the most ambitious resource development initiative in human history.";
                 
@@ -573,7 +709,6 @@ all while spearheading the most ambitious resource development initiative in hum
                 dropdownElement.textContent = dropdownItem.name;
                 dropdownElement.style.setProperty('--underline-width', `${dropdownItem.name.length + 1}ch`);
                 dropdownElement.addEventListener('click', () => {
-                    playClickSound();
                     if (dropdownItem.action) {
                         dropdownItem.action();
                     }
@@ -588,6 +723,201 @@ all while spearheading the most ambitious resource development initiative in hum
         menuBar.appendChild(menuItem);
     });
     document.body.appendChild(menuBar);
+
+    // planet info and data
+    const planetInfo = {
+        Sun: {
+            description: "Lone star of Sol. Yellow dwarf, Type G2V Main-sequence.",
+            stats: {
+                "Distance": "1 AU",
+                "Extraction": "Solar",
+                "Mass": "1.989 × 10^30 kg",
+                "Diameter": "1,392,700 km",
+                "Composition": "74% - Hydrogen<br>24% - Helium<br>2% - Other",
+                "Surface Temperature": "5,772 K"
+            }
+        },
+        Mercury: {
+            description: "Small, metal-core planet. Extreme temperature variation.",
+            stats: {
+                "Distance": "0.52-1.48 AU",
+                "Valuation": "$4-5 quintillion",
+                "Extraction": "Mining automata",
+                "Mass": "3.301 × 10^23 kg",
+                "Diameter": "4879 km",
+                "Composition": "70% - Iron<br>15% - Oxygen<br>6% - Silicon<br>3% - Sulfur<br>2% - Nickel<br>4% - Other",
+                "Surface Temperature": "100-700 K"
+            }
+        },
+        Venus: {
+            description: "Greenhouse world. Sulferic acid cloud cover",
+            stats: {
+                "Distance": "0.28-1.72 AU",
+                "Valuation": "$200-$235 quintillion",
+                "Extraction": "Mining automata, atmospheric skimming",
+                "Mass": "4.868 x 10^24 kg",
+                "Diameter": "21,103 km",
+                "Atmospheric Composition": "96.5% - Carbon Dioxide<br>3.5% - Nitrogen<br><0.01% - Other",
+                "Planet Composition": "30% - Iron<br>25% - Silicon<br>20% - Oxygen<br>15% - Magnesium<br>4% - Nickel<br>6% - Other",
+                "Surface Temperature": "737 K"
+            }
+        },
+        Earth: {
+            description: "Former home of the human race. Harvested and abandoned.",
+            stats: {
+                "Valuation": "$85-100 sextillion",
+                "Extraction": "Completed",
+                "Mass": "5.972 x 10^24 kg",
+                "Diameter": "12,742 km",
+                "Atmospheric Composition": "78% - Nitrogen<br>21% - Oxygen<br>0.9% - Argon<br>0.1% - Other",
+                "Planet Composition": "35% - Iron<br>30% - Oxygen<br>15% - Silicon<br>13% - Magnesium<br>2.4% - Nickel<br>4.6% - Other",
+                "Surface Temperature": "288 K"
+            }
+        },
+        Moon: {
+            description: "Earth's only natural satellite and humanity's first step into space. Now home to multiple research bases and mining operations.",
+            stats: {
+                "Distance": "0.0026 AU",
+                "Valuation": "$60 quintillion ",
+                "Extraction": "Mining automata",
+                "Mass": "7.346 x 10^22 kg",
+                "Diameter": "3475 km",
+                "Composition": "42% - Oxygen<br>19% - Silicon<br>14% - Magnesium<br>13% - Iron<br>8% - Calcium<br>4% - Other",
+                "Surface Temperature": "250 K"
+            }
+        },
+        Mars: {
+            description: "The red planet and humanity's first major colonization target. Rich in iron and perfect for initial terraforming experiments.",
+            stats: {
+                "Distance": "0.52-2.52 AU",
+                "Valuation": "$2-3 septillion",
+                "Extraction": "Mining automata, atmospheric skimming",
+                "Mass": "6.417 x 10^23 kg",
+                "Diameter": "6779 km",
+                "Atmospheric Composition": "95% - Carbon Dioxide<br>2.7% - Nitrogen<br>1.6% - Argon<br>0.1% - Oxygen<br>0.6% - Other",
+                "Planet Composition": "29.5% - Oxygen<br>27% - Iron<br>17% - Silicon<br>16% - Magnesium<br>3% - Sulfur<br>7.5% - Other",
+                "Surface Temperature": "210 K"
+            }
+        },
+        Jupiter: {
+            description: "The largest planet in our solar system. Its powerful gravitational field protects the inner solar system and provides unique mining opportunities.",
+            stats: {
+                "Distance": "4.20-6.22 AU",
+                "Valuation": "$1-2 octillion",
+                "Extraction": "Dyson Hemisphere",
+                "Mass": "1.898 x 10^27 kg",
+                "Diameter": "139,820 km",
+                "Composition": "89% - Hydrogen<br>10% - Helium<br>1% - Other",
+                "Surface Temperature": "134 K"
+            }
+        },
+        Saturn: {
+            description: "Known for its spectacular rings, Saturn is a gas giant with numerous moons rich in resources and potential for colonization.",
+            stats: {
+                "Distance": "8.58-10.62 AU",
+                "Valuation": "$300-600 sextillion",
+                "Extraction": "Dyson Hemisphere",
+                "Mass": "5.683 x 10^26 kg",
+                "Diameter": "116,500 km",
+                "Composition": "94% - Hydrogen<br>5% - Helium<br>1% - Other",
+                "Surface Temperature": "134 K"
+            }
+        },
+        Uranus: {
+            description: "An ice giant with unique rotational properties. Its moons hold potential for mining water ice and other valuable compounds.",
+            stats: {
+                "Distance": "18.36-20.06 AU",
+                "Valuation": "$600-900 sextillion",
+                "Extraction": "Dyson Hemisphere",
+                "Mass": "8.681 x 10^25 kg",
+                "Diameter": "50,724 km",
+                "Composition": "83% - Hydrogen<br>15% - Helium<br>1% - Oxygen<br>1% - Other",
+                "Surface Temperature": "76 K"
+            }
+        },
+        Neptune: {
+            description: "The windiest planet in the Solar System. Its position makes it a potential future fuel station for deep space missions.",
+            stats: {
+                "Distance": "28.80-30.07 AU",
+                "Valuation": "$500-600 sextillion",
+                "Extraction": "Dyson Hemisphere",
+                "Mass": "1.024 x 10^26 kg",
+                "Diameter": "49,244 km",
+                "Composition": "80% - Hydrogen<br>19% - Helium<br>1% - Other",
+                "Surface Temperature": "72 K"
+            }
+        },
+        Pluto: {
+            description: "A dwarf planet and the gateway to the Kuiper Belt. Its unique composition makes it valuable for deep space research.",
+            stats: {
+                "Distance": "29.65-49.30 AU",
+                "Valuation": "$70-80 quintillion",
+                "Extraction": "Mining automata",
+                "Mass": "1.309 x 10^22 kg",
+                "Diameter": "2376 km",
+                "Composition": "50% - Nitrogen<br>30% - Oxygen<br>10% - Carbon<br>3% - Hydrogen<br>2% - Silicon<br>5% - Other",
+                "Surface Temperature": "44 K"
+            }
+        }
+    };
+
+    // create sidebar element
+    const sidebar = document.createElement('div');
+    sidebar.className = 'info-sidebar';
+    document.body.appendChild(sidebar);
+
+    // function to show planet info
+    function showPlanetInfo(planetName) {
+        const info = planetInfo[planetName];
+        if (!info) return;
+
+        const economicSymbols = {
+            'Sun': '3',
+            'Mercury': '1',
+            'Venus': '2',
+            'Earth': '2',
+            'Moon': '1',
+            'Mars': '2',
+            'Jupiter': '3',
+            'Saturn': '2',
+            'Uranus': '2',
+            'Neptune': '2',
+            'Pluto': '1'
+        };
+
+        const dollarCount = parseInt(economicSymbols[planetName]) || 1;
+        const whiteDollars = '$'.repeat(dollarCount);
+        const grayDollars = '$'.repeat(3 - dollarCount);
+
+        sidebar.innerHTML = `
+            <div class="sidebar-content">
+                <button class="sidebar-close">&times;</button>
+                <h2 class="sidebar-header">
+                    ${planetName}
+                    <div style="font-family: Source Code Pro; font-size: 60px; margin-top: 5px;">
+                        <span style="color: rgb(255, 255, 255);">${whiteDollars}</span><span style="color: rgb(95, 95, 95);">${grayDollars}</span>
+                    </div>
+                </h2>
+                <p class="planet-description">${info.description}</p>
+                ${Object.entries(info.stats).map(([label, value]) => `
+                    <div class="planet-stat">
+                        <div class="stat-label">${label}</div>
+                        <div class="stat-value">${value}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        const closeButton = sidebar.querySelector('.sidebar-close');
+        closeButton.addEventListener('click', () => {
+            const closeSound = new Audio('close.mp3');
+            closeSound.volume = 0.4;
+            closeSound.play();
+            sidebar.classList.remove('active');
+        });
+
+        sidebar.classList.add('active');
+    }
 
     // celestial scale constants
     const KM_TO_PIXELS = 1/1000;
@@ -763,18 +1093,33 @@ all while spearheading the most ambitious resource development initiative in hum
             translate(${plutoX}px, ${plutoY}px)
             rotate(${plutoDegrees}deg)`;
 
+    // Create and configure planet labels
+    function configurePlanetLabel(label, planetName) {
+        label.style.cursor = 'pointer';
+        label.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const navigationItem = menuItems[1].dropdown.find(item => item.name === planetName);
+            if (navigationItem && navigationItem.action) {
+                navigationItem.action();
+            }
+            showPlanetInfo(planetName);
+            playClickSound();
+        });
+        return label;
+    }
+
     // planet labels
-    const sunLabel = createPlanetLabel('Sun', 0, 0);
-    const mercuryLabel = createPlanetLabel('Mercury', mercuryX, mercuryY);
-    const venusLabel = createPlanetLabel('Venus', venusX, venusY);
-    const earthLabel = createPlanetLabel('Earth', earthX, earthY);
-    const moonLabel = createPlanetLabel('Moon', moonX, moonY);
-    const marsLabel = createPlanetLabel('Mars', marsX, marsY);
-    const jupiterLabel = createPlanetLabel('Jupiter', jupiterX, jupiterY);
-    const saturnLabel = createPlanetLabel('Saturn', saturnX, saturnY);
-    const uranusLabel = createPlanetLabel('Uranus', uranusX, uranusY);
-    const neptuneLabel = createPlanetLabel('Neptune', neptuneX, neptuneY);
-    const plutoLabel = createPlanetLabel('Pluto', plutoX, plutoY);
+    const sunLabel = configurePlanetLabel(createPlanetLabel('Sun', 0, 0), 'Sun');
+    const mercuryLabel = configurePlanetLabel(createPlanetLabel('Mercury', mercuryX, mercuryY), 'Mercury');
+    const venusLabel = configurePlanetLabel(createPlanetLabel('Venus', venusX, venusY), 'Venus');
+    const earthLabel = configurePlanetLabel(createPlanetLabel('Earth', earthX, earthY), 'Earth');
+    const moonLabel = configurePlanetLabel(createPlanetLabel('Moon', moonX, moonY), 'Moon');
+    const marsLabel = configurePlanetLabel(createPlanetLabel('Mars', marsX, marsY), 'Mars');
+    const jupiterLabel = configurePlanetLabel(createPlanetLabel('Jupiter', jupiterX, jupiterY), 'Jupiter');
+    const saturnLabel = configurePlanetLabel(createPlanetLabel('Saturn', saturnX, saturnY), 'Saturn');
+    const uranusLabel = configurePlanetLabel(createPlanetLabel('Uranus', uranusX, uranusY), 'Uranus');
+    const neptuneLabel = configurePlanetLabel(createPlanetLabel('Neptune', neptuneX, neptuneY), 'Neptune');
+    const plutoLabel = configurePlanetLabel(createPlanetLabel('Pluto', plutoX, plutoY), 'Pluto');
 
     objectsContainer.appendChild(sunLabel);
     objectsContainer.appendChild(mercuryLabel);
@@ -831,5 +1176,69 @@ all while spearheading the most ambitious resource development initiative in hum
     orbitsSvg.appendChild(neptuneOrbit);
     orbitsSvg.appendChild(plutoOrbit);
 
+    // click handlers for planets
+    [
+        { element: sunImage, name: 'Sun' },
+        { element: mercuryImage, name: 'Mercury' },
+        { element: venusImage, name: 'Venus' },
+        { element: earthImage, name: 'Earth' },
+        { element: moonImage, name: 'Moon' },
+        { element: marsImage, name: 'Mars' },
+        { element: jupiterImage, name: 'Jupiter' },
+        { element: saturnImage, name: 'Saturn' },
+        { element: uranusImage, name: 'Neptune' },
+        { element: neptuneImage, name: 'Neptune' },
+        { element: plutoImage, name: 'Pluto' }
+    ].forEach(planet => {
+        planet.element.style.cursor = 'pointer';
+        planet.element.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const navigationItem = menuItems[1].dropdown.find(item => item.name === planet.name);
+            if (navigationItem && navigationItem.action) {
+                navigationItem.action();
+            }
+            showPlanetInfo(planet.name);
+            playClickSound();
+        });
+    });
+
+    // zoom indicator
+    const zoomIndicator = document.createElement('div');
+    zoomIndicator.className = 'control-indicator ui-element';
+    zoomIndicator.style.left = '20px';
+    zoomIndicator.style.bottom = '142px';
+    zoomIndicator.style.width = '100px';
+    
+    const zoomIcon = document.createElement('img');
+    zoomIcon.src = 'scroll_icon.png';
+    zoomIcon.alt = 'Zoom';
+    
+    const zoomText = document.createElement('span');
+    zoomText.textContent = 'Zoom';
+    zoomText.style.marginLeft = '-3px';
+    
+    zoomIndicator.appendChild(zoomIcon);
+    zoomIndicator.appendChild(zoomText);
+
+    // pan indicator
+    const panIndicator = document.createElement('div');
+    panIndicator.className = 'control-indicator ui-element';
+    panIndicator.style.left = '20px';
+    panIndicator.style.bottom = '60px';
+    panIndicator.style.width = '100px';
+    
+    const panIcon = document.createElement('img');
+    panIcon.src = 'pan_icon.png';
+    panIcon.alt = 'Pan';
+    
+    const panText = document.createElement('span');
+    panText.textContent = 'Pan';
+    panText.style.marginLeft = '0px';
+    
+    panIndicator.appendChild(panIcon);
+    panIndicator.appendChild(panText);
+
     addUIElement(zoomDisplay);
+    addUIElement(zoomIndicator);
+    addUIElement(panIndicator);
 });
