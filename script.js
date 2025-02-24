@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // calculate zoom point
         const pointX = (mouseX - containerCenterX - state.offsetX) / state.scale;
         const pointY = (mouseY - containerCenterY - state.offsetY) / state.scale;
-    
+        
         // calculate new scale
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
         const newScale = Math.min(Math.max(state.scale * delta, 0.00006), 100);
