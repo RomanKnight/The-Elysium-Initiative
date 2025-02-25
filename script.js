@@ -1,9 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const ambientSound = new Audio('ambience.mp3');
     ambientSound.loop = true;
-    ambientSound.volume = 0;
+    ambientSound.volume = 0.2;
     ambientSound.play();
 
+    // repeated functions
     function createHoverSound() {
         const sound = new Audio('hover.mp3');
         sound.volume = 0.25;
@@ -22,6 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const sound = createClickSound();
         sound.play();
     }
+    function closeAllPages() {
+        document.querySelectorAll('div[id$="-page"]').forEach(page => page.remove());
+        container.style.display = 'flex';
+    }
+
     const fontStyle = document.createElement('style');
     fontStyle.textContent = `
         @font-face {
@@ -103,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .menu-item:hover .dropdown-item {
             opacity: 1;
             transform: translateX(0);
-            transition: opacity 0.31s ease, transform 0.3s ease;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
         .menu-item:hover .dropdown-item:nth-child(1) { transition-delay: 0.05s; }
         .menu-item:hover .dropdown-item:nth-child(2) { transition-delay: 0.1s; }
@@ -154,6 +160,80 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     `;
     document.head.appendChild(menuStyle);
+
+    // nested dropdown style (for moons)
+    const nestedMenuStyle = document.createElement('style');
+    nestedMenuStyle.textContent = `
+        .dropdown-item {
+            position: relative;
+        }
+        
+        .nested-dropdown {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            min-width: 150px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .dropdown-item:hover .nested-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+        
+        .nested-dropdown-item {
+            color: rgb(200, 200, 200);
+            padding: 15px 20px;
+            cursor: pointer;
+            font-family: 'Havelock Titling Medium', sans-serif;
+            font-size: 18px;
+            position: relative;
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        
+        .nested-dropdown-item:hover {
+            color: rgb(255, 255, 255);
+        }
+        
+        .dropdown-item:hover .nested-dropdown-item {
+            opacity: 1;
+            transform: translateX(0);
+            transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+        }
+        
+        .nested-dropdown-item::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 20px;
+            width: 0;
+            height: 2px;
+            background-color: rgb(255, 255, 255);
+            transition: width 0.3s ease;
+            transform-origin: left;
+        }
+        
+        .nested-dropdown-item:hover::after {
+            width: var(--underline-width);
+        }
+        
+        /* Add arrow indicator for items with nested dropdowns */
+        .has-nested-dropdown::before {
+            content: '›';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+        }
+    `;
+    document.head.appendChild(nestedMenuStyle);
 
     // sidebar style
     const sidebarStyle = document.createElement('style');
@@ -306,22 +386,58 @@ document.addEventListener('DOMContentLoaded', () => {
         lastMouseY: 0,
         scale: 1,
         targetScale: 1,
-        strokeWidth: 2.5
+        planetOrbitWidth: 2.5,
+        moonOrbitWidth: 2
     };
 
-    // planet label fading thresholds (second number should be larger)
+    // label fade thresholds
     const labelFadeThresholds = {
         'Sun': { start: 0.01, end: 0.1 },
         'Mercury': { start: 0.1, end: 1 },
         'Venus': { start: 0.05, end: 0.5 },
         'Earth': { start: 0.05, end: 0.5 },
-        'Moon': { start: 0.1, end: 1 },
+        'Moon': { 
+            farStart: 0.018,
+            farEnd: 0.03,
+            closeStart: 0.5,
+            closeEnd: 1
+        },
         'Mars': { start: 0.1, end: 1 },
+        'Phobos': { 
+            farStart: 0.15,
+            farEnd: 0.3,
+            closeStart: 5,
+            closeEnd: 10
+        },
+        'Deimos': { 
+            farStart: 0.15,
+            farEnd: 0.3,
+            closeStart: 5,
+            closeEnd: 10
+        },
         'Jupiter': { start: 0.1, end: 1 },
         'Saturn': { start: 0.15, end: 1.5 },
         'Uranus': { start: 0.01, end: 0.1 },
         'Neptune': { start: 0.01, end: 0.1 },
-        'Pluto': { start: 0.001, end: 0.01 }
+        'Pluto': { start: 0.01, end: 0.02 }
+    };
+
+    // orbit fade thresholds
+    const orbitFadeThresholdsPlanets = {
+        'Mercury': { start: 0.005, end: 0.01 },
+        'Venus': { start: 0.005, end: 0.01 },
+        'Earth': { start: 0.005, end: 0.01 },
+        'Mars': { start: 0.005, end: 0.01 },
+        'Jupiter': { start: 0.001, end: 0.005 },
+        'Saturn': { start: 0.001, end: 0.005 },
+        'Uranus': { start: 0.001, end: 0.005 },
+        'Neptune': { start: 0.001, end: 0.005 },
+        'Pluto': { start: 0.001, end: 0.005 },
+    };
+    const orbitFadeThresholdsMoons = {
+        'Moon': { farStart: 0.005, farEnd: 0.035, closeStart: 0.7, closeEnd: 1 },
+        'Phobos': { farStart: 0.15, farEnd: 0.3, closeStart: 1.5, closeEnd: 2 },
+        'Deimos': { farStart: 0.15, farEnd: 0.3, closeStart: 1.5, closeEnd: 2 }
     };
 
     // function to add a new interactive object
@@ -378,27 +494,69 @@ document.addEventListener('DOMContentLoaded', () => {
         backgroundContainer.style.transform = `translate(-50%, -50%)`;
         objectsContainer.style.transform = `translate(${state.offsetX}px, ${state.offsetY}px) scale(${state.scale})`;
         
-        const orbits = orbitsSvg.getElementsByTagName('circle');
-        for (let orbit of orbits) {
-            orbit.setAttribute('stroke-width', state.strokeWidth / state.scale);
+        // handle regular planet orbits
+        const planetOrbits = Array.from(orbitsSvg.getElementsByTagName('circle'))
+        .filter(orbit => !orbit.classList.contains('moon-orbit'));
+        for (let orbit of planetOrbits) {
+            orbit.setAttribute('stroke-width', state.planetOrbitWidth / state.scale);
             
-            const opacity = Math.max(0, Math.min(1, (state.scale - 0.01) / (0.0001 - 0.01)));
-            orbit.style.opacity = opacity;
+            if (orbit.dataset.planetName && orbitFadeThresholdsPlanets[orbit.dataset.planetName]) {
+                const { start, end } = orbitFadeThresholdsPlanets[orbit.dataset.planetName];
+                const opacity = Math.max(0, Math.min(1, (state.scale - end) / (start - end)));
+                orbit.style.opacity = opacity;
+            } else {
+                orbit.style.opacity = 1;
+            }
         }
-    
+        
+        // handle moon orbits
+        const moonOrbits = Array.from(orbitsSvg.getElementsByClassName('moon-orbit'));
+        for (let moonOrbit of moonOrbits) {
+            const moonName = moonOrbit.dataset.moonName;
+            
+            if (moonName === 'Moon') {
+                moonOrbit.style.transform = `translate(${earthX}px, ${earthY}px)`;
+            } else if (moonName === 'Phobos' || moonName === 'Deimos') {
+                moonOrbit.style.transform = `translate(${marsX}px, ${marsY}px)`;
+            }
+            moonOrbit.setAttribute('stroke-width', state.moonOrbitWidth / state.scale);
+            
+            const thresholds = orbitFadeThresholdsMoons[moonName];
+            if (thresholds) {
+                const { farStart, farEnd, closeStart, closeEnd } = thresholds;
+                let farOpacity = Math.max(0, Math.min(1, (state.scale - farStart) / (farEnd - farStart)));
+                let closeOpacity = Math.max(0, Math.min(1, (closeEnd - state.scale) / (closeEnd - closeStart)));
+                let moonOrbitOpacity = Math.min(farOpacity, closeOpacity);
+                moonOrbit.style.opacity = moonOrbitOpacity;
+            } else {
+                moonOrbit.style.opacity = 1;
+            }
+        }
+      
+        // update the labels section in updateTransform:
         const labels = objectsContainer.getElementsByTagName('div');
         for (let label of labels) {
             const planetName = label.dataset.planetName;
             if (planetName && labelFadeThresholds[planetName]) {
-                const { start, end } = labelFadeThresholds[planetName];
-                const labelOpacity = Math.max(0, Math.min(1, (state.scale - end) / (start - end)));
-                label.style.opacity = labelOpacity;
+                if (planetName === 'Moon' || planetName === 'Phobos' || planetName === 'Deimos') {
+                    const { farStart, farEnd, closeStart, closeEnd } = labelFadeThresholds[planetName];
+                    
+                    let farOpacity = Math.max(0, Math.min(1, (state.scale - farStart) / (farEnd - farStart)));
+                    let closeOpacity = Math.max(0, Math.min(1, (closeEnd - state.scale) / (closeEnd - closeStart)));
+                    
+                    let moonLabelOpacity = Math.min(farOpacity, closeOpacity);
+                    label.style.opacity = moonLabelOpacity;
+                }
+                else {
+                    const { start, end } = labelFadeThresholds[planetName];
+                    const labelOpacity = Math.max(0, Math.min(1, (state.scale - end) / (start - end)));
+                    label.style.opacity = labelOpacity;
+                }
             }
             label.style.transform = label.style.transform.replace(/scale\([^\)]+\)/, `scale(${1 / state.scale})`);
         }
-        
-        zoomDisplay.textContent = `Magnification: ${(state.scale * 10000).toFixed(2)}`;
-    }
+        zoomDisplay.textContent = `Magnification: ${(state.scale).toFixed(5)}`;
+      }
 
     // zoom handling function
     function handleZoom(e) {
@@ -487,13 +645,12 @@ document.addEventListener('DOMContentLoaded', () => {
             title: 'Navigation',
             action: () => {
                 playClickSound();
-                if (document.getElementById('about-page')) {
-                    document.body.removeChild(document.getElementById('about-page'));
-                    container.style.display = 'flex';
-                }
+                closeAllPages();
+                container.style.display = 'flex';
             },
             dropdown: [
                 { name: 'Sun', action: () => {
+                    closeAllPages();
                     state.scale = 0.8;
                     state.offsetX = 0;
                     state.offsetY = 0;
@@ -501,6 +658,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showPlanetInfo('Sun');
                 }},
                 { name: 'Mercury', action: () => {
+                    closeAllPages();
                     state.scale = 9;
                     state.offsetX = -mercuryX * state.scale;
                     state.offsetY = -mercuryY * state.scale;
@@ -508,6 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showPlanetInfo('Mercury');
                 }},
                 { name: 'Venus', action: () => {
+                    closeAllPages();
                     state.scale = 5;
                     state.offsetX = -venusX * state.scale;
                     state.offsetY = -venusY * state.scale;
@@ -515,27 +674,62 @@ document.addEventListener('DOMContentLoaded', () => {
                     showPlanetInfo('Venus');
                 }},
                 { name: 'Earth', action: () => {
+                    closeAllPages();
                     state.scale = 5.5;
                     state.offsetX = -earthX * state.scale;
                     state.offsetY = -earthY * state.scale;
                     updateTransform();
                     showPlanetInfo('Earth');
-                }},
-                { name: 'Moon', action: () => {
-                    state.scale = 13;
-                    state.offsetX = -(EARTH_DISTANCE_PX + MOON_DISTANCE_PX) * state.scale;
-                    state.offsetY = 0;
-                    updateTransform();
-                    showPlanetInfo('Moon');
-                }},
+                },
+                    nestedDropdown: [
+                        { 
+                            name: 'Moon', 
+                            action: () => {
+                                closeAllPages();
+                                state.scale = 13;
+                                state.offsetX = -(EARTH_DISTANCE_PX + MOON_DISTANCE_PX) * state.scale;
+                                state.offsetY = 0;
+                                updateTransform();
+                                showPlanetInfo('Moon');
+                            } 
+                        }
+                    ]
+                },
                 { name: 'Mars', action: () => {
+                    closeAllPages();
                     state.scale = 10;
                     state.offsetX = -marsX * state.scale;
                     state.offsetY = -marsY * state.scale;
                     updateTransform();
                     showPlanetInfo('Mars');
-                }},
+                },
+                    nestedDropdown: [
+                        { 
+                            name: 'Phobos',
+                            action: () => {
+                                closeAllPages();
+                                state.scale = 50;
+                                state.offsetX = -phobosX * state.scale;
+                                state.offsetY = -phobosY * state.scale;
+                                updateTransform();
+                                showPlanetInfo('Phobos');
+                            } 
+                        },
+                        { 
+                            name: 'Deimos', 
+                            action: () => {
+                                closeAllPages();
+                                state.scale = 50;
+                                state.offsetX = -deimosX * state.scale;
+                                state.offsetY = -deimosY * state.scale;
+                                updateTransform();
+                                showPlanetInfo('Deimos');
+                            } 
+                        }
+                    ]
+                },
                 { name: 'Jupiter', action: () => {
+                    closeAllPages();
                     state.scale = 7;
                     state.offsetX = -jupiterX * state.scale;
                     state.offsetY = -jupiterY * state.scale;
@@ -543,6 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showPlanetInfo('Jupiter');
                 }},
                 { name: 'Saturn', action: () => {
+                    closeAllPages();
                     state.scale = 10;
                     state.offsetX = -saturnX * state.scale;
                     state.offsetY = -saturnY * state.scale;
@@ -550,6 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showPlanetInfo('Saturn');
                 }},
                 { name: 'Uranus', action: () => {
+                    closeAllPages();
                     state.scale = 1.2;
                     state.offsetX = -uranusX * state.scale;
                     state.offsetY = -uranusY * state.scale;
@@ -557,6 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showPlanetInfo('Uranus');
                 }},
                 { name: 'Neptune', action: () => {
+                    closeAllPages();
                     state.scale = 1.2;
                     state.offsetX = -neptuneX * state.scale;
                     state.offsetY = -neptuneY * state.scale;
@@ -564,6 +761,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showPlanetInfo('Neptune');
                 }},
                 { name: 'Pluto', action: () => {
+                    closeAllPages();
                     state.scale = 0.15;
                     state.offsetX = -plutoX * state.scale;
                     state.offsetY = -plutoY * state.scale;
@@ -575,25 +773,252 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             title: 'Prospecting',
             dropdown: [
-                { name: 'Index'},
-                { name: 'Extraction'}
+                { 
+                    name: 'Index',
+                    action: () => {
+                        sidebar.classList.remove('active');
+                        container.style.display = 'none';
+                        
+                        const indexPage = document.createElement('div');
+                        indexPage.id = 'index-page';
+                        indexPage.style.minHeight = '100vh';
+                        indexPage.style.height = '100%';
+                        indexPage.style.backgroundColor = 'black';
+                        indexPage.style.color = 'white';
+                        indexPage.style.padding = '120px 2rem 2rem 2rem';
+                        indexPage.style.display = 'flex';
+                        indexPage.style.justifyContent = 'center';
+                        indexPage.style.position = 'fixed';
+                        indexPage.style.top = '0';
+                        indexPage.style.left = '0';
+                        indexPage.style.right = '0';
+                        indexPage.style.bottom = '0';
+                        indexPage.style.overflowY = 'scroll';
+                
+                        const content = document.createElement('div');
+                        content.style.maxWidth = '1060px';
+                        content.style.width = '100%';
+                        
+                        const title = document.createElement('h1');
+                        title.textContent = "Resource Index";
+                        title.style.fontSize = '2.5rem';
+                        title.style.marginBottom = '2rem';
+                        title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        title.style.color = 'white';
+                
+                        const text = document.createElement('p');
+                        text.style.fontSize = '1.25rem';
+                        text.style.marginBottom = '2rem';
+                        text.style.lineHeight = '1.75';
+                        text.style.fontFamily = 'Source Code Pro, sans-serif';
+                        text.style.color = 'rgb(209, 213, 219)';
+                        text.textContent = "[Placeholder]";
+                
+                        content.appendChild(title);
+                        content.appendChild(text);
+                        indexPage.appendChild(content);
+                        document.body.appendChild(indexPage);
+                    }
+                },
+                { 
+                    name: 'Extraction',
+                    action: () => {
+                        sidebar.classList.remove('active');
+                        container.style.display = 'none';
+                        
+                        const extractionPage = document.createElement('div');
+                        extractionPage.id = 'extraction-page';
+                        extractionPage.style.minHeight = '100vh';
+                        extractionPage.style.height = '100%';
+                        extractionPage.style.backgroundColor = 'black';
+                        extractionPage.style.color = 'white';
+                        extractionPage.style.padding = '120px 2rem 2rem 2rem';
+                        extractionPage.style.display = 'flex';
+                        extractionPage.style.justifyContent = 'center';
+                        extractionPage.style.position = 'fixed';
+                        extractionPage.style.top = '0';
+                        extractionPage.style.left = '0';
+                        extractionPage.style.right = '0';
+                        extractionPage.style.bottom = '0';
+                        extractionPage.style.overflowY = 'scroll';
+                
+                        const content = document.createElement('div');
+                        content.style.maxWidth = '1060px';
+                        content.style.width = '100%';
+                        
+                        const title = document.createElement('h1');
+                        title.textContent = "Extraction Operations";
+                        title.style.fontSize = '2.5rem';
+                        title.style.marginBottom = '2rem';
+                        title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        title.style.color = 'white';
+                
+                        const text = document.createElement('p');
+                        text.style.fontSize = '1.25rem';
+                        text.style.marginBottom = '2rem';
+                        text.style.lineHeight = '1.75';
+                        text.style.fontFamily = 'Source Code Pro, sans-serif';
+                        text.style.color = 'rgb(209, 213, 219)';
+                        text.textContent = "[Placeholder]";
+                
+                        content.appendChild(title);
+                        content.appendChild(text);
+                        extractionPage.appendChild(content);
+                        document.body.appendChild(extractionPage);
+                    }
+                }
             ]
         },
         {
             title: 'Travel',
             dropdown: [
-                { name: 'Getaways'},
-                { name: 'Expeditions'},
-                { name: 'Charters'}
+                { 
+                    name: 'Getaways',
+                    action: () => {
+                        sidebar.classList.remove('active');
+                        container.style.display = 'none';
+                        
+                        const getawaysPage = document.createElement('div');
+                        getawaysPage.id = 'getaways-page';
+                        getawaysPage.style.minHeight = '100vh';
+                        getawaysPage.style.height = '100%';
+                        getawaysPage.style.backgroundColor = 'black';
+                        getawaysPage.style.color = 'white';
+                        getawaysPage.style.padding = '120px 2rem 2rem 2rem';
+                        getawaysPage.style.display = 'flex';
+                        getawaysPage.style.justifyContent = 'center';
+                        getawaysPage.style.position = 'fixed';
+                        getawaysPage.style.top = '0';
+                        getawaysPage.style.left = '0';
+                        getawaysPage.style.right = '0';
+                        getawaysPage.style.bottom = '0';
+                        getawaysPage.style.overflowY = 'scroll';
+                
+                        const content = document.createElement('div');
+                        content.style.maxWidth = '1060px';
+                        content.style.width = '100%';
+                        
+                        const title = document.createElement('h1');
+                        title.textContent = "Luxury Getaways";
+                        title.style.fontSize = '2.5rem';
+                        title.style.marginBottom = '2rem';
+                        title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        title.style.color = 'white';
+                
+                        const text = document.createElement('p');
+                        text.style.fontSize = '1.25rem';
+                        text.style.marginBottom = '2rem';
+                        text.style.lineHeight = '1.75';
+                        text.style.fontFamily = 'Source Code Pro, sans-serif';
+                        text.style.color = 'rgb(209, 213, 219)';
+                        text.textContent = "[Placeholder]";
+                
+                        content.appendChild(title);
+                        content.appendChild(text);
+                        getawaysPage.appendChild(content);
+                        document.body.appendChild(getawaysPage);
+                    }
+                },
+                { 
+                    name: 'Expeditions',
+                    action: () => {
+                        sidebar.classList.remove('active');
+                        container.style.display = 'none';
+                        
+                        const expeditionsPage = document.createElement('div');
+                        expeditionsPage.id = 'expeditions-page';
+                        expeditionsPage.style.minHeight = '100vh';
+                        expeditionsPage.style.height = '100%';
+                        expeditionsPage.style.backgroundColor = 'black';
+                        expeditionsPage.style.color = 'white';
+                        expeditionsPage.style.padding = '120px 2rem 2rem 2rem';
+                        expeditionsPage.style.display = 'flex';
+                        expeditionsPage.style.justifyContent = 'center';
+                        expeditionsPage.style.position = 'fixed';
+                        expeditionsPage.style.top = '0';
+                        expeditionsPage.style.left = '0';
+                        expeditionsPage.style.right = '0';
+                        expeditionsPage.style.bottom = '0';
+                        expeditionsPage.style.overflowY = 'scroll';
+                
+                        const content = document.createElement('div');
+                        content.style.maxWidth = '1060px';
+                        content.style.width = '100%';
+                        
+                        const title = document.createElement('h1');
+                        title.textContent = "Research Expeditions";
+                        title.style.fontSize = '2.5rem';
+                        title.style.marginBottom = '2rem';
+                        title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        title.style.color = 'white';
+                
+                        const text = document.createElement('p');
+                        text.style.fontSize = '1.25rem';
+                        text.style.marginBottom = '2rem';
+                        text.style.lineHeight = '1.75';
+                        text.style.fontFamily = 'Source Code Pro, sans-serif';
+                        text.style.color = 'rgb(209, 213, 219)';
+                        text.textContent = "[Placeholder]";
+                
+                        content.appendChild(title);
+                        content.appendChild(text);
+                        expeditionsPage.appendChild(content);
+                        document.body.appendChild(expeditionsPage);
+                    }
+                },
+                { 
+                    name: 'Charters',
+                    action: () => {
+                        sidebar.classList.remove('active');
+                        container.style.display = 'none';
+                        
+                        const chartersPage = document.createElement('div');
+                        chartersPage.id = 'charters-page';
+                        chartersPage.style.minHeight = '100vh';
+                        chartersPage.style.height = '100%';
+                        chartersPage.style.backgroundColor = 'black';
+                        chartersPage.style.color = 'white';
+                        chartersPage.style.padding = '120px 2rem 2rem 2rem';
+                        chartersPage.style.display = 'flex';
+                        chartersPage.style.justifyContent = 'center';
+                        chartersPage.style.position = 'fixed';
+                        chartersPage.style.top = '0';
+                        chartersPage.style.left = '0';
+                        chartersPage.style.right = '0';
+                        chartersPage.style.bottom = '0';
+                        chartersPage.style.overflowY = 'scroll';
+                
+                        const content = document.createElement('div');
+                        content.style.maxWidth = '1060px';
+                        content.style.width = '100%';
+                        
+                        const title = document.createElement('h1');
+                        title.textContent = "Private Charters";
+                        title.style.fontSize = '2.5rem';
+                        title.style.marginBottom = '2rem';
+                        title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        title.style.color = 'white';
+                
+                        const text = document.createElement('p');
+                        text.style.fontSize = '1.25rem';
+                        text.style.marginBottom = '2rem';
+                        text.style.lineHeight = '1.75';
+                        text.style.fontFamily = 'Source Code Pro, sans-serif';
+                        text.style.color = 'rgb(209, 213, 219)';
+                        text.textContent = "[Placeholder]";
+                
+                        content.appendChild(title);
+                        content.appendChild(text);
+                        chartersPage.appendChild(content);
+                        document.body.appendChild(chartersPage);
+                    }
+                }
             ]
         },
         {
             title: 'About',
             action: () => {
-                // close sidebar
                 sidebar.classList.remove('active');
-                
-                // hide main container
                 container.style.display = 'none';
         
                 const aboutPageContainer = document.createElement('div');
@@ -706,14 +1131,51 @@ all while spearheading the most ambitious resource development initiative in hum
             item.dropdown.forEach(dropdownItem => {
                 const dropdownElement = document.createElement('div');
                 dropdownElement.className = 'dropdown-item';
+                if (dropdownItem.nestedDropdown) {
+                    dropdownElement.classList.add('has-nested-dropdown');
+                }
+                
                 dropdownElement.textContent = dropdownItem.name;
                 dropdownElement.style.setProperty('--underline-width', `${dropdownItem.name.length + 1}ch`);
-                dropdownElement.addEventListener('click', () => {
+                dropdownElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    playClickSound();
                     if (dropdownItem.action) {
+                        // Prevent event from propagating if there's a nested dropdown
+                        if (dropdownItem.nestedDropdown) {
+                            e.stopPropagation();
+                        }
                         dropdownItem.action();
                     }
                 });
                 dropdownElement.addEventListener('mouseenter', playHoverSound);
+                
+                // Create nested dropdown if it exists
+                if (dropdownItem.nestedDropdown && dropdownItem.nestedDropdown.length > 0) {
+                    const nestedDropdown = document.createElement('div');
+                    nestedDropdown.className = 'nested-dropdown';
+                    
+                    dropdownItem.nestedDropdown.forEach(nestedItem => {
+                        const nestedElement = document.createElement('div');
+                        nestedElement.className = 'nested-dropdown-item';
+                        nestedElement.textContent = nestedItem.name;
+                        nestedElement.style.setProperty('--underline-width', `${nestedItem.name.length + 1}ch`);
+                        
+                        nestedElement.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            playClickSound();
+                            if (nestedItem.action) {
+                                nestedItem.action();
+                            }
+                        });
+                        nestedElement.addEventListener('mouseenter', playHoverSound);
+                        
+                        nestedDropdown.appendChild(nestedElement);
+                    });
+                    
+                    dropdownElement.appendChild(nestedDropdown);
+                }
+                
                 dropdown.appendChild(dropdownElement);
             });
     
@@ -750,7 +1212,7 @@ all while spearheading the most ambitious resource development initiative in hum
             }
         },
         Venus: {
-            description: "Greenhouse world. Sulferic acid cloud cover",
+            description: "Greenhouse world. Sulfuric acid cloud cover",
             stats: {
                 "Distance": "0.28-1.72 AU",
                 "Valuation": "$200-$235 quintillion",
@@ -765,7 +1227,7 @@ all while spearheading the most ambitious resource development initiative in hum
         Earth: {
             description: "Former home of the human race. Harvested and abandoned.",
             stats: {
-                "Valuation": "$85-100 sextillion",
+                "Valuation": "N/A",
                 "Extraction": "Completed",
                 "Mass": "5.972 x 10^24 kg",
                 "Diameter": "12,742 km",
@@ -775,7 +1237,7 @@ all while spearheading the most ambitious resource development initiative in hum
             }
         },
         Moon: {
-            description: "Earth's only natural satellite and humanity's first step into space. Now home to multiple research bases and mining operations.",
+            description: "Earth's only natural satellite. Tidally locked.",
             stats: {
                 "Distance": "0.0026 AU",
                 "Valuation": "$60 quintillion ",
@@ -787,7 +1249,7 @@ all while spearheading the most ambitious resource development initiative in hum
             }
         },
         Mars: {
-            description: "The red planet and humanity's first major colonization target. Rich in iron and perfect for initial terraforming experiments.",
+            description: "Cold desert planet. Red, iron-rich surface",
             stats: {
                 "Distance": "0.52-2.52 AU",
                 "Valuation": "$2-3 septillion",
@@ -799,8 +1261,32 @@ all while spearheading the most ambitious resource development initiative in hum
                 "Surface Temperature": "210 K"
             }
         },
+        Phobos: {
+            description: "Larger, inmost of Mars' two moons. Heavily cratered.",
+            stats: {
+                "Distance from Mars": "0.0000401 AU",
+                "Valuation": "$45 trillion",
+                "Extraction": "Mining automata",
+                "Mass": "1.0659 × 10^16 kg",
+                "Diameter": "22.2 km",
+                "Composition": "38% - Silicon<br>21% - Iron<br>17% - Magnesium<br>14% - Oxygen<br>5% - Calcium<br>5% - Other",
+                "Surface Temperature": "241 K"
+            }
+        },
+        Deimos: {
+            description: "Smaller, outer moon of Mars. Relatively smooth surface.",
+            stats: {
+                "Distance from Mars": "0.0001568 AU",
+                "Valuation": "$28 trillion",
+                "Extraction": "Mining automata",
+                "Mass": "1.4762 × 10^15 kg",
+                "Diameter": "12.4 km",
+                "Composition": "40% - Silicon<br>18% - Iron<br>16% - Magnesium<br>15% - Oxygen<br>5% - Sulfur<br>6% - Other",
+                "Surface Temperature": "233 K"
+            }
+        },
         Jupiter: {
-            description: "The largest planet in our solar system. Its powerful gravitational field protects the inner solar system and provides unique mining opportunities.",
+            description: "Massive gas giant. Raging, turbulent atmosphere.",
             stats: {
                 "Distance": "4.20-6.22 AU",
                 "Valuation": "$1-2 octillion",
@@ -812,7 +1298,7 @@ all while spearheading the most ambitious resource development initiative in hum
             }
         },
         Saturn: {
-            description: "Known for its spectacular rings, Saturn is a gas giant with numerous moons rich in resources and potential for colonization.",
+            description: "Second-largest gas giant. Rings of ice and rock.",
             stats: {
                 "Distance": "8.58-10.62 AU",
                 "Valuation": "$300-600 sextillion",
@@ -824,7 +1310,7 @@ all while spearheading the most ambitious resource development initiative in hum
             }
         },
         Uranus: {
-            description: "An ice giant with unique rotational properties. Its moons hold potential for mining water ice and other valuable compounds.",
+            description: "Icy blue, with faint rings. Dramatically tilted axis.",
             stats: {
                 "Distance": "18.36-20.06 AU",
                 "Valuation": "$600-900 sextillion",
@@ -836,7 +1322,7 @@ all while spearheading the most ambitious resource development initiative in hum
             }
         },
         Neptune: {
-            description: "The windiest planet in the Solar System. Its position makes it a potential future fuel station for deep space missions.",
+            description: "Deep blue, frigid atmosphere. Supersonic winds.",
             stats: {
                 "Distance": "28.80-30.07 AU",
                 "Valuation": "$500-600 sextillion",
@@ -848,7 +1334,7 @@ all while spearheading the most ambitious resource development initiative in hum
             }
         },
         Pluto: {
-            description: "A dwarf planet and the gateway to the Kuiper Belt. Its unique composition makes it valuable for deep space research.",
+            description: "Distant dwarf planet. Nitrogen ice.",
             stats: {
                 "Distance": "29.65-49.30 AU",
                 "Valuation": "$70-80 quintillion",
@@ -875,9 +1361,11 @@ all while spearheading the most ambitious resource development initiative in hum
             'Sun': '3',
             'Mercury': '1',
             'Venus': '2',
-            'Earth': '2',
+            'Earth': '0',
             'Moon': '1',
             'Mars': '2',
+            'Deimos': '1',
+            'Phobos': '1',
             'Jupiter': '3',
             'Saturn': '2',
             'Uranus': '2',
@@ -885,7 +1373,7 @@ all while spearheading the most ambitious resource development initiative in hum
             'Pluto': '1'
         };
 
-        const dollarCount = parseInt(economicSymbols[planetName]) || 1;
+        const dollarCount = parseInt(economicSymbols[planetName]) || 0;
         const whiteDollars = '$'.repeat(dollarCount);
         const grayDollars = '$'.repeat(3 - dollarCount);
 
@@ -929,6 +1417,8 @@ all while spearheading the most ambitious resource development initiative in hum
     const EARTH_DIAMETER = 127420; // added a zero
     const MOON_DIAMETER = 34740; // added a zero
     const MARS_DIAMETER = 67790; // added a zero
+    const PHOBOS_DIAMETER = 2200; // added two zeroes
+    const DEIMOS_DIAMETER = 1200; // added two zeroes
     const JUPITER_DIAMETER = 142984;
     const SATURN_DIAMETER = 120536;
     const URANUS_DIAMETER = 511180; // added a zero
@@ -940,6 +1430,8 @@ all while spearheading the most ambitious resource development initiative in hum
     const EARTH_SIZE_PX = EARTH_DIAMETER * KM_TO_PIXELS;
     const MOON_SIZE_PX = MOON_DIAMETER * KM_TO_PIXELS;
     const MARS_SIZE_PX = MARS_DIAMETER * KM_TO_PIXELS;
+    const PHOBOS_SIZE_PX = PHOBOS_DIAMETER * KM_TO_PIXELS;
+    const DEIMOS_SIZE_PX = DEIMOS_DIAMETER * KM_TO_PIXELS;
     const JUPITER_SIZE_PX = JUPITER_DIAMETER * KM_TO_PIXELS;
     const SATURN_SIZE_PX = SATURN_DIAMETER * KM_TO_PIXELS;
     const URANUS_SIZE_PX = URANUS_DIAMETER * KM_TO_PIXELS;
@@ -951,6 +1443,8 @@ all while spearheading the most ambitious resource development initiative in hum
     const EARTH_SUN_DISTANCE = 147600000;
     const EARTH_MOON_DISTANCE = 3844000; // added a zero
     const MARS_SUN_DISTANCE = 229000000;
+    const MARS_PHOBOS_DISTANCE = 60000; // added a zero
+    const MARS_DEIMOS_DISTANCE = 234630; // added a zero
     const JUPITER_SUN_DISTANCE = 778000000;
     const SATURN_SUN_DISTANCE = 1427000000;
     const URANUS_SUN_DISTANCE = 2871000000;
@@ -961,6 +1455,8 @@ all while spearheading the most ambitious resource development initiative in hum
     const EARTH_DISTANCE_PX = EARTH_SUN_DISTANCE * KM_TO_PIXELS;
     const MOON_DISTANCE_PX = EARTH_MOON_DISTANCE * KM_TO_PIXELS;
     const MARS_DISTANCE_PX = MARS_SUN_DISTANCE * KM_TO_PIXELS;
+    const PHOBOS_DISTANCE_PX = MARS_PHOBOS_DISTANCE * KM_TO_PIXELS;
+    const DEIMOS_DISTANCE_PX = MARS_DEIMOS_DISTANCE * KM_TO_PIXELS;
     const JUPITER_DISTANCE_PX = JUPITER_SUN_DISTANCE * KM_TO_PIXELS;
     const SATURN_DISTANCE_PX = SATURN_SUN_DISTANCE * KM_TO_PIXELS;
     const URANUS_DISTANCE_PX = URANUS_SUN_DISTANCE * KM_TO_PIXELS;
@@ -1032,6 +1528,30 @@ all while spearheading the most ambitious resource development initiative in hum
         marsImage.style.transform = `
             translate(${marsX}px, ${marsY}px)
             rotate(${marsDegrees}deg)`;
+    
+    // phobos
+    const phobosImage = addInteractiveObject('phobos.png', {
+        maxWidth: `${PHOBOS_SIZE_PX}px`,
+        maxHeight: `${PHOBOS_SIZE_PX}px`
+        });
+        const phobosDegrees = marsDegrees + 45;
+        const phobosX = marsX + (PHOBOS_DISTANCE_PX * Math.cos(phobosDegrees * Math.PI / 180));
+        const phobosY = marsY + (PHOBOS_DISTANCE_PX * Math.sin(phobosDegrees * Math.PI / 180));
+        phobosImage.style.transform = `
+            translate(${phobosX}px, ${phobosY}px)
+            rotate(${phobosDegrees}deg)`;
+
+    // deimos
+    const deimosImage = addInteractiveObject('deimos.png', {
+        maxWidth: `${DEIMOS_SIZE_PX}px`,
+        maxHeight: `${DEIMOS_SIZE_PX}px`
+        });
+        const deimosDegrees = marsDegrees + 135;
+        const deimosX = marsX + (DEIMOS_DISTANCE_PX * Math.cos(deimosDegrees * Math.PI / 180));
+        const deimosY = marsY + (DEIMOS_DISTANCE_PX * Math.sin(deimosDegrees * Math.PI / 180));
+        deimosImage.style.transform = `
+            translate(${deimosX}px, ${deimosY}px)
+            rotate(${deimosDegrees}deg)`;
 
     // jupiter
     const jupiterImage = addInteractiveObject('jupiter.png', {
@@ -1093,12 +1613,30 @@ all while spearheading the most ambitious resource development initiative in hum
             translate(${plutoX}px, ${plutoY}px)
             rotate(${plutoDegrees}deg)`;
 
-    // Create and configure planet labels
+    // configure planet labels
     function configurePlanetLabel(label, planetName) {
         label.style.cursor = 'pointer';
         label.addEventListener('click', (e) => {
+            // can't click label if opacity = 0
+            if (parseFloat(label.style.opacity) <= 0) {
+                e.stopPropagation();
+                return;
+            }
             e.stopPropagation();
-            const navigationItem = menuItems[1].dropdown.find(item => item.name === planetName);
+            let navigationItem = null;
+            navigationItem = menuItems[1].dropdown.find(item => item.name === planetName);
+            if (!navigationItem) {
+                for (const item of menuItems[1].dropdown) {
+                    if (item.nestedDropdown) {
+                        const nestedItem = item.nestedDropdown.find(nested => nested.name === planetName);
+                        if (nestedItem) {
+                            navigationItem = nestedItem;
+                            break;
+                        }
+                    }
+                }
+            }
+            
             if (navigationItem && navigationItem.action) {
                 navigationItem.action();
             }
@@ -1115,6 +1653,8 @@ all while spearheading the most ambitious resource development initiative in hum
     const earthLabel = configurePlanetLabel(createPlanetLabel('Earth', earthX, earthY), 'Earth');
     const moonLabel = configurePlanetLabel(createPlanetLabel('Moon', moonX, moonY), 'Moon');
     const marsLabel = configurePlanetLabel(createPlanetLabel('Mars', marsX, marsY), 'Mars');
+    const phobosLabel = configurePlanetLabel(createPlanetLabel('Phobos', phobosX, phobosY), 'Phobos');
+    const deimosLabel = configurePlanetLabel(createPlanetLabel('Deimos', deimosX, deimosY), 'Deimos');
     const jupiterLabel = configurePlanetLabel(createPlanetLabel('Jupiter', jupiterX, jupiterY), 'Jupiter');
     const saturnLabel = configurePlanetLabel(createPlanetLabel('Saturn', saturnX, saturnY), 'Saturn');
     const uranusLabel = configurePlanetLabel(createPlanetLabel('Uranus', uranusX, uranusY), 'Uranus');
@@ -1124,8 +1664,10 @@ all while spearheading the most ambitious resource development initiative in hum
     objectsContainer.appendChild(sunLabel);
     objectsContainer.appendChild(mercuryLabel);
     objectsContainer.appendChild(venusLabel);
-    objectsContainer.appendChild(earthLabel);
     objectsContainer.appendChild(moonLabel);
+    objectsContainer.appendChild(earthLabel);
+    objectsContainer.appendChild(phobosLabel);
+    objectsContainer.appendChild(deimosLabel);
     objectsContainer.appendChild(marsLabel);
     objectsContainer.appendChild(jupiterLabel);
     objectsContainer.appendChild(saturnLabel);
@@ -1151,20 +1693,30 @@ all while spearheading the most ambitious resource development initiative in hum
         circle.setAttribute('r', radius);
         circle.setAttribute('fill', 'none');
         circle.setAttribute('stroke', color);
-        circle.setAttribute('stroke-width', state.strokeWidth);
+        circle.setAttribute('stroke-width', state.planetOrbitWidth);
         circle.style.transition = 'opacity 0.3s ease';
         return circle;
     }
 
+    // planet orbits
     const mercuryOrbit = createOrbitCircle(MERCURY_DISTANCE_PX, 'rgba(255, 140, 86, 0.5)');
+    mercuryOrbit.dataset.planetName = 'Mercury';
     const venusOrbit = createOrbitCircle(VENUS_DISTANCE_PX, 'rgba(255, 217, 0, 0.5)');
+    venusOrbit.dataset.planetName = 'Venus';
     const earthOrbit = createOrbitCircle(EARTH_DISTANCE_PX, 'rgba(0, 255, 55, 0.5)');
+    earthOrbit.dataset.planetName = 'Earth';
     const marsOrbit = createOrbitCircle(MARS_DISTANCE_PX, 'rgba(255, 72, 0, 0.5)');
+    marsOrbit.dataset.planetName = 'Mars';
     const jupiterOrbit = createOrbitCircle(JUPITER_DISTANCE_PX, 'rgba(255, 166, 0, 0.5)');
+    jupiterOrbit.dataset.planetName = 'Jupiter';
     const saturnOrbit = createOrbitCircle(SATURN_DISTANCE_PX, 'rgba(255, 230, 0, 0.5)');
+    saturnOrbit.dataset.planetName = 'Saturn';
     const uranusOrbit = createOrbitCircle(URANUS_DISTANCE_PX, 'rgba(0, 225, 255, 0.5)');
+    uranusOrbit.dataset.planetName = 'Uranus';
     const neptuneOrbit = createOrbitCircle(NEPTUNE_DISTANCE_PX, 'rgba(0, 89, 255, 0.5)');
+    neptuneOrbit.dataset.planetName = 'Neptune';
     const plutoOrbit = createOrbitCircle(PLUTO_DISTANCE_PX, 'rgba(138, 87, 255, 0.5)');
+    plutoOrbit.dataset.planetName = 'Pluto';
 
     orbitsSvg.appendChild(mercuryOrbit);
     orbitsSvg.appendChild(venusOrbit);
@@ -1176,6 +1728,46 @@ all while spearheading the most ambitious resource development initiative in hum
     orbitsSvg.appendChild(neptuneOrbit);
     orbitsSvg.appendChild(plutoOrbit);
 
+    // moon orbits
+    const moons = [
+        {   name: 'Moon',
+            parent: 'Earth',
+            parentX: earthX,
+            parentY: earthY,
+            distance: MOON_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'},
+        {   name: 'Phobos',
+            parent: 'Mars',
+            parentX: marsX,
+            parentY: marsY,
+            distance: PHOBOS_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'},
+        {   name: 'Deimos',
+            parent: 'Mars',
+            parentX: marsX,
+            parentY: marsY,
+            distance: DEIMOS_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'}];
+
+    function createMoonOrbits() {
+        moons.forEach(moon => {
+          const moonOrbit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          moonOrbit.setAttribute('cx', '50%');
+          moonOrbit.setAttribute('cy', '50%');
+          moonOrbit.setAttribute('r', moon.distance);
+          moonOrbit.setAttribute('fill', 'none');
+          moonOrbit.setAttribute('stroke', moon.orbitColor);
+          moonOrbit.setAttribute('stroke-width', '1');
+          moonOrbit.style.transition = 'opacity 0.3s ease';
+          moonOrbit.dataset.moonName = moon.name;
+          moonOrbit.dataset.parentName = moon.parent;
+          moonOrbit.classList.add('moon-orbit');
+          moonOrbit.style.transform = `translate(${moon.parentX}px, ${moon.parentY}px)`;
+          orbitsSvg.appendChild(moonOrbit);
+        });
+    }
+      createMoonOrbits();
+
     // click handlers for planets
     [
         { element: sunImage, name: 'Sun' },
@@ -1184,12 +1776,15 @@ all while spearheading the most ambitious resource development initiative in hum
         { element: earthImage, name: 'Earth' },
         { element: moonImage, name: 'Moon' },
         { element: marsImage, name: 'Mars' },
+        { element: phobosImage, name: 'Phobos' },
+        { element: deimosImage, name: 'Deimos' },
         { element: jupiterImage, name: 'Jupiter' },
         { element: saturnImage, name: 'Saturn' },
         { element: uranusImage, name: 'Neptune' },
         { element: neptuneImage, name: 'Neptune' },
         { element: plutoImage, name: 'Pluto' }
-    ].forEach(planet => {
+    ]
+    .forEach(planet => {
         planet.element.style.cursor = 'pointer';
         planet.element.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1199,6 +1794,29 @@ all while spearheading the most ambitious resource development initiative in hum
             }
             showPlanetInfo(planet.name);
             playClickSound();
+        });
+    });
+
+    // click handlers for moons
+    [
+        { element: phobosImage, name: 'Phobos', parent: 'Mars' },
+        { element: deimosImage, name: 'Deimos', parent: 'Mars' }
+    ].forEach(moon => {
+        moon.element.style.cursor = 'pointer';
+        moon.element.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Find the parent planet dropdown item
+            const parentDropdownItem = menuItems[1].dropdown.find(item => item.name === moon.parent);
+            
+            // Find the nested moon item
+            if (parentDropdownItem && parentDropdownItem.nestedDropdown) {
+                const moonItem = parentDropdownItem.nestedDropdown.find(item => item.name === moon.name);
+                if (moonItem && moonItem.action) {
+                    moonItem.action();
+                }
+            }
+            showPlanetInfo(moon.name);
         });
     });
 
