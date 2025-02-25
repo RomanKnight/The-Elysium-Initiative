@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const ambientSound = new Audio('ambience.mp3');
     ambientSound.loop = true;
-    ambientSound.volume = 0.2;
+    ambientSound.volume = 0;
     ambientSound.play();
 
     // repeated functions
@@ -396,33 +396,22 @@ document.addEventListener('DOMContentLoaded', () => {
         'Mercury': { start: 0.1, end: 1 },
         'Venus': { start: 0.05, end: 0.5 },
         'Earth': { start: 0.05, end: 0.5 },
-        'Moon': { 
-            farStart: 0.018,
-            farEnd: 0.03,
-            closeStart: 0.5,
-            closeEnd: 1
-        },
+        'Moon': { farStart: 0.018, farEnd: 0.03,closeStart: 0.5, closeEnd: 1 },
         'Mars': { start: 0.1, end: 1 },
-        'Phobos': { 
-            farStart: 0.15,
-            farEnd: 0.3,
-            closeStart: 5,
-            closeEnd: 10
-        },
-        'Deimos': { 
-            farStart: 0.15,
-            farEnd: 0.3,
-            closeStart: 5,
-            closeEnd: 10
-        },
-        'Jupiter': { start: 0.1, end: 1 },
+        'Phobos': { farStart: 0.15, farEnd: 0.3, closeStart: 5, closeEnd: 10 },
+        'Deimos': { farStart: 0.15, farEnd: 0.3, closeStart: 5, closeEnd: 10 },
+        'Jupiter': { start: 0.01, end: 0.1 },
+        'Ganymede': { farStart: 0.001, farEnd: 0.01, closeStart: 0.25, closeEnd: 1 },
+        'Io': { farStart: 0.001, farEnd: 0.01, closeStart: 0.5, closeEnd: 1.5 },
+        'Europa': { farStart: 0.001, farEnd: 0.01, closeStart: 1, closeEnd: 3 },
+        'Callisto': { farStart: 0.001, farEnd: 0.01, closeStart: 0.25, closeEnd: 1 },
         'Saturn': { start: 0.15, end: 1.5 },
         'Uranus': { start: 0.01, end: 0.1 },
         'Neptune': { start: 0.01, end: 0.1 },
         'Pluto': { start: 0.01, end: 0.02 }
     };
 
-    // orbit fade thresholds
+    // orbit fade thresholds for planets
     const orbitFadeThresholdsPlanets = {
         'Mercury': { start: 0.005, end: 0.01 },
         'Venus': { start: 0.005, end: 0.01 },
@@ -434,10 +423,16 @@ document.addEventListener('DOMContentLoaded', () => {
         'Neptune': { start: 0.001, end: 0.005 },
         'Pluto': { start: 0.001, end: 0.005 },
     };
+
+    // orbit fade thresholds for moons
     const orbitFadeThresholdsMoons = {
         'Moon': { farStart: 0.005, farEnd: 0.035, closeStart: 0.7, closeEnd: 1 },
         'Phobos': { farStart: 0.15, farEnd: 0.3, closeStart: 1.5, closeEnd: 2 },
-        'Deimos': { farStart: 0.15, farEnd: 0.3, closeStart: 1.5, closeEnd: 2 }
+        'Deimos': { farStart: 0.15, farEnd: 0.3, closeStart: 1.5, closeEnd: 2 },
+        'Ganymede': { farStart: 0.001, farEnd: 0.01, closeStart: 0.1, closeEnd: 0.3 },
+        'Io': { farStart: 0.001, farEnd: 0.01, closeStart: 0.1, closeEnd: 0.3 },
+        'Europa': { farStart: 0.001, farEnd: 0.01, closeStart: 0.1, closeEnd: 0.3 },
+        'Callisto': { farStart: 0.001, farEnd: 0.01, closeStart: 0.1, closeEnd: 0.3 }
     };
 
     // function to add a new interactive object
@@ -538,16 +533,21 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let label of labels) {
             const planetName = label.dataset.planetName;
             if (planetName && labelFadeThresholds[planetName]) {
-                if (planetName === 'Moon' || planetName === 'Phobos' || planetName === 'Deimos') {
+                if (
+                    planetName === 'Moon' || 
+                    planetName === 'Phobos' || 
+                    planetName === 'Deimos' ||
+                    planetName === 'Ganymede' ||
+                    planetName === 'Io' ||
+                    planetName === 'Europa' ||
+                    planetName === 'Callisto'
+                ) {
                     const { farStart, farEnd, closeStart, closeEnd } = labelFadeThresholds[planetName];
-                    
                     let farOpacity = Math.max(0, Math.min(1, (state.scale - farStart) / (farEnd - farStart)));
                     let closeOpacity = Math.max(0, Math.min(1, (closeEnd - state.scale) / (closeEnd - closeStart)));
-                    
                     let moonLabelOpacity = Math.min(farOpacity, closeOpacity);
                     label.style.opacity = moonLabelOpacity;
-                }
-                else {
+                } else {
                     const { start, end } = labelFadeThresholds[planetName];
                     const labelOpacity = Math.max(0, Math.min(1, (state.scale - end) / (start - end)));
                     label.style.opacity = labelOpacity;
@@ -708,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             name: 'Phobos',
                             action: () => {
                                 closeAllPages();
-                                state.scale = 50;
+                                state.scale = 100;
                                 state.offsetX = -phobosX * state.scale;
                                 state.offsetY = -phobosY * state.scale;
                                 updateTransform();
@@ -719,7 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             name: 'Deimos', 
                             action: () => {
                                 closeAllPages();
-                                state.scale = 50;
+                                state.scale = 100;
                                 state.offsetX = -deimosX * state.scale;
                                 state.offsetY = -deimosY * state.scale;
                                 updateTransform();
@@ -730,12 +730,59 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 { name: 'Jupiter', action: () => {
                     closeAllPages();
-                    state.scale = 7;
+                    state.scale = 0.6;
                     state.offsetX = -jupiterX * state.scale;
                     state.offsetY = -jupiterY * state.scale;
                     updateTransform();
                     showPlanetInfo('Jupiter');
-                }},
+                },
+                    nestedDropdown: [
+                        { 
+                            name: 'Ganymede', 
+                            action: () => {
+                                closeAllPages();
+                                state.scale = 8;
+                                state.offsetX = -ganymedeX * state.scale;
+                                state.offsetY = -ganymedeY * state.scale;
+                                updateTransform();
+                                showPlanetInfo('Ganymede');
+                            }
+                        },
+                        { 
+                            name: 'Io', 
+                            action: () => {
+                                closeAllPages();
+                                state.scale = 8;
+                                state.offsetX = -ioX * state.scale;
+                                state.offsetY = -ioY * state.scale;
+                                updateTransform();
+                                showPlanetInfo('Io');
+                            }
+                        },
+                        { 
+                            name: 'Europa', 
+                            action: () => {
+                                closeAllPages();
+                                state.scale = 8;
+                                state.offsetX = -europaX * state.scale;
+                                state.offsetY = -europaY * state.scale;
+                                updateTransform();
+                                showPlanetInfo('Europa');
+                            }
+                        },
+                        { 
+                            name: 'Callisto', 
+                            action: () => {
+                                closeAllPages();
+                                state.scale = 8;
+                                state.offsetX = -callistoX * state.scale;
+                                state.offsetY = -callistoY * state.scale;
+                                updateTransform();
+                                showPlanetInfo('Callisto');
+                            }
+                        }
+                    ]
+                },                
                 { name: 'Saturn', action: () => {
                     closeAllPages();
                     state.scale = 10;
@@ -1191,7 +1238,7 @@ all while spearheading the most ambitious resource development initiative in hum
         Sun: {
             description: "Lone star of Sol. Yellow dwarf, Type G2V Main-sequence.",
             stats: {
-                "Distance": "1 AU",
+                "Distance from Earth": "1 AU",
                 "Extraction": "Solar",
                 "Mass": "1.989 × 10^30 kg",
                 "Diameter": "1,392,700 km",
@@ -1202,7 +1249,7 @@ all while spearheading the most ambitious resource development initiative in hum
         Mercury: {
             description: "Small, metal-core planet. Extreme temperature variation.",
             stats: {
-                "Distance": "0.52-1.48 AU",
+                "Distance from Earth": "0.52-1.48 AU",
                 "Valuation": "$4-5 quintillion",
                 "Extraction": "Mining automata",
                 "Mass": "3.301 × 10^23 kg",
@@ -1214,7 +1261,7 @@ all while spearheading the most ambitious resource development initiative in hum
         Venus: {
             description: "Greenhouse world. Sulfuric acid cloud cover",
             stats: {
-                "Distance": "0.28-1.72 AU",
+                "Distance from Earth": "0.28-1.72 AU",
                 "Valuation": "$200-$235 quintillion",
                 "Extraction": "Mining automata, atmospheric skimming",
                 "Mass": "4.868 x 10^24 kg",
@@ -1239,7 +1286,7 @@ all while spearheading the most ambitious resource development initiative in hum
         Moon: {
             description: "Earth's only natural satellite. Tidally locked.",
             stats: {
-                "Distance": "0.0026 AU",
+                "Distance from Earth": "384,400 km",
                 "Valuation": "$60 quintillion ",
                 "Extraction": "Mining automata",
                 "Mass": "7.346 x 10^22 kg",
@@ -1251,8 +1298,8 @@ all while spearheading the most ambitious resource development initiative in hum
         Mars: {
             description: "Cold desert planet. Red, iron-rich surface",
             stats: {
-                "Distance": "0.52-2.52 AU",
-                "Valuation": "$2-3 septillion",
+                "Distance from Earth": "0.52-2.52 AU",
+                "Valuation": "$2-3 sextillion",
                 "Extraction": "Mining automata, atmospheric skimming",
                 "Mass": "6.417 x 10^23 kg",
                 "Diameter": "6779 km",
@@ -1264,7 +1311,7 @@ all while spearheading the most ambitious resource development initiative in hum
         Phobos: {
             description: "Larger, inmost of Mars' two moons. Heavily cratered.",
             stats: {
-                "Distance from Mars": "0.0000401 AU",
+                "Distance from Mars": "6,000 km",
                 "Valuation": "$45 trillion",
                 "Extraction": "Mining automata",
                 "Mass": "1.0659 × 10^16 kg",
@@ -1276,7 +1323,7 @@ all while spearheading the most ambitious resource development initiative in hum
         Deimos: {
             description: "Smaller, outer moon of Mars. Relatively smooth surface.",
             stats: {
-                "Distance from Mars": "0.0001568 AU",
+                "Distance from Mars": "23,460 km",
                 "Valuation": "$28 trillion",
                 "Extraction": "Mining automata",
                 "Mass": "1.4762 × 10^15 kg",
@@ -1288,7 +1335,7 @@ all while spearheading the most ambitious resource development initiative in hum
         Jupiter: {
             description: "Massive gas giant. Raging, turbulent atmosphere.",
             stats: {
-                "Distance": "4.20-6.22 AU",
+                "Distance from Earth": "4.20-6.22 AU",
                 "Valuation": "$1-2 octillion",
                 "Extraction": "Dyson Hemisphere",
                 "Mass": "1.898 x 10^27 kg",
@@ -1297,10 +1344,58 @@ all while spearheading the most ambitious resource development initiative in hum
                 "Surface Temperature": "134 K"
             }
         },
+        Ganymede: {
+            description: "Largest moon in the solar system. Subsurface ocean.",
+            stats: {
+                "Distance from Jupiter": "1,070,000 km",
+                "Valuation": "$40–50 quintillion",
+                "Extraction": "Mining automata",
+                "Mass": "1.4819 × 10^23 kg",
+                "Diameter": "5262 km",
+                "Composition": "40% - Water Ice<br>20% - Oxygen<br>15% - Silicon<br>10% - Magnesium<br>10% - Iron<br>5% - Other",
+                "Surface Temperature": "110 K"
+            }
+        },
+        Io: {
+            description: "Volcanically active and geologically dynamic.",
+            stats: {
+                "Distance from Jupiter": "421,700 km",
+                "Valuation": "$35–45 quintillion",
+                "Extraction": "Mining automata",
+                "Mass": "8.9319 × 10^22 kg",
+                "Diameter": "3643 km",
+                "Composition": "35% - Sulfur Compounds<br>30% - Silicate Rock<br>15% - Oxygen<br>10% - Iron<br>10% - Other",
+                "Surface Temperature": "130 K"
+            }
+        },
+        Europa: {
+            description: "Extremely smooth, icy moon. Subsurface ocean.",
+            stats: {
+                "Distance from Jupiter": "670,900 km",
+                "Valuation": "$30–40 quintillion",
+                "Extraction": "Mining automata",
+                "Mass": "4.7998 × 10^22 kg",
+                "Diameter": "3122 km",
+                "Composition": "55% - Water Ice<br>20% - Silicate Rock<br>10% - Oxygen<br>5% - Magnesium<br>10% - Other",
+                "Surface Temperature": "102 K"
+            }
+        },
+        Callisto: {
+            description: "Heavily cratered. One of the oldest surfaces in the system.",
+            stats: {
+                "Distance from Jupiter": "1,882,700 km",
+                "Valuation": "$25–35 quintillion",
+                "Extraction": "Mining automata",
+                "Mass": "1.0759 × 10^23 kg",
+                "Diameter": "4820 km",
+                "Composition": "45% - Water Ice<br>25% - Silicate Rock<br>10% - Oxygen<br>10% - Magnesium<br>5% - Iron<br>5% - Other",
+                "Surface Temperature": "133 K"
+            }
+        },    
         Saturn: {
             description: "Second-largest gas giant. Rings of ice and rock.",
             stats: {
-                "Distance": "8.58-10.62 AU",
+                "Distance from Earth": "8.58-10.62 AU",
                 "Valuation": "$300-600 sextillion",
                 "Extraction": "Dyson Hemisphere",
                 "Mass": "5.683 x 10^26 kg",
@@ -1312,7 +1407,7 @@ all while spearheading the most ambitious resource development initiative in hum
         Uranus: {
             description: "Icy blue, with faint rings. Dramatically tilted axis.",
             stats: {
-                "Distance": "18.36-20.06 AU",
+                "Distance from Earth": "18.36-20.06 AU",
                 "Valuation": "$600-900 sextillion",
                 "Extraction": "Dyson Hemisphere",
                 "Mass": "8.681 x 10^25 kg",
@@ -1324,7 +1419,7 @@ all while spearheading the most ambitious resource development initiative in hum
         Neptune: {
             description: "Deep blue, frigid atmosphere. Supersonic winds.",
             stats: {
-                "Distance": "28.80-30.07 AU",
+                "Distance from Earth": "28.80-30.07 AU",
                 "Valuation": "$500-600 sextillion",
                 "Extraction": "Dyson Hemisphere",
                 "Mass": "1.024 x 10^26 kg",
@@ -1336,7 +1431,7 @@ all while spearheading the most ambitious resource development initiative in hum
         Pluto: {
             description: "Distant dwarf planet. Nitrogen ice.",
             stats: {
-                "Distance": "29.65-49.30 AU",
+                "Distance from Earth": "29.65-49.30 AU",
                 "Valuation": "$70-80 quintillion",
                 "Extraction": "Mining automata",
                 "Mass": "1.309 x 10^22 kg",
@@ -1367,6 +1462,10 @@ all while spearheading the most ambitious resource development initiative in hum
             'Deimos': '1',
             'Phobos': '1',
             'Jupiter': '3',
+            'Europa': '1',
+            'Ganymede': '1',
+            'Io': '1',
+            'Callisto': '1',
             'Saturn': '2',
             'Uranus': '2',
             'Neptune': '2',
@@ -1419,7 +1518,11 @@ all while spearheading the most ambitious resource development initiative in hum
     const MARS_DIAMETER = 67790; // added a zero
     const PHOBOS_DIAMETER = 2200; // added two zeroes
     const DEIMOS_DIAMETER = 1200; // added two zeroes
-    const JUPITER_DIAMETER = 142984;
+    const JUPITER_DIAMETER = 1429840; // added a zero
+    const GANYMEDE_DIAMETER = 52620; // added a zero
+    const IO_DIAMETER = 36430; // added a zero
+    const EUROPA_DIAMETER = 31220; // added a zero
+    const CALLISTO_DIAMETER = 48200; // added a zero
     const SATURN_DIAMETER = 120536;
     const URANUS_DIAMETER = 511180; // added a zero
     const NEPTUNE_DIAMETER = 492440; // added a zero
@@ -1433,6 +1536,10 @@ all while spearheading the most ambitious resource development initiative in hum
     const PHOBOS_SIZE_PX = PHOBOS_DIAMETER * KM_TO_PIXELS;
     const DEIMOS_SIZE_PX = DEIMOS_DIAMETER * KM_TO_PIXELS;
     const JUPITER_SIZE_PX = JUPITER_DIAMETER * KM_TO_PIXELS;
+    const GANYMEDE_SIZE_PX = GANYMEDE_DIAMETER * KM_TO_PIXELS;
+    const IO_SIZE_PX = IO_DIAMETER * KM_TO_PIXELS;
+    const EUROPA_SIZE_PX = EUROPA_DIAMETER * KM_TO_PIXELS;
+    const CALLISTO_SIZE_PX = CALLISTO_DIAMETER * KM_TO_PIXELS;
     const SATURN_SIZE_PX = SATURN_DIAMETER * KM_TO_PIXELS;
     const URANUS_SIZE_PX = URANUS_DIAMETER * KM_TO_PIXELS;
     const NEPTUNE_SIZE_PX = NEPTUNE_DIAMETER * KM_TO_PIXELS;
@@ -1446,6 +1553,10 @@ all while spearheading the most ambitious resource development initiative in hum
     const MARS_PHOBOS_DISTANCE = 60000; // added a zero
     const MARS_DEIMOS_DISTANCE = 234630; // added a zero
     const JUPITER_SUN_DISTANCE = 778000000;
+    const JUPITER_GANYMEDE_DISTANCE = 10700000; // added a zero
+    const JUPITER_IO_DISTANCE = 4217000; // added a zero
+    const JUPITER_EUROPA_DISTANCE = 6709000; // added a zero
+    const JUPITER_CALLISTO_DISTANCE = 18827000; // added a zero
     const SATURN_SUN_DISTANCE = 1427000000;
     const URANUS_SUN_DISTANCE = 2871000000;
     const NEPTUNE_SUN_DISTANCE = 4497000000;
@@ -1458,6 +1569,10 @@ all while spearheading the most ambitious resource development initiative in hum
     const PHOBOS_DISTANCE_PX = MARS_PHOBOS_DISTANCE * KM_TO_PIXELS;
     const DEIMOS_DISTANCE_PX = MARS_DEIMOS_DISTANCE * KM_TO_PIXELS;
     const JUPITER_DISTANCE_PX = JUPITER_SUN_DISTANCE * KM_TO_PIXELS;
+    const GANYMEDE_DISTANCE_PX = JUPITER_GANYMEDE_DISTANCE * KM_TO_PIXELS;
+    const IO_DISTANCE_PX = JUPITER_IO_DISTANCE * KM_TO_PIXELS;
+    const EUROPA_DISTANCE_PX = JUPITER_EUROPA_DISTANCE * KM_TO_PIXELS;
+    const CALLISTO_DISTANCE_PX = JUPITER_CALLISTO_DISTANCE * KM_TO_PIXELS;
     const SATURN_DISTANCE_PX = SATURN_SUN_DISTANCE * KM_TO_PIXELS;
     const URANUS_DISTANCE_PX = URANUS_SUN_DISTANCE * KM_TO_PIXELS;
     const NEPTUNE_DISTANCE_PX = NEPTUNE_SUN_DISTANCE * KM_TO_PIXELS;
@@ -1538,8 +1653,9 @@ all while spearheading the most ambitious resource development initiative in hum
         const phobosX = marsX + (PHOBOS_DISTANCE_PX * Math.cos(phobosDegrees * Math.PI / 180));
         const phobosY = marsY + (PHOBOS_DISTANCE_PX * Math.sin(phobosDegrees * Math.PI / 180));
         phobosImage.style.transform = `
-            translate(${phobosX}px, ${phobosY}px)
-            rotate(${phobosDegrees}deg)`;
+        translate(${phobosX}px, ${phobosY}px)
+        rotate(${phobosDegrees}deg)
+        rotateZ(0deg)`;
 
     // deimos
     const deimosImage = addInteractiveObject('deimos.png', {
@@ -1551,7 +1667,8 @@ all while spearheading the most ambitious resource development initiative in hum
         const deimosY = marsY + (DEIMOS_DISTANCE_PX * Math.sin(deimosDegrees * Math.PI / 180));
         deimosImage.style.transform = `
             translate(${deimosX}px, ${deimosY}px)
-            rotate(${deimosDegrees}deg)`;
+            rotate(${deimosDegrees}deg)
+            rotateZ(180deg)`;
 
     // jupiter
     const jupiterImage = addInteractiveObject('jupiter.png', {
@@ -1564,6 +1681,58 @@ all while spearheading the most ambitious resource development initiative in hum
         jupiterImage.style.transform = `
             translate(${jupiterX}px, ${jupiterY}px)
             rotate(${jupiterDegrees}deg)`;
+
+    // ganymede
+    const ganymedeDegrees = 30; // arbitrary angle
+    const ganymedeX = jupiterX + (GANYMEDE_DISTANCE_PX * Math.cos(ganymedeDegrees * Math.PI / 180));
+    const ganymedeY = jupiterY + (GANYMEDE_DISTANCE_PX * Math.sin(ganymedeDegrees * Math.PI / 180));
+    const ganymedeImage = addInteractiveObject('ganymede.png', {
+        maxWidth: `${GANYMEDE_SIZE_PX}px`,
+        maxHeight: `${GANYMEDE_SIZE_PX}px`
+    });
+    ganymedeImage.style.transform = `
+        translate(${ganymedeX}px, ${ganymedeY}px)
+        rotate(${ganymedeDegrees}deg)
+        rotateZ(50deg)`;
+
+    // io
+    const ioDegrees = 90;
+    const ioX = jupiterX + (IO_DISTANCE_PX * Math.cos(ioDegrees * Math.PI / 180));
+    const ioY = jupiterY + (IO_DISTANCE_PX * Math.sin(ioDegrees * Math.PI / 180));
+    const ioImage = addInteractiveObject('io.png', {
+        maxWidth: `${IO_SIZE_PX}px`,
+        maxHeight: `${IO_SIZE_PX}px`
+    });
+    ioImage.style.transform = `
+        translate(${ioX}px, ${ioY}px)
+        rotate(${ioDegrees}deg)
+        rotateZ(0deg)`;
+
+    // europa
+    const europaDegrees = 150;
+    const europaX = jupiterX + (EUROPA_DISTANCE_PX * Math.cos(europaDegrees * Math.PI / 180));
+    const europaY = jupiterY + (EUROPA_DISTANCE_PX * Math.sin(europaDegrees * Math.PI / 180));
+    const europaImage = addInteractiveObject('europa.png', {
+        maxWidth: `${EUROPA_SIZE_PX}px`,
+        maxHeight: `${EUROPA_SIZE_PX}px`
+    });
+    europaImage.style.transform = `
+        translate(${europaX}px, ${europaY}px)
+        rotate(${europaDegrees}deg)
+        rotateZ(-65deg)`;
+
+    // callisto
+    const callistoDegrees = 210;
+    const callistoX = jupiterX + (CALLISTO_DISTANCE_PX * Math.cos(callistoDegrees * Math.PI / 180));
+    const callistoY = jupiterY + (CALLISTO_DISTANCE_PX * Math.sin(callistoDegrees * Math.PI / 180));
+    const callistoImage = addInteractiveObject('callisto.png', {
+        maxWidth: `${CALLISTO_SIZE_PX}px`,
+        maxHeight: `${CALLISTO_SIZE_PX}px`
+    });
+    callistoImage.style.transform = `
+        translate(${callistoX}px, ${callistoY}px)
+        rotate(${callistoDegrees}deg)
+        rotateZ(-120deg)`;
 
     // saturn
     const saturnImage = addInteractiveObject('saturn.png', {
@@ -1656,6 +1825,10 @@ all while spearheading the most ambitious resource development initiative in hum
     const phobosLabel = configurePlanetLabel(createPlanetLabel('Phobos', phobosX, phobosY), 'Phobos');
     const deimosLabel = configurePlanetLabel(createPlanetLabel('Deimos', deimosX, deimosY), 'Deimos');
     const jupiterLabel = configurePlanetLabel(createPlanetLabel('Jupiter', jupiterX, jupiterY), 'Jupiter');
+    const ganymedeLabel = configurePlanetLabel(createPlanetLabel('Ganymede', ganymedeX, ganymedeY), 'Ganymede');
+    const ioLabel = configurePlanetLabel(createPlanetLabel('Io', ioX, ioY), 'Io');
+    const europaLabel = configurePlanetLabel(createPlanetLabel('Europa', europaX, europaY), 'Europa');
+    const callistoLabel = configurePlanetLabel(createPlanetLabel('Callisto', callistoX, callistoY), 'Callisto');
     const saturnLabel = configurePlanetLabel(createPlanetLabel('Saturn', saturnX, saturnY), 'Saturn');
     const uranusLabel = configurePlanetLabel(createPlanetLabel('Uranus', uranusX, uranusY), 'Uranus');
     const neptuneLabel = configurePlanetLabel(createPlanetLabel('Neptune', neptuneX, neptuneY), 'Neptune');
@@ -1669,6 +1842,10 @@ all while spearheading the most ambitious resource development initiative in hum
     objectsContainer.appendChild(phobosLabel);
     objectsContainer.appendChild(deimosLabel);
     objectsContainer.appendChild(marsLabel);
+    objectsContainer.appendChild(ganymedeLabel);
+    objectsContainer.appendChild(ioLabel);
+    objectsContainer.appendChild(europaLabel);
+    objectsContainer.appendChild(callistoLabel);
     objectsContainer.appendChild(jupiterLabel);
     objectsContainer.appendChild(saturnLabel);
     objectsContainer.appendChild(uranusLabel);
@@ -1747,7 +1924,36 @@ all while spearheading the most ambitious resource development initiative in hum
             parentX: marsX,
             parentY: marsY,
             distance: DEIMOS_DISTANCE_PX,
-            orbitColor: 'rgba(200, 200, 200, 0.8)'}];
+            orbitColor: 'rgba(200, 200, 200, 0.8)'},
+        {   name: 'Ganymede',
+            parent: 'Jupiter',
+            parentX: jupiterX,
+            parentY: jupiterY,
+            distance: GANYMEDE_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'
+        },
+        {   name: 'Io',
+            parent: 'Jupiter',
+            parentX: jupiterX,
+            parentY: jupiterY,
+            distance: IO_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'
+        },
+        {   name: 'Europa',
+            parent: 'Jupiter',
+            parentX: jupiterX,
+            parentY: jupiterY,
+            distance: EUROPA_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'
+        },
+        {   name: 'Callisto',
+            parent: 'Jupiter',
+            parentX: jupiterX,
+            parentY: jupiterY,
+            distance: CALLISTO_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'
+        }
+    ];
 
     function createMoonOrbits() {
         moons.forEach(moon => {
@@ -1774,17 +1980,13 @@ all while spearheading the most ambitious resource development initiative in hum
         { element: mercuryImage, name: 'Mercury' },
         { element: venusImage, name: 'Venus' },
         { element: earthImage, name: 'Earth' },
-        { element: moonImage, name: 'Moon' },
         { element: marsImage, name: 'Mars' },
-        { element: phobosImage, name: 'Phobos' },
-        { element: deimosImage, name: 'Deimos' },
         { element: jupiterImage, name: 'Jupiter' },
         { element: saturnImage, name: 'Saturn' },
         { element: uranusImage, name: 'Neptune' },
         { element: neptuneImage, name: 'Neptune' },
         { element: plutoImage, name: 'Pluto' }
-    ]
-    .forEach(planet => {
+    ].forEach(planet => {
         planet.element.style.cursor = 'pointer';
         planet.element.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1799,17 +2001,18 @@ all while spearheading the most ambitious resource development initiative in hum
 
     // click handlers for moons
     [
+        { element: moonImage, name: 'Moon', parent: 'Earth' },
         { element: phobosImage, name: 'Phobos', parent: 'Mars' },
-        { element: deimosImage, name: 'Deimos', parent: 'Mars' }
+        { element: deimosImage, name: 'Deimos', parent: 'Mars' },
+        { element: ganymedeImage, name: 'Ganymede', parent: 'Jupiter' },
+        { element: ioImage, name: 'Io', parent: 'Jupiter' },
+        { element: europaImage, name: 'Europa', parent: 'Jupiter' },
+        { element: callistoImage, name: 'Callisto', parent: 'Jupiter' }
     ].forEach(moon => {
         moon.element.style.cursor = 'pointer';
         moon.element.addEventListener('click', (e) => {
             e.stopPropagation();
-            
-            // Find the parent planet dropdown item
             const parentDropdownItem = menuItems[1].dropdown.find(item => item.name === moon.parent);
-            
-            // Find the nested moon item
             if (parentDropdownItem && parentDropdownItem.nestedDropdown) {
                 const moonItem = parentDropdownItem.nestedDropdown.find(item => item.name === moon.name);
                 if (moonItem && moonItem.action) {
@@ -1817,6 +2020,7 @@ all while spearheading the most ambitious resource development initiative in hum
                 }
             }
             showPlanetInfo(moon.name);
+            playClickSound();
         });
     });
 
