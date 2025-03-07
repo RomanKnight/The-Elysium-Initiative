@@ -4,7 +4,27 @@ document.addEventListener('DOMContentLoaded', () => {
     ambientSound.volume = 0;
     ambientSound.play();
 
-    // repeated functions
+    // functions
+    function loadChartJsScript(callback) {
+        // First, destroy any existing chart
+        const existingChart = document.getElementById('ironValueChart');
+        if (existingChart) {
+            const chartInstance = Chart.getChart(existingChart);
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+        }
+    
+        // Then check if Chart.js is already loaded
+        if (typeof Chart === 'undefined') {
+            const chartScript = document.createElement('script');
+            chartScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+            chartScript.onload = callback;
+            document.head.appendChild(chartScript);
+        } else {
+            callback();
+        }
+    }
     function createHoverSound() {
         const sound = new Audio('hover.mp3');
         sound.volume = 0.25;
@@ -403,9 +423,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'Jupiter': { start: 0.01, end: 0.1 },
         'Ganymede': { farStart: 0.001, farEnd: 0.01, closeStart: 0.25, closeEnd: 1 },
         'Io': { farStart: 0.001, farEnd: 0.01, closeStart: 0.5, closeEnd: 1.5 },
-        'Europa': { farStart: 0.001, farEnd: 0.01, closeStart: 1, closeEnd: 3 },
+        'Europa': { farStart: 0.001, farEnd: 0.01, closeStart: 0.1, closeEnd: 1 },
         'Callisto': { farStart: 0.001, farEnd: 0.01, closeStart: 0.25, closeEnd: 1 },
-        'Saturn': { start: 0.15, end: 1.5 },
+        'Saturn': { start: 0.015, end: 0.15 },
+        'Titan': { farStart: 0.005, farEnd: 0.03, closeStart: 0.5, closeEnd: 1.5 },
+        'Rhea': { farStart: 0.005, farEnd: 0.03, closeStart: 0.5, closeEnd: 1.5 },
+        'Iapetus': { farStart: 0.005, farEnd: 0.03, closeStart: 0.5, closeEnd: 1.5 },
+        'Dione': { farStart: 0.005, farEnd: 0.03, closeStart: 0.5, closeEnd: 1.5 },
+        'Enceladus': { farStart: 0.005, farEnd: 0.03, closeStart: 0.5, closeEnd: 1.5 },
+        'Mimas': { farStart: 0.005, farEnd: 0.03, closeStart: 0.5, closeEnd: 1.5 },    
         'Uranus': { start: 0.01, end: 0.1 },
         'Neptune': { start: 0.01, end: 0.1 },
         'Pluto': { start: 0.01, end: 0.02 }
@@ -432,7 +458,13 @@ document.addEventListener('DOMContentLoaded', () => {
         'Ganymede': { farStart: 0.001, farEnd: 0.01, closeStart: 0.1, closeEnd: 0.3 },
         'Io': { farStart: 0.001, farEnd: 0.01, closeStart: 0.1, closeEnd: 0.3 },
         'Europa': { farStart: 0.001, farEnd: 0.01, closeStart: 0.1, closeEnd: 0.3 },
-        'Callisto': { farStart: 0.001, farEnd: 0.01, closeStart: 0.1, closeEnd: 0.3 }
+        'Callisto': { farStart: 0.001, farEnd: 0.01, closeStart: 0.1, closeEnd: 0.3 },
+        'Titan': { farStart: 0.005, farEnd: 0.03, closeStart: 0.5, closeEnd: 1.5 },
+        'Rhea': { farStart: 0.005, farEnd: 0.03, closeStart: 0.5, closeEnd: 1.5 },
+        'Iapetus': { farStart: 0.005, farEnd: 0.03, closeStart: 0.5, closeEnd: 1.5 },
+        'Dione': { farStart: 0.005, farEnd: 0.03, closeStart: 0.5, closeEnd: 1.5 },
+        'Enceladus': { farStart: 0.005, farEnd: 0.03, closeStart: 0.5, closeEnd: 1.5 },
+        'Mimas': { farStart: 0.005, farEnd: 0.03, closeStart: 0.5, closeEnd: 1.5 },
     };
 
     // function to add a new interactive object
@@ -443,16 +475,6 @@ document.addEventListener('DOMContentLoaded', () => {
         img.style.maxHeight = options.maxHeight || '80%';
         img.style.objectFit = 'contain';
         img.style.position = 'absolute';
-
-        img.onerror = () => {
-            console.error(`Failed to load image: ${imgSrc}`);
-            const errorMsg = document.createElement('div');
-            errorMsg.textContent = 'Error: Could not load image.';
-            errorMsg.style.color = 'red';
-            errorMsg.style.fontWeight = 'bold';
-            objectsContainer.appendChild(errorMsg);
-        };
-
         objectsContainer.appendChild(img);
         return img;
     }
@@ -540,7 +562,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     planetName === 'Ganymede' ||
                     planetName === 'Io' ||
                     planetName === 'Europa' ||
-                    planetName === 'Callisto'
+                    planetName === 'Callisto' ||
+                    planetName === 'Titan' ||
+                    planetName === 'Rhea' ||
+                    planetName === 'Iapetus' ||
+                    planetName === 'Dione' ||
+                    planetName === 'Enceladus' ||
+                    planetName === 'Mimas'
                 ) {
                     const { farStart, farEnd, closeStart, closeEnd } = labelFadeThresholds[planetName];
                     let farOpacity = Math.max(0, Math.min(1, (state.scale - farStart) / (farEnd - farStart)));
@@ -691,9 +719,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 state.offsetY = 0;
                                 updateTransform();
                                 showPlanetInfo('Moon');
-                            } 
-                        }
-                    ]
+                            }}
+                        ]
                 },
                 { name: 'Mars', action: () => {
                     closeAllPages();
@@ -724,9 +751,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 state.offsetY = -deimosY * state.scale;
                                 updateTransform();
                                 showPlanetInfo('Deimos');
-                            } 
-                        }
-                    ]
+                            }}
+                        ]
                 },
                 { name: 'Jupiter', action: () => {
                     closeAllPages();
@@ -741,7 +767,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             name: 'Ganymede', 
                             action: () => {
                                 closeAllPages();
-                                state.scale = 8;
+                                state.scale = 9;
                                 state.offsetX = -ganymedeX * state.scale;
                                 state.offsetY = -ganymedeY * state.scale;
                                 updateTransform();
@@ -752,7 +778,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             name: 'Io', 
                             action: () => {
                                 closeAllPages();
-                                state.scale = 8;
+                                state.scale = 10;
                                 state.offsetX = -ioX * state.scale;
                                 state.offsetY = -ioY * state.scale;
                                 updateTransform();
@@ -763,7 +789,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             name: 'Europa', 
                             action: () => {
                                 closeAllPages();
-                                state.scale = 8;
+                                state.scale = 5.5;
                                 state.offsetX = -europaX * state.scale;
                                 state.offsetY = -europaY * state.scale;
                                 updateTransform();
@@ -774,23 +800,75 @@ document.addEventListener('DOMContentLoaded', () => {
                             name: 'Callisto', 
                             action: () => {
                                 closeAllPages();
-                                state.scale = 8;
+                                state.scale = 9;
                                 state.offsetX = -callistoX * state.scale;
                                 state.offsetY = -callistoY * state.scale;
                                 updateTransform();
                                 showPlanetInfo('Callisto');
-                            }
-                        }
-                    ]
+                            }}
+                        ]
                 },                
-                { name: 'Saturn', action: () => {
-                    closeAllPages();
-                    state.scale = 10;
-                    state.offsetX = -saturnX * state.scale;
-                    state.offsetY = -saturnY * state.scale;
-                    updateTransform();
-                    showPlanetInfo('Saturn');
-                }},
+                {
+                    name: 'Saturn', 
+                    action: () => {
+                        closeAllPages();
+                        state.scale = 1;
+                        state.offsetX = -saturnX * state.scale;
+                        state.offsetY = -saturnY * state.scale;
+                        updateTransform();
+                        showPlanetInfo('Saturn');
+                    },
+                        nestedDropdown: [
+                            { name: 'Titan', action: () => {
+                                closeAllPages();
+                                state.scale = 6;
+                                state.offsetX = -titanX * state.scale;
+                                state.offsetY = -titanY * state.scale;
+                                updateTransform();
+                                showPlanetInfo('Titan');
+                            }},
+                            { name: 'Rhea', action: () => {
+                                closeAllPages();
+                                state.scale = 2.5;
+                                state.offsetX = -rheaX * state.scale;
+                                state.offsetY = -rheaY * state.scale;
+                                updateTransform();
+                                showPlanetInfo('Rhea');
+                            }},
+                            { name: 'Iapetus', action: () => {
+                                closeAllPages();
+                                state.scale = 3.25;
+                                state.offsetX = -iapetusX * state.scale;
+                                state.offsetY = -iapetusY * state.scale;
+                                updateTransform();
+                                showPlanetInfo('Iapetus');
+                            }},
+                            { name: 'Dione', action: () => {
+                                closeAllPages();
+                                state.scale = 3;
+                                state.offsetX = -dioneX * state.scale;
+                                state.offsetY = -dioneY * state.scale;
+                                updateTransform();
+                                showPlanetInfo('Dione');
+                            }},
+                            { name: 'Enceladus', action: () => {
+                                closeAllPages();
+                                state.scale = 8;
+                                state.offsetX = -enceladusX * state.scale;
+                                state.offsetY = -enceladusY * state.scale;
+                                updateTransform();
+                                showPlanetInfo('Enceladus');
+                            }},
+                            { name: 'Mimas', action: () => {
+                                closeAllPages();
+                                state.scale = 8;
+                                state.offsetX = -mimasX * state.scale;
+                                state.offsetY = -mimasY * state.scale;
+                                updateTransform();
+                                showPlanetInfo('Mimas');
+                            }}
+                        ]
+                },                
                 { name: 'Uranus', action: () => {
                     closeAllPages();
                     state.scale = 1.2;
@@ -823,9 +901,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 { 
                     name: 'Index',
                     action: () => {
+                        closeAllPages();
                         sidebar.classList.remove('active');
                         container.style.display = 'none';
-                        
+
+                        // Remove any existing index page
+                        const existingPage = document.getElementById('index-page');
+                        if (existingPage) {
+                            existingPage.remove();
+                        }
+
+                        // Create and set up the page structure first
                         const indexPage = document.createElement('div');
                         indexPage.id = 'index-page';
                         indexPage.style.minHeight = '100vh';
@@ -841,29 +927,324 @@ document.addEventListener('DOMContentLoaded', () => {
                         indexPage.style.right = '0';
                         indexPage.style.bottom = '0';
                         indexPage.style.overflowY = 'scroll';
-                
+
                         const content = document.createElement('div');
                         content.style.maxWidth = '1060px';
                         content.style.width = '100%';
-                        
+
                         const title = document.createElement('h1');
                         title.textContent = "Resource Index";
                         title.style.fontSize = '2.5rem';
                         title.style.marginBottom = '2rem';
                         title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
                         title.style.color = 'white';
-                
-                        const text = document.createElement('p');
-                        text.style.fontSize = '1.25rem';
-                        text.style.marginBottom = '2rem';
-                        text.style.lineHeight = '1.75';
-                        text.style.fontFamily = 'Source Code Pro, sans-serif';
-                        text.style.color = 'rgb(209, 213, 219)';
-                        text.textContent = "[Placeholder]";
-                
+                        
+                        // Create resource value section
+                        const resourceSection = document.createElement('div');
+                        resourceSection.style.marginBottom = '3rem';
+
+                        // Chart container
+                        const chartContainer = document.createElement('div');
+                        chartContainer.id = 'resource-chart-container';
+                        chartContainer.style.width = '100%';
+                        chartContainer.style.height = '400px';
+                        chartContainer.style.backgroundColor = 'rgba(30, 30, 30, 0.7)';
+                        chartContainer.style.borderRadius = '8px';
+                        chartContainer.style.padding = '20px';
+                        chartContainer.style.position = 'relative';
+                        chartContainer.style.marginBottom = '2rem';
+
+                        // Add all elements to the resource section
+                        resourceSection.appendChild(chartContainer);
+
+                        // Replace the old text with our new content
                         content.appendChild(title);
-                        content.appendChild(text);
+                        content.appendChild(resourceSection);
+
+                        // Create the iron value chart
+                        const canvas = document.createElement('canvas');
+                        canvas.id = 'ironValueChart';
+                        canvas.style.width = '100%';
+                        canvas.style.height = '100%';
+                        chartContainer.appendChild(canvas);
+
+                        // Tooltip element
+                        const tooltip = document.createElement('div');
+                        tooltip.style.position = 'absolute';
+                        tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                        tooltip.style.color = 'white';
+                        tooltip.style.padding = '10px';
+                        tooltip.style.borderRadius = '4px';
+                        tooltip.style.pointerEvents = 'none';
+                        tooltip.style.opacity = '0';
+                        tooltip.style.transition = 'opacity 0.2s';
+                        tooltip.style.fontFamily = 'Source Code Pro, sans-serif';
+                        tooltip.style.fontSize = '14px';
+                        tooltip.style.zIndex = '10';
+                        chartContainer.appendChild(tooltip);
+
+                        // Generate the iron price data (fictional)
+                        function generateIronData() {
+                            const years = [];
+                            const values = [];
+                            const volatility = [];
+                            
+                            // Starting from year 2150
+                            for (let i = 0; i <= 30; i++) {
+                                years.push(2150 + i);
+                                
+                                // Create an interesting pattern with peaks and valleys
+                                let baseValue = 100; // Index starts at 100
+                                
+                                // Add a general upward trend
+                                baseValue += i * 8;
+                                
+                                // Add some cyclical patterns
+                                baseValue += Math.sin(i * 0.8) * 30;
+                                
+                                // Add some random noise
+                                baseValue += (Math.random() - 0.5) * 20;
+                                
+                                // Significant events
+                                if (i === 7) baseValue += 50; // Discovery spike
+                                if (i === 15) baseValue -= 70; // Market crash
+                                if (i === 23) baseValue += 80; // New technology
+                                
+                                // Calculate volatility (for the candlestick representation)
+                                const volFactor = Math.abs(Math.sin(i * 0.3) * 15) + 5;
+                                
+                                values.push(Math.max(20, Math.round(baseValue)));
+                                volatility.push(Math.round(volFactor));
+                            }
+                            
+                            return { years, values, volatility };
+                        }
+
+                        // Create the actual chart
+                        function createIronChart() {
+                            const ctx = document.getElementById('ironValueChart').getContext('2d');
+                            const { years, values, volatility } = generateIronData();
+                            
+                            // Process data for candlestick representation
+                            const candlestickData = [];
+                            
+                            for (let i = 0; i < years.length; i++) {
+                                const vol = volatility[i];
+                                const value = values[i];
+                                
+                                // Create high, low, open, close values
+                                const open = value - (Math.random() * vol * 0.7);
+                                const close = value + (Math.random() * vol * 0.7);
+                                const high = Math.max(open, close) + (Math.random() * vol * 0.3);
+                                const low = Math.min(open, close) - (Math.random() * vol * 0.3);
+                                
+                                candlestickData.push({
+                                    x: years[i],
+                                    o: Math.round(open),
+                                    h: Math.round(high),
+                                    l: Math.round(low),
+                                    c: Math.round(close)
+                                });
+                            }
+                            
+                            const chart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: years,
+                                    datasets: [{
+                                        label: 'Iron Index Value',
+                                        data: values,
+                                        backgroundColor: 'rgba(211, 84, 0, 0.2)',
+                                        borderColor: '#d35400',
+                                        borderWidth: 2,
+                                        pointBackgroundColor: '#d35400',
+                                        pointRadius: 4,
+                                        pointHoverRadius: 6,
+                                        fill: true,
+                                        tension: 0.3
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: {
+                                        x: {
+                                            title: {
+                                                display: true,
+                                                text: 'Year',
+                                                color: 'rgba(255, 255, 255, 0.7)',
+                                                font: {
+                                                    family: 'Source Code Pro',
+                                                    size: 14
+                                                }
+                                            },
+                                            grid: {
+                                                color: 'rgba(255, 255, 255, 0.1)'
+                                            },
+                                            ticks: {
+                                                color: 'rgba(255, 255, 255, 0.7)',
+                                                font: {
+                                                    family: 'Source Code Pro'
+                                                }
+                                            }
+                                        },
+                                        y: {
+                                            title: {
+                                                display: true,
+                                                text: 'Value Index',
+                                                color: 'rgba(255, 255, 255, 0.7)',
+                                                font: {
+                                                    family: 'Source Code Pro',
+                                                    size: 14
+                                                }
+                                            },
+                                            grid: {
+                                                color: 'rgba(255, 255, 255, 0.1)'
+                                            },
+                                            ticks: {
+                                                color: 'rgba(255, 255, 255, 0.7)',
+                                                font: {
+                                                    family: 'Source Code Pro'
+                                                }
+                                            }
+                                        }
+                                    },
+                                    plugins: {
+                                        tooltip: {
+                                            enabled: false,
+                                            external: function(context) {
+                                                // Hide the tooltip when we're not hovering over a point
+                                                if (context.tooltip.opacity === 0) {
+                                                    tooltip.style.opacity = '0';
+                                                    return;
+                                                }
+                                                
+                                                // Get positions of both the chart container and the specific point
+                                                const chartContainer = document.getElementById('resource-chart-container');
+                                                const containerRect = chartContainer.getBoundingClientRect();
+                                                const position = context.chart.canvas.getBoundingClientRect();
+                                                
+                                                tooltip.style.opacity = '1';
+                                                
+                                                // Calculate tooltip position relative to the chart container
+                                                const tooltipX = position.left + context.tooltip.caretX - containerRect.left + window.scrollX;
+                                                const tooltipY = position.top + context.tooltip.caretY - containerRect.top + window.scrollY;
+                                                
+                                                // Add slight offset to prevent tooltip from covering the point
+                                                const offsetX = 10;
+                                                const offsetY = -20;
+                                                
+                                                tooltip.style.left = `${tooltipX + offsetX}px`;
+                                                tooltip.style.top = `${tooltipY + offsetY}px`;
+                                                
+                                                // Clear existing tooltip content
+                                                while (tooltip.firstChild) {
+                                                    tooltip.removeChild(tooltip.firstChild);
+                                                }
+                                                
+                                                // Create tooltip title
+                                                const title = document.createElement('div');
+                                                title.style.fontWeight = 'bold';
+                                                title.style.marginBottom = '5px';
+                                                title.textContent = context.tooltip.title[0];
+                                                tooltip.appendChild(title);
+                                                
+                                                // Get the value and add the content
+                                                const dataIndex = context.tooltip.dataPoints[0].dataIndex;
+                                                const value = values[dataIndex];
+                                                const year = years[dataIndex];
+                                                const vol = volatility[dataIndex];
+                                                
+                                                // Add value info
+                                                const valueElement = document.createElement('div');
+                                                valueElement.style.display = 'flex';
+                                                valueElement.style.justifyContent = 'space-between';
+                                                valueElement.style.marginBottom = '3px';
+                                                
+                                                const valueLabel = document.createElement('span');
+                                                valueLabel.textContent = 'Value:';
+                                                valueLabel.style.marginRight = '20px';
+                                                valueLabel.style.color = 'rgba(255, 255, 255, 0.7)';
+                                                
+                                                const valueText = document.createElement('span');
+                                                valueText.textContent = value;
+                                                valueText.style.fontWeight = 'bold';
+                                                valueText.style.color = '#d35400';
+                                                
+                                                valueElement.appendChild(valueLabel);
+                                                valueElement.appendChild(valueText);
+                                                tooltip.appendChild(valueElement);
+                                                
+                                                // Add volatility info
+                                                const volElement = document.createElement('div');
+                                                volElement.style.display = 'flex';
+                                                volElement.style.justifyContent = 'space-between';
+                                                
+                                                const volLabel = document.createElement('span');
+                                                volLabel.textContent = 'Volatility:';
+                                                volLabel.style.marginRight = '20px';
+                                                volLabel.style.color = 'rgba(255, 255, 255, 0.7)';
+                                                
+                                                const volText = document.createElement('span');
+                                                volText.textContent = vol;
+                                                volText.style.fontWeight = 'bold';
+                                                
+                                                // Color coding for volatility
+                                                if (vol < 10) {
+                                                    volText.style.color = '#2ecc71'; // Green for low volatility
+                                                } else if (vol < 15) {
+                                                    volText.style.color = '#f39c12'; // Orange for medium
+                                                } else {
+                                                    volText.style.color = '#e74c3c'; // Red for high
+                                                }
+                                                
+                                                volElement.appendChild(volLabel);
+                                                volElement.appendChild(volText);
+                                                tooltip.appendChild(volElement);
+                                            }
+                                        },
+                                        legend: {
+                                            labels: {
+                                                color: 'rgba(255, 255, 255, 0.7)',
+                                                font: {
+                                                    family: 'Source Code Pro'
+                                                }
+                                            }
+                                        }
+                                    },
+                                    interaction: {
+                                        mode: 'index',
+                                        intersect: false
+                                    },
+                                    animation: {
+                                        duration: 1500,
+                                        easing: 'easeOutQuart'
+                                    }
+                                }
+                            });
+                            
+                            return chart;
+                        }
+
+                        // Add annotations for significant events
+                        const annotations = document.createElement('div');
+                        annotations.style.width = '100%';
+                        annotations.style.marginTop = '10px';
+                        annotations.style.marginBottom = '2rem';
+                        annotations.style.display = 'flex';
+                        annotations.style.justifyContent = 'space-between';
+                        annotations.style.padding = '0 10px';
+
+                        resourceSection.appendChild(annotations);
                         indexPage.appendChild(content);
+
+                        loadChartJsScript(() => {
+                            requestAnimationFrame(() => {
+                                createIronChart();
+                                console.log('Chart created');
+                            });
+                        });
+
                         document.body.appendChild(indexPage);
                     }
                 },
@@ -1112,7 +1493,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 missionText.style.fontFamily = 'Source Code Pro, sans-serif';
                 missionText.style.color = 'rgb(209, 213, 219)';
                 missionText.style.whiteSpace = 'pre-wrap'
-                missionText.textContent = "     As the universe's premiere prospecting and colonization agency, \
+                missionText.textContent = "     As the galaxy's premiere prospecting and colonization agency, \
 The Elysium Initiative is relentlessly committed to fueling humanity's golden age. Through long-distance \
 planetary assessment, efficient extraction, and material reclamation, we ensure that every world is \
 utilized to its fullest, delivering unparalleled returns for our stakeholders.\
@@ -1404,6 +1785,78 @@ all while spearheading the most ambitious resource development initiative in hum
                 "Surface Temperature": "134 K"
             }
         },
+        Titan: {
+            description: "Largest moon of Saturn with a thick, hazy atmosphere and liquid hydrocarbon lakes.",
+            stats: {
+                "Distance from Saturn": "1,222,000 km",
+                "Valuation": "$150 quintillion",
+                "Extraction": "Potential ice and organic mining",
+                "Mass": "1.3452 × 10^23 kg",
+                "Diameter": "5150 km",
+                "Composition": "65% - Oxygen<br>6% - Hydrogen<br>9.5% - Silicon<br>7% - Magnesium<br>6.5% - Iron<br>4% - Calcium<br>2% - Other",
+                "Surface Temperature": "94 K"
+            }
+        },
+        Rhea: {
+            description: "An icy, heavily cratered moon with a rugged surface.",
+            stats: {
+                "Distance from Saturn": "527,000 km",
+                "Valuation": "$20 quintillion",
+                "Extraction": "Mining automata",
+                "Mass": "2.306 × 10^21 kg",
+                "Diameter": "1528 km",
+                "Composition": "79% - Oxygen<br>9% - Hydrogen<br>4% - Silicon<br>3% - Magnesium<br>3% - Iron<br>2% - Calcium<br>1% - Other",
+                "Surface Temperature": "107 K"
+            }
+        },
+        Iapetus: {
+            description: "A uniquely two-toned moon known for its dark and bright hemispheres.",
+            stats: {
+                "Distance from Saturn": "3,560,000 km",
+                "Valuation": "$15 quintillion",
+                "Extraction": "Mining automata",
+                "Mass": "1.805 × 10^21 kg",
+                "Diameter": "1469 km",
+                "Composition": "84% - Oxygen<br>10% - Hydrogen<br>2% - Silicon<br>1% - Magnesium<br>1% - Iron<br>1% - Calcium<br>1% - Other",
+                "Surface Temperature": "130 K"
+            }
+        },
+        Dione: {
+            description: "An icy moon with a mix of heavily cratered regions and smoother plains.",
+            stats: {
+                "Distance from Saturn": "377,000 km",
+                "Valuation": "$10 quintillion",
+                "Extraction": "Mining automata",
+                "Mass": "1.095 × 10^21 kg",
+                "Diameter": "1122 km",
+                "Composition": "70% - Oxygen<br>7% - Hydrogen<br>8% - Silicon<br>6% - Magnesium<br>5% - Iron<br>3% - Calcium<br>2% - Other",
+                "Surface Temperature": "102 K"
+            }
+        },
+        Enceladus: {
+            description: "A small, reflective moon famous for its water-ice geysers and subsurface ocean.",
+            stats: {
+                "Distance from Saturn": "238,000 km",
+                "Valuation": "$8 quintillion",
+                "Extraction": "Mining automata, water extraction",
+                "Mass": "1.08 × 10^20 kg",
+                "Diameter": "504 km",
+                "Composition": "75% - Oxygen<br>8% - Hydrogen<br>6% - Silicon<br>4% - Magnesium<br>4% - Iron<br>2% - Calcium<br>1% - Other",
+                "Surface Temperature": "75 K"
+            }
+        },
+        Mimas: {
+            description: "A small, cratered moon often compared to the Death Star due to its giant impact crater.",
+            stats: {
+                "Distance from Saturn": "185,000 km",
+                "Valuation": "$5 quintillion",
+                "Extraction": "Mining automata",
+                "Mass": "3.749 × 10^19 kg",
+                "Diameter": "396 km",
+                "Composition": "82% - Oxygen<br>9% - Hydrogen<br>3% - Silicon<br>2% - Magnesium<br>2% - Iron<br>1% - Calcium<br>1% - Other",
+                "Surface Temperature": "70 K"
+            }
+        }, 
         Uranus: {
             description: "Icy blue, with faint rings. Dramatically tilted axis.",
             stats: {
@@ -1467,6 +1920,12 @@ all while spearheading the most ambitious resource development initiative in hum
             'Io': '1',
             'Callisto': '1',
             'Saturn': '2',
+            'Titan': '1',
+            'Rhea': '1',
+            'Iapetus': '1',
+            'Dione': '1',
+            'Enceladus': '1',
+            'Mimas': '1',
             'Uranus': '2',
             'Neptune': '2',
             'Pluto': '1'
@@ -1509,7 +1968,8 @@ all while spearheading the most ambitious resource development initiative in hum
     // celestial scale constants
     const KM_TO_PIXELS = 1/1000;
 
-    // zeroes added in some places to resize for smoothing (planets scales are not accurate)
+    // zeroes added in some places to resize for smoothing
+    // (planet scales are not all accurate)
     const SUN_DIAMETER = 1392000;
     const MERCURY_DIAMETER = 48780; // added a zero
     const VENUS_DIAMETER = 121040; // added a zero
@@ -1521,9 +1981,15 @@ all while spearheading the most ambitious resource development initiative in hum
     const JUPITER_DIAMETER = 1429840; // added a zero
     const GANYMEDE_DIAMETER = 52620; // added a zero
     const IO_DIAMETER = 36430; // added a zero
-    const EUROPA_DIAMETER = 31220; // added a zero
+    const EUROPA_DIAMETER = 31220*3; // added a zero and times 3
     const CALLISTO_DIAMETER = 48200; // added a zero
-    const SATURN_DIAMETER = 120536;
+    const SATURN_DIAMETER = 1205360; // added a zero
+    const TITAN_DIAMETER = 51500*2; // added a zero and times 2
+    const RHEA_DIAMETER = 152800; // added two zeros
+    const IAPETUS_DIAMETER = 146900; // added two zeros
+    const DIONE_DIAMETER = 112200; // added two zeros
+    const ENCELADUS_DIAMETER = 50400; // added two zeros
+    const MIMAS_DIAMETER = 39600; // added two zeros
     const URANUS_DIAMETER = 511180; // added a zero
     const NEPTUNE_DIAMETER = 492440; // added a zero
     const PLUTO_DIAMETER = 2377000; // added three zeroes
@@ -1541,6 +2007,12 @@ all while spearheading the most ambitious resource development initiative in hum
     const EUROPA_SIZE_PX = EUROPA_DIAMETER * KM_TO_PIXELS;
     const CALLISTO_SIZE_PX = CALLISTO_DIAMETER * KM_TO_PIXELS;
     const SATURN_SIZE_PX = SATURN_DIAMETER * KM_TO_PIXELS;
+    const TITAN_SIZE_PX = TITAN_DIAMETER * KM_TO_PIXELS;
+    const RHEA_SIZE_PX = RHEA_DIAMETER * KM_TO_PIXELS;
+    const IAPETUS_SIZE_PX = IAPETUS_DIAMETER * KM_TO_PIXELS;
+    const DIONE_SIZE_PX = DIONE_DIAMETER * KM_TO_PIXELS;
+    const ENCELADUS_SIZE_PX = ENCELADUS_DIAMETER * KM_TO_PIXELS;
+    const MIMAS_SIZE_PX = MIMAS_DIAMETER * KM_TO_PIXELS;
     const URANUS_SIZE_PX = URANUS_DIAMETER * KM_TO_PIXELS;
     const NEPTUNE_SIZE_PX = NEPTUNE_DIAMETER * KM_TO_PIXELS;
     const PLUTO_SIZE_PX = PLUTO_DIAMETER * KM_TO_PIXELS;
@@ -1558,6 +2030,12 @@ all while spearheading the most ambitious resource development initiative in hum
     const JUPITER_EUROPA_DISTANCE = 6709000; // added a zero
     const JUPITER_CALLISTO_DISTANCE = 18827000; // added a zero
     const SATURN_SUN_DISTANCE = 1427000000;
+    const SATURN_TITAN_DISTANCE = 12220000; // added a zero
+    const SATURN_RHEA_DISTANCE = 5270000; // added a zero
+    const SATURN_IAPETUS_DISTANCE = 35600000; // added a zero
+    const SATURN_DIONE_DISTANCE = 3770000; // added a zero
+    const SATURN_ENCELADUS_DISTANCE = 2380000; // added a zero
+    const SATURN_MIMAS_DISTANCE = 1850000; // added a zero
     const URANUS_SUN_DISTANCE = 2871000000;
     const NEPTUNE_SUN_DISTANCE = 4497000000;
     const PLUTO_SUN_DISTANCE = 5913000000;
@@ -1574,6 +2052,12 @@ all while spearheading the most ambitious resource development initiative in hum
     const EUROPA_DISTANCE_PX = JUPITER_EUROPA_DISTANCE * KM_TO_PIXELS;
     const CALLISTO_DISTANCE_PX = JUPITER_CALLISTO_DISTANCE * KM_TO_PIXELS;
     const SATURN_DISTANCE_PX = SATURN_SUN_DISTANCE * KM_TO_PIXELS;
+    const TITAN_DISTANCE_PX = SATURN_TITAN_DISTANCE * KM_TO_PIXELS;
+    const RHEA_DISTANCE_PX = SATURN_RHEA_DISTANCE * KM_TO_PIXELS;
+    const IAPETUS_DISTANCE_PX = SATURN_IAPETUS_DISTANCE * KM_TO_PIXELS;
+    const DIONE_DISTANCE_PX = SATURN_DIONE_DISTANCE * KM_TO_PIXELS;
+    const ENCELADUS_DISTANCE_PX = SATURN_ENCELADUS_DISTANCE * KM_TO_PIXELS;
+    const MIMAS_DISTANCE_PX = SATURN_MIMAS_DISTANCE * KM_TO_PIXELS;
     const URANUS_DISTANCE_PX = URANUS_SUN_DISTANCE * KM_TO_PIXELS;
     const NEPTUNE_DISTANCE_PX = NEPTUNE_SUN_DISTANCE * KM_TO_PIXELS;
     const PLUTO_DISTANCE_PX = PLUTO_SUN_DISTANCE * KM_TO_PIXELS;
@@ -1745,6 +2229,84 @@ all while spearheading the most ambitious resource development initiative in hum
         saturnImage.style.transform = `
             translate(${saturnX}px, ${saturnY}px)
             rotate(${saturnDegrees}deg)`;
+    
+    // titan
+    const titanDegrees = 45;
+    const titanX = saturnX + (TITAN_DISTANCE_PX * Math.cos(titanDegrees * Math.PI / 180));
+    const titanY = saturnY + (TITAN_DISTANCE_PX * Math.sin(titanDegrees * Math.PI / 180));
+    const titanImage = addInteractiveObject('titan.png', {
+        maxWidth: `${TITAN_SIZE_PX}px`,
+        maxHeight: `${TITAN_SIZE_PX}px`
+    });
+    titanImage.style.transform = `
+        translate(${titanX}px, ${titanY}px)
+        rotate(${titanDegrees}deg)
+        rotateZ(-45deg)`;
+
+    // rhea
+    const rheaDegrees = 90;
+    const rheaX = saturnX + (RHEA_DISTANCE_PX * Math.cos(rheaDegrees * Math.PI / 180));
+    const rheaY = saturnY + (RHEA_DISTANCE_PX * Math.sin(rheaDegrees * Math.PI / 180));
+    const rheaImage = addInteractiveObject('rhea.png', {
+        maxWidth: `${RHEA_SIZE_PX}px`,
+        maxHeight: `${RHEA_SIZE_PX}px`
+    });
+    rheaImage.style.transform = `
+        translate(${rheaX}px, ${rheaY}px)
+        rotate(${rheaDegrees}deg)
+        rotateZ(-90deg)`;
+
+    // iapetus
+    const iapetusDegrees = 135;
+    const iapetusX = saturnX + (IAPETUS_DISTANCE_PX * Math.cos(iapetusDegrees * Math.PI / 180));
+    const iapetusY = saturnY + (IAPETUS_DISTANCE_PX * Math.sin(iapetusDegrees * Math.PI / 180));
+    const iapetusImage = addInteractiveObject('iapetus.png', {
+        maxWidth: `${IAPETUS_SIZE_PX}px`,
+        maxHeight: `${IAPETUS_SIZE_PX}px`
+    });
+    iapetusImage.style.transform = `
+        translate(${iapetusX}px, ${iapetusY}px)
+        rotate(${iapetusDegrees}deg)
+        rotateZ(-135deg)`;
+
+    // dione
+    const dioneDegrees = 180;
+    const dioneX = saturnX + (DIONE_DISTANCE_PX * Math.cos(dioneDegrees * Math.PI / 180));
+    const dioneY = saturnY + (DIONE_DISTANCE_PX * Math.sin(dioneDegrees * Math.PI / 180));
+    const dioneImage = addInteractiveObject('dione.png', {
+        maxWidth: `${DIONE_SIZE_PX}px`,
+        maxHeight: `${DIONE_SIZE_PX}px`
+    });
+    dioneImage.style.transform = `
+        translate(${dioneX}px, ${dioneY}px)
+        rotate(${dioneDegrees}deg)
+        rotateZ(180deg)`;
+
+    // enceladus
+    const enceladusDegrees = 225;
+    const enceladusX = saturnX + (ENCELADUS_DISTANCE_PX * Math.cos(enceladusDegrees * Math.PI / 180));
+    const enceladusY = saturnY + (ENCELADUS_DISTANCE_PX * Math.sin(enceladusDegrees * Math.PI / 180));
+    const enceladusImage = addInteractiveObject('enceladus.png', {
+        maxWidth: `${ENCELADUS_SIZE_PX}px`,
+        maxHeight: `${ENCELADUS_SIZE_PX}px`
+    });
+    enceladusImage.style.transform = `
+        translate(${enceladusX}px, ${enceladusY}px)
+        rotate(${enceladusDegrees}deg)
+        rotateZ(-225deg)`;
+
+    // mimas
+    const mimasDegrees = 270;
+    const mimasX = saturnX + (MIMAS_DISTANCE_PX * Math.cos(mimasDegrees * Math.PI / 180));
+    const mimasY = saturnY + (MIMAS_DISTANCE_PX * Math.sin(mimasDegrees * Math.PI / 180));
+    const mimasImage = addInteractiveObject('mimas.png', {
+        maxWidth: `${MIMAS_SIZE_PX}px`,
+        maxHeight: `${MIMAS_SIZE_PX}px`
+    });
+    mimasImage.style.transform = `
+        translate(${mimasX}px, ${mimasY}px)
+        rotate(${mimasDegrees}deg)
+        rotateZ(90deg)`;
 
     // uranus
     const uranusImage = addInteractiveObject('uranus.png', {
@@ -1830,6 +2392,12 @@ all while spearheading the most ambitious resource development initiative in hum
     const europaLabel = configurePlanetLabel(createPlanetLabel('Europa', europaX, europaY), 'Europa');
     const callistoLabel = configurePlanetLabel(createPlanetLabel('Callisto', callistoX, callistoY), 'Callisto');
     const saturnLabel = configurePlanetLabel(createPlanetLabel('Saturn', saturnX, saturnY), 'Saturn');
+    const titanLabel = configurePlanetLabel(createPlanetLabel('Titan', titanX, titanY), 'Titan');
+    const rheaLabel = configurePlanetLabel(createPlanetLabel('Rhea', rheaX, rheaY), 'Rhea');
+    const iapetusLabel = configurePlanetLabel(createPlanetLabel('Iapetus', iapetusX, iapetusY), 'Iapetus');
+    const dioneLabel = configurePlanetLabel(createPlanetLabel('Dione', dioneX, dioneY), 'Dione');
+    const enceladusLabel = configurePlanetLabel(createPlanetLabel('Enceladus', enceladusX, enceladusY), 'Enceladus');
+    const mimasLabel = configurePlanetLabel(createPlanetLabel('Mimas', mimasX, mimasY), 'Mimas');
     const uranusLabel = configurePlanetLabel(createPlanetLabel('Uranus', uranusX, uranusY), 'Uranus');
     const neptuneLabel = configurePlanetLabel(createPlanetLabel('Neptune', neptuneX, neptuneY), 'Neptune');
     const plutoLabel = configurePlanetLabel(createPlanetLabel('Pluto', plutoX, plutoY), 'Pluto');
@@ -1839,14 +2407,20 @@ all while spearheading the most ambitious resource development initiative in hum
     objectsContainer.appendChild(venusLabel);
     objectsContainer.appendChild(moonLabel);
     objectsContainer.appendChild(earthLabel);
-    objectsContainer.appendChild(phobosLabel);
-    objectsContainer.appendChild(deimosLabel);
+    objectsContainer.appendChild(phobosLabel); // moons here are ordered before their
+    objectsContainer.appendChild(deimosLabel); // planets for label overlap reasons
     objectsContainer.appendChild(marsLabel);
     objectsContainer.appendChild(ganymedeLabel);
     objectsContainer.appendChild(ioLabel);
     objectsContainer.appendChild(europaLabel);
     objectsContainer.appendChild(callistoLabel);
     objectsContainer.appendChild(jupiterLabel);
+    objectsContainer.appendChild(titanLabel);
+    objectsContainer.appendChild(rheaLabel);
+    objectsContainer.appendChild(iapetusLabel);
+    objectsContainer.appendChild(dioneLabel);
+    objectsContainer.appendChild(enceladusLabel);
+    objectsContainer.appendChild(mimasLabel);
     objectsContainer.appendChild(saturnLabel);
     objectsContainer.appendChild(uranusLabel);
     objectsContainer.appendChild(neptuneLabel);
@@ -1952,7 +2526,49 @@ all while spearheading the most ambitious resource development initiative in hum
             parentY: jupiterY,
             distance: CALLISTO_DISTANCE_PX,
             orbitColor: 'rgba(200, 200, 200, 0.8)'
-        }
+        },
+        {   name: 'Titan',
+            parent: 'Saturn',
+            parentX: saturnX,
+            parentY: saturnY,
+            distance: TITAN_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'
+        },
+        {   name: 'Rhea',
+            parent: 'Saturn',
+            parentX: saturnX,
+            parentY: saturnY,
+            distance: RHEA_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'
+        },
+        {   name: 'Iapetus',
+            parent: 'Saturn',
+            parentX: saturnX,
+            parentY: saturnY,
+            distance: IAPETUS_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'
+        },
+        {   name: 'Dione',
+            parent: 'Saturn',
+            parentX: saturnX,
+            parentY: saturnY,
+            distance: DIONE_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'
+        },
+        {   name: 'Enceladus',
+            parent: 'Saturn',
+            parentX: saturnX,
+            parentY: saturnY,
+            distance: ENCELADUS_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'
+        },
+        {   name: 'Mimas',
+            parent: 'Saturn',
+            parentX: saturnX,
+            parentY: saturnY,
+            distance: MIMAS_DISTANCE_PX,
+            orbitColor: 'rgba(200, 200, 200, 0.8)'
+        },
     ];
 
     function createMoonOrbits() {
@@ -2007,7 +2623,13 @@ all while spearheading the most ambitious resource development initiative in hum
         { element: ganymedeImage, name: 'Ganymede', parent: 'Jupiter' },
         { element: ioImage, name: 'Io', parent: 'Jupiter' },
         { element: europaImage, name: 'Europa', parent: 'Jupiter' },
-        { element: callistoImage, name: 'Callisto', parent: 'Jupiter' }
+        { element: callistoImage, name: 'Callisto', parent: 'Jupiter' },
+        { element: titanImage, name: 'Titan', parent: 'Saturn' },
+        { element: rheaImage, name: 'Rhea', parent: 'Saturn' },
+        { element: iapetusImage, name: 'Iapetus', parent: 'Saturn' },
+        { element: dioneImage, name: 'Dione', parent: 'Saturn' },
+        { element: enceladusImage, name: 'Enceladus', parent: 'Saturn' },
+        { element: mimasImage, name: 'Mimas', parent: 'Saturn' },
     ].forEach(moon => {
         moon.element.style.cursor = 'pointer';
         moon.element.addEventListener('click', (e) => {
