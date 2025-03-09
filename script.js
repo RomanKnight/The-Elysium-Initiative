@@ -905,13 +905,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         sidebar.classList.remove('active');
                         container.style.display = 'none';
 
-                        // Remove any existing index page
+                        // page switch fix (remove existing index page)
                         const existingPage = document.getElementById('index-page');
                         if (existingPage) {
                             existingPage.remove();
                         }
 
-                        // Create and set up the page structure first
                         const indexPage = document.createElement('div');
                         indexPage.id = 'index-page';
                         indexPage.style.minHeight = '100vh';
@@ -926,49 +925,93 @@ document.addEventListener('DOMContentLoaded', () => {
                         indexPage.style.left = '0';
                         indexPage.style.right = '0';
                         indexPage.style.bottom = '0';
+                        indexPage.style.width = '100%';
                         indexPage.style.overflowY = 'scroll';
 
                         const content = document.createElement('div');
-                        content.style.maxWidth = '1060px';
+                        content.style.maxWidth = '1600px';
                         content.style.width = '100%';
+                        content.style.marginBottom = '65rem';
 
                         const title = document.createElement('h1');
                         title.textContent = "Resource Index";
-                        title.style.fontSize = '2.5rem';
+                        title.style.textAlign = 'center';
+                        title.style.fontSize = '5rem';
                         title.style.marginBottom = '2rem';
                         title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
                         title.style.color = 'white';
                         
-                        // Create resource value section
                         const resourceSection = document.createElement('div');
                         resourceSection.style.marginBottom = '3rem';
 
-                        // Chart container
                         const chartContainer = document.createElement('div');
                         chartContainer.id = 'resource-chart-container';
                         chartContainer.style.width = '100%';
-                        chartContainer.style.height = '400px';
+                        chartContainer.style.height = '600px';
                         chartContainer.style.backgroundColor = 'rgba(30, 30, 30, 0.7)';
                         chartContainer.style.borderRadius = '8px';
                         chartContainer.style.padding = '20px';
                         chartContainer.style.position = 'relative';
                         chartContainer.style.marginBottom = '2rem';
 
-                        // Add all elements to the resource section
-                        resourceSection.appendChild(chartContainer);
+                        const buttonContainer = document.createElement('div');
+                        buttonContainer.style.display = 'flex';
+                        buttonContainer.style.justifyContent = 'center';
+                        buttonContainer.style.gap = '15px';
+                        buttonContainer.style.marginBottom = '20px';
 
-                        // Replace the old text with our new content
+                        const resources = [
+                            { name: 'Iron', color: 'rgb(183, 65, 14)' },
+                            { name: 'Silicon', color: 'rgb(31, 117, 24)' },
+                            { name: 'Magnesium', color: 'rgb(155, 89, 182)' },
+                            { name: 'Sulfur', color: 'rgb(241, 196, 15)' },
+                            { name: 'Nickel', color: 'rgb(127, 140, 141)' },
+                            { name: 'Calcium', color: 'rgb(236, 240, 241)' },
+                            { name: 'Aluminum', color: 'rgb(30, 139, 134)' },
+                            { name: 'Carbon', color: 'rgb(13, 76, 192)' },
+                            { name: 'Platinum', color: 'rgb(84, 178, 255)' },
+                        ];
+
+                        resources.forEach(resource => {
+                            const button = document.createElement('button');
+                            button.textContent = resource.name;
+                            button.style.padding = '8px 16px';
+                            button.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                            button.style.color = 'white';
+                            button.style.border = 'none';
+                            button.style.borderRadius = '4px';
+                            button.style.cursor = 'pointer';
+                            button.style.fontFamily = 'Source Code Pro, sans-serif';
+                            button.style.transition = 'transform 0.2s, opacity 0.2s';
+                            
+                            button.onmouseover = () => {
+                                playHoverSound();
+                                button.style.opacity = '0.8';
+                                button.style.transform = 'scale(1.05)';
+                            };
+                            button.onmouseout = () => {
+                                button.style.opacity = '1';
+                                button.style.transform = 'scale(1)';
+                            };
+                            
+                            button.onclick = () => {
+                                playClickSound();
+                                updateChart(resource.name);
+                            };
+                            
+                            buttonContainer.appendChild(button);
+                        });
+                        resourceSection.appendChild(buttonContainer);
+                        resourceSection.appendChild(chartContainer);
                         content.appendChild(title);
                         content.appendChild(resourceSection);
 
-                        // Create the iron value chart
                         const canvas = document.createElement('canvas');
-                        canvas.id = 'ironValueChart';
+                        canvas.id = 'resourceValueChart';
                         canvas.style.width = '100%';
                         canvas.style.height = '100%';
                         chartContainer.appendChild(canvas);
 
-                        // Tooltip element
                         const tooltip = document.createElement('div');
                         tooltip.style.position = 'absolute';
                         tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
@@ -983,85 +1026,119 @@ document.addEventListener('DOMContentLoaded', () => {
                         tooltip.style.zIndex = '10';
                         chartContainer.appendChild(tooltip);
 
-                        // Generate the iron price data (fictional)
-                        function generateIronData() {
+                        let currentChart = null;
+                        let currentResource = 'Iron';
+
+                        // generate resource data
+                        function generateResourceData(resourceName) {
                             const years = [];
                             const values = [];
-                            const volatility = [];
                             
-                            // Starting from year 2150
+                            // starting from year 2150
                             for (let i = 0; i <= 30; i++) {
-                                years.push(2150 + i);
+                                years.push(2100 + i);
                                 
-                                // Create an interesting pattern with peaks and valleys
-                                let baseValue = 100; // Index starts at 100
+                                let baseValue = 100;
                                 
-                                // Add a general upward trend
-                                baseValue += i * 8;
-                                
-                                // Add some cyclical patterns
-                                baseValue += Math.sin(i * 0.8) * 30;
-                                
-                                // Add some random noise
-                                baseValue += (Math.random() - 0.5) * 20;
-                                
-                                // Significant events
-                                if (i === 7) baseValue += 50; // Discovery spike
-                                if (i === 15) baseValue -= 70; // Market crash
-                                if (i === 23) baseValue += 80; // New technology
-                                
-                                // Calculate volatility (for the candlestick representation)
-                                const volFactor = Math.abs(Math.sin(i * 0.3) * 15) + 5;
+                                // resource chart maths
+                                switch(resourceName) {
+                                    case 'Iron':
+                                        baseValue += i * 15;
+                                        baseValue += Math.sin(i * 1.5) * 50;
+                                        if (i === 12) baseValue += 120;
+                                        if (i === 18) baseValue -= 100;
+                                        break;
+
+                                    case 'Silicon':
+                                        baseValue += i * 18;
+                                        baseValue += Math.sin(i * 1.6) * 45;
+                                        if (i === 11) baseValue += 110;
+                                        if (i === 17) baseValue -= 90;
+                                        break;
+
+                                    case 'Magnesium':
+                                        baseValue += i * 12;
+                                        baseValue += Math.sin(i * 1.3) * 55;
+                                        if (i === 13) baseValue += 130;
+                                        if (i === 19) baseValue -= 110;
+                                        break;
+
+                                    case 'Sulfur':
+                                        baseValue += i * 20;
+                                        baseValue += Math.sin(i * 1.7) * 40;
+                                        if (i === 10) baseValue += 100;
+                                        if (i === 16) baseValue -= 80;
+                                        break;
+
+                                    case 'Nickel':
+                                        baseValue += i * 16;
+                                        baseValue += Math.sin(i * 1.4) * 60;
+                                        if (i === 14) baseValue += 140;
+                                        if (i === 20) baseValue -= 120;
+                                        break;
+
+                                    case 'Calcium':
+                                        baseValue += i * 14;
+                                        baseValue += Math.sin(i * 1.2) * 65;
+                                        if (i === 13) baseValue += 125;
+                                        if (i === 19) baseValue -= 105;
+                                        break;
+
+                                    case 'Aluminum':
+                                        baseValue += i * 17;
+                                        baseValue += Math.sin(i * 1.8) * 48;
+                                        if (i === 11) baseValue += 115;
+                                        if (i === 17) baseValue -= 95;
+                                        break;
+
+                                    case 'Carbon':
+                                        baseValue += i * 22;
+                                        baseValue += Math.sin(i * 1.9) * 42;
+                                        if (i === 10) baseValue += 105;
+                                        if (i === 16) baseValue -= 85;
+                                        break;
+
+                                    case 'Platinum':
+                                        baseValue += i * 25;
+                                        baseValue += Math.sin(i * 2.0) * 70;
+                                        if (i === 9) baseValue += 150;
+                                        if (i === 15) baseValue -= 130;
+                                        break;
+                                }
                                 
                                 values.push(Math.max(20, Math.round(baseValue)));
-                                volatility.push(Math.round(volFactor));
                             }
                             
-                            return { years, values, volatility };
+                            return { years, values };
                         }
 
-                        // Create the actual chart
-                        function createIronChart() {
-                            const ctx = document.getElementById('ironValueChart').getContext('2d');
-                            const { years, values, volatility } = generateIronData();
+                        // make the chart
+                        function createResourceChart(resourceName) {
+                            const ctx = document.getElementById('resourceValueChart').getContext('2d');
+                            const { years, values } = generateResourceData(resourceName);
                             
-                            // Process data for candlestick representation
-                            const candlestickData = [];
+                            const resourceColor = resources.find(r => r.name === resourceName).color;
                             
-                            for (let i = 0; i < years.length; i++) {
-                                const vol = volatility[i];
-                                const value = values[i];
-                                
-                                // Create high, low, open, close values
-                                const open = value - (Math.random() * vol * 0.7);
-                                const close = value + (Math.random() * vol * 0.7);
-                                const high = Math.max(open, close) + (Math.random() * vol * 0.3);
-                                const low = Math.min(open, close) - (Math.random() * vol * 0.3);
-                                
-                                candlestickData.push({
-                                    x: years[i],
-                                    o: Math.round(open),
-                                    h: Math.round(high),
-                                    l: Math.round(low),
-                                    c: Math.round(close)
-                                });
+                            // delete any existing chart
+                            if (currentChart) {
+                                currentChart.destroy();
                             }
                             
-                            const chart = new Chart(ctx, {
+                            currentChart = new Chart(ctx, {
                                 type: 'line',
                                 data: {
                                     labels: years,
                                     datasets: [{
-                                        label: 'Iron Index Value',
+                                        label: `${resourceName} Index Value by Ton Recycled (TR)`,
                                         data: values,
-                                        backgroundColor: 'rgba(211, 84, 0, 0.2)',
-                                        borderColor: '#d35400',
-                                        borderWidth: 2,
-                                        pointBackgroundColor: '#d35400',
-                                        pointRadius: 4,
-                                        pointHoverRadius: 6,
+                                        backgroundColor: `${resourceColor.replace('rgb', 'rgba').replace(')', ', 0.2)')}`,
+                                        borderColor: resourceColor,
+                                        borderWidth: 3,
+                                        pointBackgroundColor: resourceColor,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 8,
                                         fill: true,
-                                        tension: 0.3
+                                        tension: 0
                                     }]
                                 },
                                 options: {
@@ -1075,7 +1152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                                 color: 'rgba(255, 255, 255, 0.7)',
                                                 font: {
                                                     family: 'Source Code Pro',
-                                                    size: 14
+                                                    size: 16
                                                 }
                                             },
                                             grid: {
@@ -1084,18 +1161,19 @@ document.addEventListener('DOMContentLoaded', () => {
                                             ticks: {
                                                 color: 'rgba(255, 255, 255, 0.7)',
                                                 font: {
-                                                    family: 'Source Code Pro'
+                                                    family: 'Source Code Pro',
+                                                    size: 12
                                                 }
                                             }
                                         },
                                         y: {
                                             title: {
                                                 display: true,
-                                                text: 'Value Index',
+                                                text: 'Value Index (TR)',
                                                 color: 'rgba(255, 255, 255, 0.7)',
                                                 font: {
                                                     family: 'Source Code Pro',
-                                                    size: 14
+                                                    size: 16
                                                 }
                                             },
                                             grid: {
@@ -1104,7 +1182,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                             ticks: {
                                                 color: 'rgba(255, 255, 255, 0.7)',
                                                 font: {
-                                                    family: 'Source Code Pro'
+                                                    family: 'Source Code Pro',
+                                                    size: 12
                                                 }
                                             }
                                         }
@@ -1113,101 +1192,50 @@ document.addEventListener('DOMContentLoaded', () => {
                                         tooltip: {
                                             enabled: false,
                                             external: function(context) {
-                                                // Hide the tooltip when we're not hovering over a point
                                                 if (context.tooltip.opacity === 0) {
                                                     tooltip.style.opacity = '0';
                                                     return;
                                                 }
                                                 
-                                                // Get positions of both the chart container and the specific point
                                                 const chartContainer = document.getElementById('resource-chart-container');
                                                 const containerRect = chartContainer.getBoundingClientRect();
                                                 const position = context.chart.canvas.getBoundingClientRect();
                                                 
                                                 tooltip.style.opacity = '1';
                                                 
-                                                // Calculate tooltip position relative to the chart container
                                                 const tooltipX = position.left + context.tooltip.caretX - containerRect.left + window.scrollX;
                                                 const tooltipY = position.top + context.tooltip.caretY - containerRect.top + window.scrollY;
                                                 
-                                                // Add slight offset to prevent tooltip from covering the point
                                                 const offsetX = 10;
                                                 const offsetY = -20;
                                                 
                                                 tooltip.style.left = `${tooltipX + offsetX}px`;
                                                 tooltip.style.top = `${tooltipY + offsetY}px`;
                                                 
-                                                // Clear existing tooltip content
-                                                while (tooltip.firstChild) {
-                                                    tooltip.removeChild(tooltip.firstChild);
-                                                }
+                                                tooltip.innerHTML = '';
                                                 
-                                                // Create tooltip title
-                                                const title = document.createElement('div');
-                                                title.style.fontWeight = 'bold';
-                                                title.style.marginBottom = '5px';
-                                                title.textContent = context.tooltip.title[0];
-                                                tooltip.appendChild(title);
-                                                
-                                                // Get the value and add the content
                                                 const dataIndex = context.tooltip.dataPoints[0].dataIndex;
                                                 const value = values[dataIndex];
                                                 const year = years[dataIndex];
-                                                const vol = volatility[dataIndex];
                                                 
-                                                // Add value info
-                                                const valueElement = document.createElement('div');
-                                                valueElement.style.display = 'flex';
-                                                valueElement.style.justifyContent = 'space-between';
-                                                valueElement.style.marginBottom = '3px';
-                                                
-                                                const valueLabel = document.createElement('span');
-                                                valueLabel.textContent = 'Value:';
-                                                valueLabel.style.marginRight = '20px';
-                                                valueLabel.style.color = 'rgba(255, 255, 255, 0.7)';
-                                                
-                                                const valueText = document.createElement('span');
-                                                valueText.textContent = value;
-                                                valueText.style.fontWeight = 'bold';
-                                                valueText.style.color = '#d35400';
-                                                
-                                                valueElement.appendChild(valueLabel);
-                                                valueElement.appendChild(valueText);
-                                                tooltip.appendChild(valueElement);
-                                                
-                                                // Add volatility info
-                                                const volElement = document.createElement('div');
-                                                volElement.style.display = 'flex';
-                                                volElement.style.justifyContent = 'space-between';
-                                                
-                                                const volLabel = document.createElement('span');
-                                                volLabel.textContent = 'Volatility:';
-                                                volLabel.style.marginRight = '20px';
-                                                volLabel.style.color = 'rgba(255, 255, 255, 0.7)';
-                                                
-                                                const volText = document.createElement('span');
-                                                volText.textContent = vol;
-                                                volText.style.fontWeight = 'bold';
-                                                
-                                                // Color coding for volatility
-                                                if (vol < 10) {
-                                                    volText.style.color = '#2ecc71'; // Green for low volatility
-                                                } else if (vol < 15) {
-                                                    volText.style.color = '#f39c12'; // Orange for medium
-                                                } else {
-                                                    volText.style.color = '#e74c3c'; // Red for high
-                                                }
-                                                
-                                                volElement.appendChild(volLabel);
-                                                volElement.appendChild(volText);
-                                                tooltip.appendChild(volElement);
+                                                tooltip.innerHTML = `
+                                                    <div style="display: flex; margin-bottom: 5px;">
+                                                        <span style="color: rgba(255, 255, 255, 0.7); margin-right: 8px;">Year:</span>
+                                                        <span style="font-weight: bold;">${year}</span>
+                                                    </div>
+                                                    <div style="display: flex;">
+                                                        <span style="color: rgba(255, 255, 255, 0.7); margin-right: 8px;">Value:</span>
+                                                        <span style="color: ${resourceColor}; font-weight: bold;">${value}</span>
+                                                    </div>
+                                                `;
                                             }
                                         },
                                         legend: {
                                             labels: {
                                                 color: 'rgba(255, 255, 255, 0.7)',
                                                 font: {
-                                                    family: 'Source Code Pro'
+                                                    family: 'Source Code Pro',
+                                                    size: 14
                                                 }
                                             }
                                         }
@@ -1223,24 +1251,20 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                             });
                             
-                            return chart;
+                            return currentChart;
                         }
 
-                        // Add annotations for significant events
-                        const annotations = document.createElement('div');
-                        annotations.style.width = '100%';
-                        annotations.style.marginTop = '10px';
-                        annotations.style.marginBottom = '2rem';
-                        annotations.style.display = 'flex';
-                        annotations.style.justifyContent = 'space-between';
-                        annotations.style.padding = '0 10px';
+                        function updateChart(resourceName) {
+                            currentResource = resourceName;
+                            createResourceChart(resourceName);
+                        }
 
-                        resourceSection.appendChild(annotations);
                         indexPage.appendChild(content);
 
                         loadChartJsScript(() => {
                             requestAnimationFrame(() => {
-                                createIronChart();
+                                createResourceChart('Iron');
+                                updateEvents('Iron');
                                 console.log('Chart created');
                             });
                         });
@@ -1449,21 +1473,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebar.classList.remove('active');
                 container.style.display = 'none';
         
-                const aboutPageContainer = document.createElement('div');
-                aboutPageContainer.id = 'about-page';
-                aboutPageContainer.style.minHeight = '100vh';
-                aboutPageContainer.style.height = '100%';
-                aboutPageContainer.style.backgroundColor = 'black';
-                aboutPageContainer.style.color = 'white';
-                aboutPageContainer.style.padding = '120px 2rem 2rem 2rem';
-                aboutPageContainer.style.display = 'flex';
-                aboutPageContainer.style.justifyContent = 'center';
-                aboutPageContainer.style.position = 'fixed';
-                aboutPageContainer.style.top = '0';
-                aboutPageContainer.style.left = '0';
-                aboutPageContainer.style.right = '0';
-                aboutPageContainer.style.bottom = '0';
-                aboutPageContainer.style.overflowY = 'scroll';
+                const aboutPage = document.createElement('div');
+                aboutPage.id = 'about-page';
+                aboutPage.style.minHeight = '100vh';
+                aboutPage.style.height = '100%';
+                aboutPage.style.backgroundColor = 'black';
+                aboutPage.style.color = 'white';
+                aboutPage.style.padding = '120px 2rem 2rem 2rem';
+                aboutPage.style.display = 'flex';
+                aboutPage.style.justifyContent = 'center';
+                aboutPage.style.position = 'fixed';
+                aboutPage.style.top = '0';
+                aboutPage.style.left = '0';
+                aboutPage.style.right = '0';
+                aboutPage.style.bottom = '0';
+                aboutPage.style.overflowY = 'scroll';
         
                 const content = document.createElement('div');
                 content.style.maxWidth = '1060px';
@@ -1518,8 +1542,8 @@ all while spearheading the most ambitious resource development initiative in hum
                 content.appendChild(missionText);
                 content.appendChild(title2);
         
-                aboutPageContainer.appendChild(content);
-                document.body.appendChild(aboutPageContainer);
+                aboutPage.appendChild(content);
+                document.body.appendChild(aboutPage);
             }
         }
     ];
