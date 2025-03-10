@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // functions
     function loadChartJsScript(callback) {
-        // First, destroy any existing chart
         const existingChart = document.getElementById('ironValueChart');
         if (existingChart) {
             const chartInstance = Chart.getChart(existingChart);
@@ -14,8 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 chartInstance.destroy();
             }
         }
-    
-        // Then check if Chart.js is already loaded
         if (typeof Chart === 'undefined') {
             const chartScript = document.createElement('script');
             chartScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
@@ -30,6 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
         sound.volume = 0.25;
         return sound;
     }
+    function createHoverSound2() {
+        const sound = new Audio('hover_2.mp3');
+        sound.volume = 0.4;
+        return sound;
+    }
     function createClickSound() {
         const sound = new Audio('click.mp3');
         sound.volume = 0.2;
@@ -37,6 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function playHoverSound() {
         const sound = createHoverSound();
+        sound.play();
+    }
+    function playHoverSound2() {
+        const sound = createHoverSound2();
         sound.play();
     }
     function playClickSound() {
@@ -163,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
             bottom: 20px;
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 8px 12px;
+            padding: 8px 35px;
             border-radius: 5px;
             font-family: 'Source Code Pro', sans-serif;
             font-size: 14px;
@@ -175,8 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         .control-indicator img {
             width: auto;
-            height: 60px;
-            margin-left: -7px;
+            height: 100px;
+            margin-left: -30px;
         }
     `;
     document.head.appendChild(menuStyle);
@@ -583,7 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             label.style.transform = label.style.transform.replace(/scale\([^\)]+\)/, `scale(${1 / state.scale})`);
         }
-        zoomDisplay.textContent = `Magnification: ${(state.scale).toFixed(5)}`;
+        zoomDisplay.textContent = `Magnification: ${(state.scale*1000).toFixed(2)}`;
       }
 
     // zoom handling function
@@ -670,7 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isImage: true
         },
         {
-            title: 'Navigation',
+            title: 'System',
             action: () => {
                 playClickSound();
                 closeAllPages();
@@ -917,7 +923,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         indexPage.style.height = '100%';
                         indexPage.style.backgroundColor = 'black';
                         indexPage.style.color = 'white';
-                        indexPage.style.padding = '120px 2rem 2rem 2rem';
+                        indexPage.style.padding = '6rem 2rem 2rem 2rem';
                         indexPage.style.display = 'flex';
                         indexPage.style.justifyContent = 'center';
                         indexPage.style.position = 'fixed';
@@ -926,7 +932,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         indexPage.style.right = '0';
                         indexPage.style.bottom = '0';
                         indexPage.style.width = '100%';
-                        indexPage.style.overflowY = 'scroll';
+                        indexPage.style.overflowY = 'overlay';
 
                         const content = document.createElement('div');
                         content.style.maxWidth = '1600px';
@@ -937,7 +943,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         title.textContent = "Resource Index";
                         title.style.textAlign = 'center';
                         title.style.fontSize = '5rem';
-                        title.style.marginBottom = '2rem';
+                        title.style.marginBottom = '4rem';
                         title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
                         title.style.color = 'white';
                         
@@ -957,7 +963,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const buttonContainer = document.createElement('div');
                         buttonContainer.style.display = 'flex';
                         buttonContainer.style.justifyContent = 'center';
-                        buttonContainer.style.gap = '15px';
+                        buttonContainer.style.gap = '30px';
                         buttonContainer.style.marginBottom = '20px';
 
                         const resources = [
@@ -975,7 +981,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         resources.forEach(resource => {
                             const button = document.createElement('button');
                             button.textContent = resource.name;
-                            button.style.padding = '8px 16px';
+                            button.style.fontSize = '16px';
+                            button.style.padding = '8px 32px';
                             button.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
                             button.style.color = 'white';
                             button.style.border = 'none';
@@ -985,7 +992,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             button.style.transition = 'transform 0.2s, opacity 0.2s';
                             
                             button.onmouseover = () => {
-                                playHoverSound();
+                                playHoverSound2();
                                 button.style.opacity = '0.8';
                                 button.style.transform = 'scale(1.05)';
                             };
@@ -1001,8 +1008,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             buttonContainer.appendChild(button);
                         });
-                        resourceSection.appendChild(buttonContainer);
                         resourceSection.appendChild(chartContainer);
+                        resourceSection.appendChild(buttonContainer);
                         content.appendChild(title);
                         content.appendChild(resourceSection);
 
@@ -1029,13 +1036,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         let currentChart = null;
                         let currentResource = 'Iron';
 
-                        // generate resource data
+                        // resource index chart math
                         function generateResourceData(resourceName) {
                             const years = [];
                             const values = [];
                             
-                            // starting from year 2150
-                            for (let i = 0; i <= 30; i++) {
+                            // starting from year 2100
+                            for (let i = 0; i <= 100; i++) {
                                 years.push(2100 + i);
                                 
                                 let baseValue = 100;
@@ -1043,66 +1050,165 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // resource chart maths
                                 switch(resourceName) {
                                     case 'Iron':
-                                        baseValue += i * 15;
-                                        baseValue += Math.sin(i * 1.5) * 50;
-                                        if (i === 12) baseValue += 120;
-                                        if (i === 18) baseValue -= 100;
+                                        baseValue += i - 50;
+                                        baseValue *= Math.pow(1.08, i/10);
+                                        baseValue += Math.sin(i * 0.1) * (baseValue * 0.2);
+                                        baseValue += Math.sin(i * 0.8) * (baseValue * 0.05);
+                                        baseValue += Math.sin(i * 1.6) * (baseValue * 0.03);
+                                        if (i % 15 === 0) baseValue *= 0.8;
+                                        if (i % 7 === 0 && i % 15 !== 0) baseValue *= 0.9;
+                                        if (i % 15 === 1) baseValue *= 1.15;
+                                        if (i % 7 === 1 && i % 15 !== 1) baseValue *= 1.08;
+                                        if (i >= 25 && i <= 30) baseValue *= 1.12;
+                                        if (i === 31) baseValue *= 0.7;
+                                        if (i >= 60 && i <= 67) baseValue *= 1.14;
+                                        if (i === 68) baseValue *= 0.65;
+                                        baseValue = Math.max(baseValue, 10);
+                                        baseValue = Math.round(baseValue * 100) / 100;
                                         break;
 
                                     case 'Silicon':
-                                        baseValue += i * 18;
-                                        baseValue += Math.sin(i * 1.6) * 45;
-                                        if (i === 11) baseValue += 110;
-                                        if (i === 17) baseValue -= 90;
+                                        baseValue += i * 1.2 - 50;
+                                        baseValue *= Math.pow(1.065, i/10);
+                                        baseValue += Math.sin(i * 0.09) * (baseValue * 0.22);
+                                        baseValue += Math.sin(i * 0.75) * (baseValue * 0.06);
+                                        baseValue += Math.sin(i * 1.5) * (baseValue * 0.04);
+                                        if (i % 14 === 0) baseValue *= 0.78;
+                                        if (i % 6 === 0 && i % 14 !== 0) baseValue *= 0.92;
+                                        if (i % 14 === 1) baseValue *= 1.17;
+                                        if (i % 6 === 1 && i % 14 !== 1) baseValue *= 1.1;
+                                        if (i >= 23 && i <= 28) baseValue *= 1.14;
+                                        if (i === 30) baseValue *= 0.75;
+                                        if (i >= 58 && i <= 65) baseValue *= 1.16;
+                                        if (i === 67) baseValue *= 0.7;
+                                        baseValue = Math.max(baseValue, 10);
+                                        baseValue = Math.round(baseValue * 100) / 100;
                                         break;
 
                                     case 'Magnesium':
-                                        baseValue += i * 12;
-                                        baseValue += Math.sin(i * 1.3) * 55;
-                                        if (i === 13) baseValue += 130;
-                                        if (i === 19) baseValue -= 110;
+                                        baseValue += i * 0.9 - 50;
+                                        baseValue *= Math.pow(1.095, i/10);
+                                        baseValue += Math.sin(i * 0.11) * (baseValue * 0.18);
+                                        baseValue += Math.sin(i * 0.9) * (baseValue * 0.04);
+                                        baseValue += Math.sin(i * 1.7) * (baseValue * 0.05);
+                                        if (i % 13 === 0) baseValue *= 0.82;
+                                        if (i % 8 === 0 && i % 13 !== 0) baseValue *= 0.87;
+                                        if (i % 13 === 1) baseValue *= 1.2;
+                                        if (i % 8 === 1 && i % 13 !== 1) baseValue *= 1.06;
+                                        if (i >= 26 && i <= 32) baseValue *= 1.1;
+                                        if (i === 34) baseValue *= 0.8;
+                                        if (i >= 62 && i <= 69) baseValue *= 1.12;
+                                        if (i === 71) baseValue *= 0.75;
+                                        baseValue = Math.max(baseValue, 10);
+                                        baseValue = Math.round(baseValue * 100) / 100;
                                         break;
 
                                     case 'Sulfur':
-                                        baseValue += i * 20;
-                                        baseValue += Math.sin(i * 1.7) * 40;
-                                        if (i === 10) baseValue += 100;
-                                        if (i === 16) baseValue -= 80;
+                                        baseValue += i * 1.1 - 50;
+                                        baseValue *= Math.pow(1.07, i/10);
+                                        baseValue += Math.sin(i * 0.12) * (baseValue * 0.24);
+                                        baseValue += Math.sin(i * 0.7) * (baseValue * 0.07);
+                                        baseValue += Math.sin(i * 1.9) * (baseValue * 0.02);
+                                        if (i % 16 === 0) baseValue *= 0.85;
+                                        if (i % 5 === 0 && i % 16 !== 0) baseValue *= 0.94;
+                                        if (i % 16 === 1) baseValue *= 1.13;
+                                        if (i % 5 === 1 && i % 16 !== 1) baseValue *= 1.12;
+                                        if (i >= 24 && i <= 29) baseValue *= 1.16;
+                                        if (i === 29) baseValue *= 0.65;
+                                        if (i >= 64 && i <= 71) baseValue *= 1.18;
+                                        if (i === 73) baseValue *= 0.6;
+                                        baseValue = Math.max(baseValue, 10);
+                                        baseValue = Math.round(baseValue * 100) / 100;
                                         break;
 
                                     case 'Nickel':
-                                        baseValue += i * 16;
-                                        baseValue += Math.sin(i * 1.4) * 60;
-                                        if (i === 14) baseValue += 140;
-                                        if (i === 20) baseValue -= 120;
+                                        baseValue += i * 1.3;
+                                        baseValue *= Math.pow(1.09, i/10);
+                                        baseValue += Math.sin(i * 0.08) * (baseValue * 0.21);
+                                        baseValue += Math.sin(i * 0.85) * (baseValue * 0.05);
+                                        baseValue += Math.sin(i * 1.8) * (baseValue * 0.03);
+                                        if (i % 17 === 0) baseValue *= 0.75;
+                                        if (i % 9 === 0 && i % 17 !== 0) baseValue *= 0.89;
+                                        if (i % 17 === 1) baseValue *= 1.19;
+                                        if (i % 9 === 1 && i % 17 !== 1) baseValue *= 1.09;
+                                        if (i >= 27 && i <= 31) baseValue *= 1.15;
+                                        if (i === 33) baseValue *= 0.68;
+                                        if (i >= 60 && i <= 68) baseValue *= 1.17;
+                                        if (i === 69) baseValue *= 0.63;
+                                        baseValue = Math.max(baseValue, 10);
+                                        baseValue = Math.round(baseValue * 100) / 100;
                                         break;
 
                                     case 'Calcium':
-                                        baseValue += i * 14;
-                                        baseValue += Math.sin(i * 1.2) * 65;
-                                        if (i === 13) baseValue += 125;
-                                        if (i === 19) baseValue -= 105;
+                                        baseValue += i * 0.8 - 50;
+                                        baseValue *= Math.pow(1.085, i/10);
+                                        baseValue += Math.sin(i * 0.1) * (baseValue * 0.19);
+                                        baseValue += Math.sin(i * 0.8) * (baseValue * 0.06);
+                                        baseValue += Math.sin(i * 1.7) * (baseValue * 0.04);
+                                        if (i % 14 === 0) baseValue *= 0.82;
+                                        if (i % 7 === 0 && i % 14 !== 0) baseValue *= 0.91;
+                                        if (i % 14 === 1) baseValue *= 1.16;
+                                        if (i % 7 === 1 && i % 14 !== 1) baseValue *= 1.07;
+                                        if (i >= 25 && i <= 31) baseValue *= 1.11;
+                                        if (i === 32) baseValue *= 0.72;
+                                        if (i >= 61 && i <= 66) baseValue *= 1.15;
+                                        if (i === 68) baseValue *= 0.67;
+                                        baseValue = Math.max(baseValue, 10);
+                                        baseValue = Math.round(baseValue * 100) / 100;
                                         break;
 
                                     case 'Aluminum':
-                                        baseValue += i * 17;
-                                        baseValue += Math.sin(i * 1.8) * 48;
-                                        if (i === 11) baseValue += 115;
-                                        if (i === 17) baseValue -= 95;
+                                        baseValue += i * 1.15 - 50;
+                                        baseValue *= Math.pow(1.075, i/10);
+                                        baseValue += Math.sin(i * 0.11) * (baseValue * 0.23);
+                                        baseValue += Math.sin(i * 0.85) * (baseValue * 0.05);
+                                        baseValue += Math.sin(i * 1.8) * (baseValue * 0.035);
+                                        if (i % 15 === 0) baseValue *= 0.79;
+                                        if (i % 8 === 0 && i % 15 !== 0) baseValue *= 0.9;
+                                        if (i % 15 === 1) baseValue *= 1.17;
+                                        if (i % 8 === 1 && i % 15 !== 1) baseValue *= 1.09;
+                                        if (i >= 24 && i <= 30) baseValue *= 1.13;
+                                        if (i === 31) baseValue *= 0.73;
+                                        if (i >= 59 && i <= 66) baseValue *= 1.16;
+                                        if (i === 67) baseValue *= 0.66;
+                                        baseValue = Math.max(baseValue, 10);
+                                        baseValue = Math.round(baseValue * 100) / 100;
                                         break;
 
                                     case 'Carbon':
-                                        baseValue += i * 22;
-                                        baseValue += Math.sin(i * 1.9) * 42;
-                                        if (i === 10) baseValue += 105;
-                                        if (i === 16) baseValue -= 85;
+                                        baseValue += i * 1.05;
+                                        baseValue *= Math.pow(1.1, i/10);
+                                        baseValue += Math.sin(i * 0.09) * (baseValue * 0.22);
+                                        baseValue += Math.sin(i * 0.8) * (baseValue * 0.045);
+                                        baseValue += Math.sin(i * 1.6) * (baseValue * 0.04);
+                                        if (i % 16 === 0) baseValue *= 0.77;
+                                        if (i % 6 === 0 && i % 16 !== 0) baseValue *= 0.93;
+                                        if (i % 16 === 1) baseValue *= 1.18;
+                                        if (i % 6 === 1 && i % 16 !== 1) baseValue *= 1.11;
+                                        if (i >= 26 && i <= 31) baseValue *= 1.14;
+                                        if (i === 33) baseValue *= 0.69;
+                                        if (i >= 62 && i <= 69) baseValue *= 1.15;
+                                        if (i === 70) baseValue *= 0.64;
+                                        baseValue = Math.max(baseValue, 10);
+                                        baseValue = Math.round(baseValue * 100) / 100;
                                         break;
 
                                     case 'Platinum':
-                                        baseValue += i * 25;
-                                        baseValue += Math.sin(i * 2.0) * 70;
-                                        if (i === 9) baseValue += 150;
-                                        if (i === 15) baseValue -= 130;
+                                        baseValue += i * 1.4;
+                                        baseValue *= Math.pow(1.1, i/10);
+                                        baseValue += Math.sin(i * 0.12) * (baseValue * 0.25);
+                                        baseValue += Math.sin(i * 0.9) * (baseValue * 0.07);
+                                        baseValue += Math.sin(i * 1.9) * (baseValue * 0.05);
+                                        if (i % 13 === 0) baseValue *= 0.85;
+                                        if (i % 5 === 0 && i % 13 !== 0) baseValue *= 0.92;
+                                        if (i % 13 === 1) baseValue *= 1.15;
+                                        if (i % 5 === 1 && i % 13 !== 1) baseValue *= 1.08;
+                                        if (i >= 23 && i <= 28) baseValue *= 1.12;
+                                        if (i === 29) baseValue *= 0.82;
+                                        if (i >= 58 && i <= 64) baseValue *= 1.14;
+                                        if (i === 65) baseValue *= 0.8;
+                                        baseValue = Math.max(baseValue, 10);
+                                        baseValue = Math.round(baseValue * 100) / 100;
                                         break;
                                 }
                                 
@@ -1129,7 +1235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 data: {
                                     labels: years,
                                     datasets: [{
-                                        label: `${resourceName} Index Value by Ton Recycled (TR)`,
+                                        label: `${resourceName} value in Solar Credit Standard™ (SCS™) per ton recycled`,
                                         data: values,
                                         backgroundColor: `${resourceColor.replace('rgb', 'rgba').replace(')', ', 0.2)')}`,
                                         borderColor: resourceColor,
@@ -1169,7 +1275,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         y: {
                                             title: {
                                                 display: true,
-                                                text: 'Value Index (TR)',
+                                                text: 'Value Index (SCS™)',
                                                 color: 'rgba(255, 255, 255, 0.7)',
                                                 font: {
                                                     family: 'Source Code Pro',
@@ -1225,7 +1331,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                                     </div>
                                                     <div style="display: flex;">
                                                         <span style="color: rgba(255, 255, 255, 0.7); margin-right: 8px;">Value:</span>
-                                                        <span style="color: ${resourceColor}; font-weight: bold;">${value}</span>
+                                                        <span style="color: ${resourceColor}; font-weight: bold;">${value} SCS™</span>
                                                     </div>
                                                 `;
                                             }
@@ -1500,7 +1606,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 logo.style.objectFit = 'contain';
                 logo.style.display = 'block';
                 logo.style.margin = '0 auto 2rem auto';
-
+        
                 const title = document.createElement('h1');
                 title.textContent = "Prosperity Without Limits ™";
                 title.style.fontSize = '2.5rem';
@@ -1529,18 +1635,558 @@ all while spearheading the most ambitious resource development initiative in hum
                 
                 const title2 = document.createElement('h2');
                 title2.textContent = "The universe is infinite. We make it valuable.";
-                title2.style.fontSize = '1.5rem';
-                title2.style.marginTop = '4rem';
-                title2.style.marginBottom = '2rem';
+                title2.style.fontSize = '1.75rem';
+                title2.style.marginTop = '6rem';
+                title2.style.marginBottom = '4rem';
                 title2.style.fontFamily = 'Havelock Titling Medium, sans-serif';
                 title2.style.color = 'white';
                 title2.style.textAlign = "center";
-                title2.style.paddingBottom = '300px'
+                
+                const leadershipGrid = document.createElement('div');
+                leadershipGrid.style.display = 'grid';
+                leadershipGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                leadershipGrid.style.gap = '2rem';
+                leadershipGrid.style.marginBottom = '5rem';
+                
+                const mediaQuery = window.matchMedia('(max-width: 768px)');
+                
+                function handleScreenChange(e) {
+                    if (e.matches) {
+                        leadershipGrid.style.gridTemplateColumns = '1fr';
+                    } else {
+                        leadershipGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                    }
+                }
+                
+                handleScreenChange(mediaQuery);
+                mediaQuery.addEventListener('change', handleScreenChange);
+                
+                // ceo profiles
+                const leaders = [
+                    {
+                        name: "Dr. Alexander Novak",
+                        title: "Chief Executive Officer",
+                        image: "ceo_1.png",
+                        bio: "Dr. Alex Novak is the mastermind behind The Elysium Initiative’s \
+success in interstellar expansion and harvesting. Under his leadership, we secured galactic economic \
+sustainability in the post-terrestial era. While some lament Earth’s loss, Novak remains committed to \
+freeing humanity from outdated planetary constraints."
+                    },
+                    {
+                        name: "Marcus Sterling",
+                        title: "Chief Operations Officer",
+                        image: "ceo_2.png",
+                        bio: "Marcus Sterling is the economic visionary driving The Elysium Initiative \
+toward unprecedented market supremacy in the post-Earth era. As the architect of the Solar Credit Standard™, \
+Sterling successfully transitioned human civilization away from antiquated terrestrial currencies and into \
+a fully centralized, resource-backed financial model."
+                    },
+                    {
+                        name: "Sebastian Voss",
+                        title: "Chief Innovation Officer",
+                        image: "ceo_3.png",
+                        bio: "Sebastian Voss, sole developer of V.A.S.T. (Value Assessment and Strategic \
+Termination), revolutionized planetary asset management with an AI capable of unbiased economic analysis \
+and termination directives. When V.A.S.T. deemed Earth not cost-effective, Voss ensured its swift \
+decommissioning, reallocating resources toward higher-value celestial investments."
+                    }
+                ];
+                
+                leaders.forEach(leader => {
+                    const leaderCard = document.createElement('div');
+                    leaderCard.style.backgroundColor = 'rgba(16, 16, 16, 0.6)';
+                    leaderCard.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                    leaderCard.style.borderRadius = '8px';
+                    leaderCard.style.padding = '2rem';
+                    leaderCard.style.display = 'flex';
+                    leaderCard.style.flexDirection = 'column';
+                    leaderCard.style.alignItems = 'center';
+                    leaderCard.style.textAlign = 'center';
+                    leaderCard.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+                    
+                    leaderCard.addEventListener('mouseenter', () => {
+                        leaderCard.style.transform = 'translateY(-10px)';
+                        leaderCard.style.boxShadow = '0 15px 30px rgba(0, 128, 255, 0.2)';
+                    });
+                    
+                    leaderCard.addEventListener('mouseleave', () => {
+                        leaderCard.style.transform = 'translateY(0)';
+                        leaderCard.style.boxShadow = 'none';
+                    });
+                    
+                    const leaderImage = document.createElement('img');
+                    leaderImage.src = leader.image;
+                    leaderImage.style.width = '180px';
+                    leaderImage.style.height = '180px';
+                    leaderImage.style.borderRadius = '50%';
+                    leaderImage.style.objectFit = 'cover';
+                    leaderImage.style.marginBottom = '1.5rem';
+                    leaderImage.style.border = '3px solid rgba(0, 128, 255, 0.7)';
+                    
+                    const leaderName = document.createElement('h3');
+                    leaderName.textContent = leader.name;
+                    leaderName.style.fontSize = '1.5rem';
+                    leaderName.style.marginBottom = '0.5rem';
+                    leaderName.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                    leaderName.style.color = 'white';
+                    
+                    const leaderTitle = document.createElement('h4');
+                    leaderTitle.textContent = leader.title;
+                    leaderTitle.style.fontSize = '1rem';
+                    leaderTitle.style.marginBottom = '1.5rem';
+                    leaderTitle.style.fontFamily = 'Source Code Pro, sans-serif';
+                    leaderTitle.style.color = 'rgba(0, 128, 255, 0.9)';
+                    leaderTitle.style.fontWeight = 'bold';
+                    
+                    const leaderBio = document.createElement('p');
+                    leaderBio.textContent = leader.bio;
+                    leaderBio.style.fontSize = '0.95rem';
+                    leaderBio.style.lineHeight = '1.6';
+                    leaderBio.style.fontFamily = 'Source Code Pro, sans-serif';
+                    leaderBio.style.color = 'rgb(209, 213, 219)';
+                    
+                    leaderCard.appendChild(leaderImage);
+                    leaderCard.appendChild(leaderName);
+                    leaderCard.appendChild(leaderTitle);
+                    leaderCard.appendChild(leaderBio);
+                    
+                    leadershipGrid.appendChild(leaderCard);
+                });
+
+                // timeline
+                const timelineSection = document.createElement('div');
+                timelineSection.style.marginTop = '10rem';
+                timelineSection.style.marginBottom = '6rem';
+
+                const timelineTitle = document.createElement('h2');
+                timelineTitle.textContent = "TRIUMPH THROUGH THE AGES";
+                timelineTitle.style.fontSize = '2.5rem';
+                timelineTitle.style.marginBottom = '6rem';
+                timelineTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                timelineTitle.style.color = 'white';
+                timelineTitle.style.textAlign = 'center';
+
+                const timeline = document.createElement('div');
+                timeline.style.position = 'relative';
+                timeline.style.maxWidth = '1000px';
+                timeline.style.margin = '0 auto';
+                timeline.style.paddingBottom = '2rem';
+
+                // timeline center line
+                const timelineLine = document.createElement('div');
+                timelineLine.style.position = 'absolute';
+                timelineLine.style.top = '0';
+                timelineLine.style.bottom = '0';
+                timelineLine.style.width = '2px';
+                timelineLine.style.backgroundColor = 'rgba(0, 128, 255, 0.5)';
+                timelineLine.style.left = '50%';
+                timelineLine.style.transform = 'translateX(-50%)';
+
+                timeline.appendChild(timelineLine);
+
+                const milestones = [
+                    {
+                        year: "2124",
+                        title: "FIRST INTERSTELLAR EXPEDITION",
+                        description: "The inaugural mining fleet leaves Earth's solar system, beginning humanity's journey toward unlimited prosperity."
+                    },
+                    {
+                        year: "2131",
+                        title: "QUANTUM EXTRACTION BREAKTHROUGH",
+                        description: "Our scientists develop the revolutionary Molecular Decoupling System, allowing 99.8% resource extraction efficiency."
+                    },
+                    {
+                        year: "2142",
+                        title: "SOLAR CREDIT STANDARD™ ESTABLISHED",
+                        description: "The Elysium Initiative introduces the universal currency that would soon replace all terrestrial financial systems."
+                    },
+                    {
+                        year: "2148",
+                        title: "EARTH DECOMMISSIONING",
+                        description: "After careful economic analysis by V.A.S.T., Earth's resources were efficiently redistributed to more profitable ventures."
+                    },
+                    {
+                        year: "2151",
+                        title: "GALACTIC EXPANSION INITIATIVE",
+                        description: "Launch of 500 autonomous harvesting fleets, ensuring prosperity for our stakeholders for generations to come."
+                    }
+                ];
+
+                const timelineMediaQuery = window.matchMedia('(max-width: 768px)');
+                function handleTimelineScreenChange(e) {
+                    const isSmallScreen = e.matches;
+                    milestones.forEach((milestone, index) => {
+                        const milestoneNode = document.getElementById(`milestone-${index}`);
+                        if (milestoneNode) {
+                            if (isSmallScreen) {
+                                milestoneNode.style.width = '85%';
+                                milestoneNode.style.marginLeft = '15%';
+                            } else {
+                                milestoneNode.style.width = '42%';
+                                milestoneNode.style.marginLeft = index % 2 === 0 ? '0' : '58%';
+                            }
+                        }
+                    });
+                    
+                    if (isSmallScreen) {
+                        timelineLine.style.left = '7%';
+                    } else {
+                        timelineLine.style.left = '50%';
+                    }
+                }
+
+                milestones.forEach((milestone, index) => {
+                    const milestoneNode = document.createElement('div');
+                    milestoneNode.id = `milestone-${index}`;
+                    milestoneNode.style.position = 'relative';
+                    milestoneNode.style.marginBottom = '4rem';
+                    milestoneNode.style.backgroundColor = 'rgba(16, 16, 16, 0.8)';
+                    milestoneNode.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+                    milestoneNode.style.borderRadius = '8px';
+                    milestoneNode.style.padding = '2rem';
+                    milestoneNode.style.width = '42%';
+                    milestoneNode.style.boxSizing = 'border-box';
+                    milestoneNode.style.marginLeft = index % 2 === 0 ? '0' : '58%';
+                    milestoneNode.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+                    
+                    milestoneNode.addEventListener('mouseenter', () => {
+                        milestoneNode.style.transform = 'scale(1.03)';
+                        milestoneNode.style.boxShadow = '0 10px 25px rgba(0, 128, 255, 0.2)';
+                    });
+                    
+                    milestoneNode.addEventListener('mouseleave', () => {
+                        milestoneNode.style.transform = 'scale(1)';
+                        milestoneNode.style.boxShadow = 'none';
+                    });
+                    
+                    // year badge
+                    const yearBadge = document.createElement('div');
+                    yearBadge.textContent = milestone.year;
+                    yearBadge.style.position = 'absolute';
+                    yearBadge.style.top = index % 2 === 0 ? '0' : '50%';
+                    yearBadge.style.transform = 'translate(-50%, -50%)';
+                    yearBadge.style.left = index % 2 === 0 ? '100%' : '0';
+                    yearBadge.style.backgroundColor = 'rgba(0, 128, 255, 0.9)';
+                    yearBadge.style.color = 'white';
+                    yearBadge.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                    yearBadge.style.padding = '0.5rem 1rem';
+                    yearBadge.style.borderRadius = '30px';
+                    yearBadge.style.zIndex = '2';
+                    yearBadge.style.fontSize = '1.1rem';
+                    
+                    const milestoneTitle = document.createElement('h3');
+                    milestoneTitle.textContent = milestone.title;
+                    milestoneTitle.style.fontSize = '1.25rem';
+                    milestoneTitle.style.marginBottom = '1rem';
+                    milestoneTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                    milestoneTitle.style.color = 'white';
+                    
+                    const milestoneDesc = document.createElement('p');
+                    milestoneDesc.textContent = milestone.description;
+                    milestoneDesc.style.fontSize = '1rem';
+                    milestoneDesc.style.lineHeight = '1.6';
+                    milestoneDesc.style.fontFamily = 'Source Code Pro, sans-serif';
+                    milestoneDesc.style.color = 'rgb(209, 213, 219)';
+                    
+                    milestoneNode.appendChild(yearBadge);
+                    milestoneNode.appendChild(milestoneTitle);
+                    milestoneNode.appendChild(milestoneDesc);
+                    
+                    timeline.appendChild(milestoneNode);
+                });
+
+                handleTimelineScreenChange(timelineMediaQuery);
+                timelineMediaQuery.addEventListener('change', handleTimelineScreenChange);
+
+                timelineSection.appendChild(timelineTitle);
+                timelineSection.appendChild(timeline);
+
+                // testimonials
+                const testimonialSection = document.createElement('div');
+                testimonialSection.style.marginTop = '6rem';
+                testimonialSection.style.marginBottom = '6rem';
+
+                const testimonialTitle = document.createElement('h2');
+                testimonialTitle.textContent = "STAKEHOLDER TESTIMONIALS";
+                testimonialTitle.style.fontSize = '1.75rem';
+                testimonialTitle.style.marginBottom = '1.5rem';
+                testimonialTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                testimonialTitle.style.color = 'white';
+                testimonialTitle.style.textAlign = 'center';
+
+                // stars
+                const starDivider = document.createElement('div');
+                starDivider.style.display = 'flex';
+                starDivider.style.justifyContent = 'center';
+                starDivider.style.gap = '12px';
+                starDivider.style.marginBottom = '2rem';
+
+                // create 5
+                for (let i = 0; i < 5; i++) {
+                const star = document.createElement('div');
+                
+                // Star SVG using innerHTML
+                star.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="rgba(0, 128, 255, 0.9)">
+                    <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/>
+                    </svg>
+                `;
+                
+                // animation
+                star.style.transition = 'transform 0.3s ease';
+                
+                star.addEventListener('mouseenter', () => {
+                    star.style.transform = 'scale(1.3) rotate(144deg)';
+                });
+                
+                star.addEventListener('mouseleave', () => {
+                    star.style.transform = 'scale(1) rotate(0deg)';
+                });
+                
+                starDivider.appendChild(star);
+                }
+
+                const testimonialSlider = document.createElement('div');
+                testimonialSlider.style.position = 'relative';
+                testimonialSlider.style.overflow = 'hidden';
+                testimonialSlider.style.height = '250px';
+
+                const testimonialContainer = document.createElement('div');
+                testimonialContainer.className = 'testimonial-container';
+                testimonialContainer.style.position = 'relative';
+                testimonialContainer.style.width = '100%';
+                testimonialContainer.style.height = '100%';
+                testimonialSlider.appendChild(testimonialContainer);
+
+                const testimonials = [
+                    {
+                        quote: "Since investing in The Elysium Initiative, my portfolio has seen returns beyond imagination. The decision to prioritize off-world assets over terrestrial ones was the wisest financial move I've ever made.",
+                        author: "Samantha Chen, Early Investor"
+                    },
+                    {
+                        quote: "As a luxury resort developer, partnering with The Elysium Initiative has given me access to materials previously thought impossible to obtain. Our orbital facilities are now the most sought-after destinations in the sector.",
+                        author: "Marco Valentini, Luxury Development CEO"
+                    },
+                    {
+                        quote: "When Earth was scheduled for decommissioning, I was skeptical. But seeing the economic prosperity that followed, I can only applaud The Elysium Initiative's vision. My family now lives in comfort among the stars.",
+                        author: "James Rodriguez, Former Terrestrial Resident"
+                    }
+                ];
+
+                let currentTestimonial = 0;
+
+                testimonials.forEach((testimonial, index) => {
+                    const testimonialCard = document.createElement('div');
+                    testimonialCard.className = 'testimonial-card'; // Add a class for easier selection
+                    testimonialCard.style.position = 'absolute';
+                    testimonialCard.style.top = '0';
+                    testimonialCard.style.left = '0';
+                    testimonialCard.style.right = '0';
+                    testimonialCard.style.padding = '2rem';
+                    testimonialCard.style.backgroundColor = 'rgba(16, 16, 16, 0.5)';
+                    testimonialCard.style.borderRadius = '8px';
+                    testimonialCard.style.border = '1px solid rgba(0, 128, 255, 0.2)';
+                    testimonialCard.style.transform = `translateX(${index * 100}%)`;
+                    testimonialCard.style.transition = 'transform 0.5s ease';
+                    testimonialCard.style.height = '200px';
+                    testimonialCard.style.display = 'flex';
+                    testimonialCard.style.flexDirection = 'column';
+                    testimonialCard.style.justifyContent = 'center';
+                    
+                    const quoteIcon = document.createElement('div');
+                    quoteIcon.textContent = '"';
+                    quoteIcon.style.fontSize = '4rem';
+                    quoteIcon.style.position = 'absolute';
+                    quoteIcon.style.top = '0';
+                    quoteIcon.style.left = '1rem';
+                    quoteIcon.style.opacity = '0.2';
+                    quoteIcon.style.color = 'rgba(0, 128, 255, 0.9)';
+                    quoteIcon.style.fontFamily = 'Georgia, serif';
+                    
+                    const quoteText = document.createElement('p');
+                    quoteText.textContent = testimonial.quote;
+                    quoteText.style.fontSize = '1.1rem';
+                    quoteText.style.fontStyle = 'italic';
+                    quoteText.style.lineHeight = '1.6';
+                    quoteText.style.textAlign = 'center';
+                    quoteText.style.fontFamily = 'Source Code Pro, sans-serif';
+                    quoteText.style.color = 'rgb(209, 213, 219)';
+                    quoteText.style.marginBottom = '1.5rem';
+                    quoteText.style.zIndex = '1';
+                    quoteText.style.position = 'relative';
+                    
+                    const authorText = document.createElement('p');
+                    authorText.textContent = `— ${testimonial.author}`;
+                    authorText.style.fontSize = '1rem';
+                    authorText.style.textAlign = 'center';
+                    authorText.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                    authorText.style.color = 'rgba(0, 128, 255, 0.9)';
+                    
+                    testimonialCard.appendChild(quoteIcon);
+                    testimonialCard.appendChild(quoteText);
+                    testimonialCard.appendChild(authorText);
+                    
+                    testimonialContainer.appendChild(testimonialCard); // Append to container instead
+                });
+
+                // navigation arrows
+                const prevArrow = document.createElement('button');
+                prevArrow.innerHTML = '&#10094;';
+                prevArrow.style.position = 'absolute';
+                prevArrow.style.top = '50%';
+                prevArrow.style.left = '10px';
+                prevArrow.style.transform = 'translateY(-50%)';
+                prevArrow.style.zIndex = '2';
+                prevArrow.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                prevArrow.style.color = 'white';
+                prevArrow.style.border = 'none';
+                prevArrow.style.borderRadius = '50%';
+                prevArrow.style.width = '40px';
+                prevArrow.style.height = '40px';
+                prevArrow.style.fontSize = '20px';
+                prevArrow.style.cursor = 'pointer';
+                prevArrow.style.transition = 'background-color 0.3s ease';
+
+                const nextArrow = document.createElement('button');
+                nextArrow.innerHTML = '&#10095;';
+                nextArrow.style.position = 'absolute';
+                nextArrow.style.top = '50%';
+                nextArrow.style.right = '10px';
+                nextArrow.style.transform = 'translateY(-50%)';
+                nextArrow.style.zIndex = '2';
+                nextArrow.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                nextArrow.style.color = 'white';
+                nextArrow.style.border = 'none';
+                nextArrow.style.borderRadius = '50%';
+                nextArrow.style.width = '40px';
+                nextArrow.style.height = '40px';
+                nextArrow.style.fontSize = '20px';
+                nextArrow.style.cursor = 'pointer';
+                nextArrow.style.transition = 'background-color 0.3s ease';
+
+                prevArrow.addEventListener('mouseenter', () => {
+                    prevArrow.style.backgroundColor = 'rgba(0, 128, 255, 0.7)';
+                });
+                prevArrow.addEventListener('mouseleave', () => {
+                    prevArrow.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                });
+                nextArrow.addEventListener('mouseenter', () => {
+                    nextArrow.style.backgroundColor = 'rgba(0, 128, 255, 0.7)';
+                });
+                nextArrow.addEventListener('mouseleave', () => {
+                    nextArrow.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                });
+
+                prevArrow.addEventListener('click', () => {
+                    if (currentTestimonial > 0) {
+                        currentTestimonial--;
+                        updateTestimonialSlider();
+                    }
+                });
+
+                nextArrow.addEventListener('click', () => {
+                    if (currentTestimonial < testimonials.length - 1) {
+                        currentTestimonial++;
+                        updateTestimonialSlider();
+                    }
+                });
+
+                function updateTestimonialSlider() {
+                    const cards = testimonialContainer.querySelectorAll('.testimonial-card');
+                    cards.forEach((card, index) => {
+                        card.style.transform = `translateX(${(index - currentTestimonial) * 100}%)`;
+                    });
+                }
+
+                testimonialSlider.appendChild(prevArrow);
+                testimonialSlider.appendChild(nextArrow);
+                testimonialSection.appendChild(testimonialTitle);
+                testimonialSection.appendChild(starDivider);
+                testimonialSection.appendChild(testimonialSlider);
+                
+                // call to action
+                const ctaSection = document.createElement('div');
+                ctaSection.style.textAlign = 'center';
+                ctaSection.style.marginTop = '3rem';
+                ctaSection.style.marginBottom = '6rem';
+                ctaSection.style.padding = '3rem';
+                ctaSection.style.backgroundColor = 'rgba(0, 28, 55, 0.5)';
+                ctaSection.style.borderRadius = '12px';
+                ctaSection.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+                
+                const ctaTitle = document.createElement('h3');
+                ctaTitle.textContent = "JOIN THE VANGUARD OF COSMIC ENTERPRISE";
+                ctaTitle.style.fontSize = '1.5rem';
+                ctaTitle.style.marginBottom = '1.5rem';
+                ctaTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                ctaTitle.style.color = 'white';
+                
+                const ctaText = document.createElement('p');
+                ctaText.textContent = "The Elysium Initiative is always seeking exceptional talent for our expeditionary teams, research divisions, and operational command. Whether you're a seasoned xenobiologist, quantum engineer, or strategic investor, there's a place for you in humanity's greatest endeavor.";
+                ctaText.style.fontSize = '1.1rem';
+                ctaText.style.lineHeight = '1.75';
+                ctaText.style.marginBottom = '2rem';
+                ctaText.style.fontFamily = 'Source Code Pro, sans-serif';
+                ctaText.style.color = 'rgb(209, 213, 219)';
+                
+                const ctaButton = document.createElement('button');
+                ctaButton.textContent = "APPLY NOW";
+                ctaButton.style.padding = '1rem 2.5rem';
+                ctaButton.style.fontSize = '1.1rem';
+                ctaButton.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                ctaButton.style.backgroundColor = 'rgba(0, 128, 255, 0.9)';
+                ctaButton.style.color = 'white';
+                ctaButton.style.border = 'none';
+                ctaButton.style.borderRadius = '4px';
+                ctaButton.style.cursor = 'pointer';
+                ctaButton.style.transition = 'all 0.3s ease';
+                
+                ctaButton.addEventListener('mouseenter', () => {
+                    ctaButton.style.backgroundColor = 'rgba(0, 160, 255, 1)';
+                    ctaButton.style.transform = 'scale(1.05)';
+                });
+                
+                ctaButton.addEventListener('mouseleave', () => {
+                    ctaButton.style.backgroundColor = 'rgba(0, 128, 255, 0.9)';
+                    ctaButton.style.transform = 'scale(1)';
+                });
+                
+                ctaButton.addEventListener('click', () => {
+                    alert("Application system coming online soon. The stars await.");
+                });
+                
+                
+                
+                // footer
+                const footer = document.createElement('div');
+                footer.style.textAlign = 'center';
+                footer.style.marginTop = '4rem';
+                footer.style.paddingBottom = '2rem';
+                footer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
+                footer.style.paddingTop = '2rem';
+                
+                const footerText = document.createElement('p');
+                footerText.textContent = "© 2152 The Elysium Initiative. All rights reserved across known space.";
+                footerText.style.fontSize = '0.9rem';
+                footerText.style.fontFamily = 'Source Code Pro, sans-serif';
+                footerText.style.color = 'rgba(209, 213, 219, 0.6)';
+                footerText.style.marginBottom = '200px';
         
+
+                // append all ur shit
                 content.appendChild(logo);
                 content.appendChild(title);
                 content.appendChild(missionText);
                 content.appendChild(title2);
+                content.appendChild(leadershipGrid);
+                content.appendChild(testimonialSection);
+                content.appendChild(timelineSection);
+                ctaSection.appendChild(ctaTitle);
+                ctaSection.appendChild(ctaText);
+                ctaSection.appendChild(ctaButton);
+                content.appendChild(ctaSection);
+                content.appendChild(footer);
+                footer.appendChild(footerText);
         
                 aboutPage.appendChild(content);
                 document.body.appendChild(aboutPage);
@@ -1593,7 +2239,6 @@ all while spearheading the most ambitious resource development initiative in hum
                     e.stopPropagation();
                     playClickSound();
                     if (dropdownItem.action) {
-                        // Prevent event from propagating if there's a nested dropdown
                         if (dropdownItem.nestedDropdown) {
                             e.stopPropagation();
                         }
@@ -1602,7 +2247,6 @@ all while spearheading the most ambitious resource development initiative in hum
                 });
                 dropdownElement.addEventListener('mouseenter', playHoverSound);
                 
-                // Create nested dropdown if it exists
                 if (dropdownItem.nestedDropdown && dropdownItem.nestedDropdown.length > 0) {
                     const nestedDropdown = document.createElement('div');
                     nestedDropdown.className = 'nested-dropdown';
@@ -2654,6 +3298,7 @@ all while spearheading the most ambitious resource development initiative in hum
         { element: dioneImage, name: 'Dione', parent: 'Saturn' },
         { element: enceladusImage, name: 'Enceladus', parent: 'Saturn' },
         { element: mimasImage, name: 'Mimas', parent: 'Saturn' },
+
     ].forEach(moon => {
         moon.element.style.cursor = 'pointer';
         moon.element.addEventListener('click', (e) => {
@@ -2674,7 +3319,7 @@ all while spearheading the most ambitious resource development initiative in hum
     const zoomIndicator = document.createElement('div');
     zoomIndicator.className = 'control-indicator ui-element';
     zoomIndicator.style.left = '20px';
-    zoomIndicator.style.bottom = '142px';
+    zoomIndicator.style.bottom = '182px';
     zoomIndicator.style.width = '100px';
     
     const zoomIcon = document.createElement('img');
