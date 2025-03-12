@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const ambientSound = new Audio('ambience.mp3');
     ambientSound.loop = true;
-    ambientSound.volume = 0;
+    ambientSound.volume = 0.2;
     ambientSound.play();
 
     // functions
