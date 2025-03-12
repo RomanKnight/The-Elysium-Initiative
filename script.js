@@ -37,6 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
         sound.volume = 0.2;
         return sound;
     }
+    function createCloseSound() {
+        const sound = new Audio('close.mp3');
+        sound.volume = 0.4;
+        return sound;
+    }
     function playHoverSound() {
         const sound = createHoverSound();
         sound.play();
@@ -47,6 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function playClickSound() {
         const sound = createClickSound();
+        sound.play();
+    }
+    function playCloseSound() {
+        const sound = createCloseSound();
         sound.play();
     }
     function closeAllPages() {
@@ -923,7 +932,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         indexPage.style.height = '100%';
                         indexPage.style.backgroundColor = 'black';
                         indexPage.style.color = 'white';
-                        indexPage.style.padding = '6rem 2rem 2rem 2rem';
+                        indexPage.style.padding = '6rem 0 2rem 0';
                         indexPage.style.display = 'flex';
                         indexPage.style.justifyContent = 'center';
                         indexPage.style.position = 'fixed';
@@ -937,7 +946,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         const content = document.createElement('div');
                         content.style.maxWidth = '1600px';
                         content.style.width = '100%';
-                        content.style.marginBottom = '65rem';
+                        content.style.margin = '0 auto 65rem auto';
+                        content.style.position = 'relative';
 
                         const title = document.createElement('h1');
                         title.textContent = "Resource Index";
@@ -959,6 +969,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         chartContainer.style.padding = '20px';
                         chartContainer.style.position = 'relative';
                         chartContainer.style.marginBottom = '2rem';
+                        chartContainer.style.margin = '0 auto 2rem auto';
+                        chartContainer.style.maxWidth = '1500px';
 
                         const buttonContainer = document.createElement('div');
                         buttonContainer.style.display = 'flex';
@@ -1782,34 +1794,73 @@ decommissioning, reallocating resources toward higher-value celestial investment
                 timelineLine.style.left = '50%';
                 timelineLine.style.transform = 'translateX(-50%)';
 
+                // top fade overlay
+                const topFade = document.createElement('div');
+                topFade.style.position = 'absolute';
+                topFade.style.top = '0';
+                topFade.style.left = '0';
+                topFade.style.right = '0';
+                topFade.style.height = '80px';
+                topFade.style.zIndex = '0';
+                topFade.style.background = 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%)';
+                topFade.style.pointerEvents = 'none';
+
+                // bottom fade overlay
+                const bottomFade = document.createElement('div');
+                bottomFade.style.position = 'absolute';
+                bottomFade.style.bottom = '0';
+                bottomFade.style.left = '0';
+                bottomFade.style.right = '0';
+                bottomFade.style.height = '80px';
+                bottomFade.style.zIndex = '0';
+                bottomFade.style.background = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%)';
+                bottomFade.style.pointerEvents = 'none';
+
                 timeline.appendChild(timelineLine);
+                timeline.appendChild(topFade);
+                timeline.appendChild(bottomFade);
 
                 const milestones = [
                     {
-                        year: "2124",
-                        title: "FIRST INTERSTELLAR EXPEDITION",
-                        description: "The inaugural mining fleet leaves Earth's solar system, beginning humanity's journey toward unlimited prosperity."
+                        year: "2099",
+                        title: "FIRST V.A.S.T. EVALUATION",
+                        description: "Using recent breakthroughs in quantum computing, our incredible V.A.S.T. intelligence system determined the Earth to be not cost-effective."
                     },
                     {
-                        year: "2131",
-                        title: "QUANTUM EXTRACTION BREAKTHROUGH",
-                        description: "Our scientists develop the revolutionary Molecular Decoupling System, allowing 99.8% resource extraction efficiency."
+                        year: "2115",
+                        title: "FIRST COLONIES SENT OFFWORLD",
+                        description: "In preparation for the upcoming decommissioning. a number of our brave top investors blazed a path to the outer worlds."
                     },
                     {
-                        year: "2142",
+                        year: "2132",
                         title: "SOLAR CREDIT STANDARD™ ESTABLISHED",
-                        description: "The Elysium Initiative introduces the universal currency that would soon replace all terrestrial financial systems."
+                        description: "The Elysium Initiative introduced the universal currency which would soon replace all terrestrial financial systems."
                     },
                     {
-                        year: "2148",
+                        year: "2138-49",
                         title: "EARTH DECOMMISSIONING",
-                        description: "After careful economic analysis by V.A.S.T., Earth's resources were efficiently redistributed to more profitable ventures."
+                        description: "After careful economic and material preperations, Earth's resources were efficiently redistributed to more profitable ventures."
                     },
                     {
                         year: "2151",
                         title: "GALACTIC EXPANSION INITIATIVE",
-                        description: "Launch of 500 autonomous harvesting fleets, ensuring prosperity for our stakeholders for generations to come."
-                    }
+                        description: "500 of our most cutting-edge autonomous harvesting fleets are launched into the stars, ensuring prosperity for our stakeholders for generations to come."
+                    },
+                    {
+                        year: "2173",
+                        title: "QUANTUM NEXUS ESTABLISHED",
+                        description: "The Elysium Initiative created the first interstellar quantum communication network, facilitating instantaneous resource transport across multiple star systems."
+                    },
+                    {
+                        year: "2185",
+                        title: "PLANETARY SYNTHESIS BREAKTHROUGH",
+                        description: "After decades of research, our terraforming divisions created the first ever synthetic planet from recycled resources, precisely engineered for human recreation and tourism."
+                    },
+                    {
+                        year: "2202",
+                        title: "PRESENT DAY: THE GRAND RECLEMATION",
+                        description: "With over 1,000 star systems under management and V.A.S.T. 9.0 directing our autonomous harvesting operations, The Elysium Initiative stands unchallenged as humanity's path to destined prosperity."
+                    },
                 ];
 
                 const timelineMediaQuery = window.matchMedia('(max-width: 768px)');
@@ -1863,9 +1914,16 @@ decommissioning, reallocating resources toward higher-value celestial investment
                     const yearBadge = document.createElement('div');
                     yearBadge.textContent = milestone.year;
                     yearBadge.style.position = 'absolute';
-                    yearBadge.style.top = index % 2 === 0 ? '0' : '50%';
-                    yearBadge.style.transform = 'translate(-50%, -50%)';
-                    yearBadge.style.left = index % 2 === 0 ? '100%' : '0';
+                    yearBadge.style.top = '0';
+                    if (index % 2 === 0) {
+                        // left nodes
+                        yearBadge.style.right = '-10px';
+                        yearBadge.style.transform = 'translateY(-50%)';
+                    } else {
+                        // right nodes
+                        yearBadge.style.left = '-10px';
+                        yearBadge.style.transform = 'translateY(-50%)';
+                    }
                     yearBadge.style.backgroundColor = 'rgba(0, 128, 255, 0.9)';
                     yearBadge.style.color = 'white';
                     yearBadge.style.fontFamily = 'Havelock Titling Medium, sans-serif';
@@ -1925,7 +1983,7 @@ decommissioning, reallocating resources toward higher-value celestial investment
                 for (let i = 0; i < 5; i++) {
                 const star = document.createElement('div');
                 
-                // Star SVG using innerHTML
+                // star SVG using innerHTML
                 star.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="rgba(0, 128, 255, 0.9)">
                     <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/>
@@ -1960,15 +2018,15 @@ decommissioning, reallocating resources toward higher-value celestial investment
 
                 const testimonials = [
                     {
-                        quote: "Since investing in The Elysium Initiative, my portfolio has seen returns beyond imagination. The decision to prioritize off-world assets over terrestrial ones was the wisest financial move I've ever made.",
+                        quote: "Since investing in The Elysium Initiative, my portfolio's returns have been unbelievable! It was about time we realized Earth was holding us back.",
                         author: "Samantha Chen, Early Investor"
                     },
                     {
-                        quote: "As a luxury resort developer, partnering with The Elysium Initiative has given me access to materials previously thought impossible to obtain. Our orbital facilities are now the most sought-after destinations in the sector.",
+                        quote: "As a luxury resort developer, partnering with The Elysium Initiative has given me access to building materials like never before. We can finally use all that rock and metal for something profitable!",
                         author: "Marco Valentini, Luxury Development CEO"
                     },
                     {
-                        quote: "When Earth was scheduled for decommissioning, I was skeptical. But seeing the economic prosperity that followed, I can only applaud The Elysium Initiative's vision. My family now lives in comfort among the stars.",
+                        quote: "When Earth was scheduled for decommissioning, I was skeptical. But now, I have to applaud The Elysium Initiative's vision. My family lives in comfort at our private space station.",
                         author: "James Rodriguez, Former Terrestrial Resident"
                     }
                 ];
@@ -1977,7 +2035,7 @@ decommissioning, reallocating resources toward higher-value celestial investment
 
                 testimonials.forEach((testimonial, index) => {
                     const testimonialCard = document.createElement('div');
-                    testimonialCard.className = 'testimonial-card'; // Add a class for easier selection
+                    testimonialCard.className = 'testimonial-card';
                     testimonialCard.style.position = 'absolute';
                     testimonialCard.style.top = '0';
                     testimonialCard.style.left = '0';
@@ -2115,14 +2173,16 @@ decommissioning, reallocating resources toward higher-value celestial investment
                 ctaSection.style.border = '1px solid rgba(0, 128, 255, 0.3)';
                 
                 const ctaTitle = document.createElement('h3');
-                ctaTitle.textContent = "JOIN THE VANGUARD OF COSMIC ENTERPRISE";
+                ctaTitle.textContent = "JOIN THE INITIATIVE";
                 ctaTitle.style.fontSize = '1.5rem';
                 ctaTitle.style.marginBottom = '1.5rem';
                 ctaTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
                 ctaTitle.style.color = 'white';
                 
                 const ctaText = document.createElement('p');
-                ctaText.textContent = "The Elysium Initiative is always seeking exceptional talent for our expeditionary teams, research divisions, and operational command. Whether you're a seasoned xenobiologist, quantum engineer, or strategic investor, there's a place for you in humanity's greatest endeavor.";
+                ctaText.textContent = "The Elysium Initiative is always looking for exceptional talent \
+to join our team. Whether you're a seasoned xenobiologist, quantum engineer, or generous investor, there's \
+a place for you in humanity's greatest endeavor.";
                 ctaText.style.fontSize = '1.1rem';
                 ctaText.style.lineHeight = '1.75';
                 ctaText.style.marginBottom = '2rem';
@@ -2142,6 +2202,7 @@ decommissioning, reallocating resources toward higher-value celestial investment
                 ctaButton.style.transition = 'all 0.3s ease';
                 
                 ctaButton.addEventListener('mouseenter', () => {
+                    playHoverSound();
                     ctaButton.style.backgroundColor = 'rgba(0, 160, 255, 1)';
                     ctaButton.style.transform = 'scale(1.05)';
                 });
@@ -2152,10 +2213,153 @@ decommissioning, reallocating resources toward higher-value celestial investment
                 });
                 
                 ctaButton.addEventListener('click', () => {
-                    alert("Application system coming online soon. The stars await.");
+                    playClickSound();
+                    // popup overlay
+                    const overlay = document.createElement('div');
+                    overlay.style.position = 'fixed';
+                    overlay.style.top = '0';
+                    overlay.style.left = '0';
+                    overlay.style.width = '100%';
+                    overlay.style.height = '100%';
+                    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                    overlay.style.backdropFilter = 'blur(8px)';
+                    overlay.style.zIndex = '1000';
+                    overlay.style.display = 'flex';
+                    overlay.style.justifyContent = 'center';
+                    overlay.style.alignItems = 'center';
+                    
+                    // popup container
+                    const popup = document.createElement('div');
+                    popup.style.backgroundColor = 'rgba(10, 15, 30, 0.95)';
+                    popup.style.border = '2px solid rgba(0, 128, 255, 0.7)';
+                    popup.style.borderRadius = '12px';
+                    popup.style.padding = '40px';
+                    popup.style.width = '90%';
+                    popup.style.maxWidth = '500px';
+                    popup.style.position = 'relative';
+                    popup.style.boxShadow = '0 0 30px rgba(0, 128, 255, 0.5)';
+                    popup.style.animation = 'popupFadeIn 0.3s ease-out forwards';
+                    
+                    // Create animation keyframes
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes popupFadeIn {
+                            from { opacity: 0; transform: scale(0.9); }
+                            to { opacity: 1; transform: scale(1); }
+                        }
+                        
+                        @keyframes glowPulse {
+                            0% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
+                            50% { box-shadow: 0 0 15px rgba(0, 128, 255, 0.8); }
+                            100% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    // close button
+                    const closeButton = document.createElement('button');
+                    closeButton.innerHTML = '&times;';
+                    closeButton.style.position = 'absolute';
+                    closeButton.style.top = '15px';
+                    closeButton.style.right = '15px';
+                    closeButton.style.backgroundColor = 'transparent';
+                    closeButton.style.border = 'none';
+                    closeButton.style.color = 'rgba(0, 128, 255, 0.9)';
+                    closeButton.style.fontSize = '28px';
+                    closeButton.style.cursor = 'pointer';
+                    closeButton.style.width = '40px';
+                    closeButton.style.height = '40px';
+                    closeButton.style.lineHeight = '40px';
+                    closeButton.style.padding = '0';
+                    closeButton.style.borderRadius = '50%';
+                    closeButton.style.transition = 'all 0.2s ease';
+                    
+                    closeButton.addEventListener('mouseenter', () => {
+                        closeButton.style.backgroundColor = 'rgba(0, 128, 255, 0.2)';
+                        closeButton.style.transform = 'scale(1.1)';
+                    });
+                    
+                    closeButton.addEventListener('mouseleave', () => {
+                        closeButton.style.backgroundColor = 'transparent';
+                        closeButton.style.transform = 'scale(1)';
+                    });
+                    
+                    closeButton.addEventListener('click', () => {
+                        playCloseSound();
+                        overlay.style.opacity = '0';
+                        popup.style.transform = 'scale(0.9)';
+                        popup.style.opacity = '0';
+                        setTimeout(() => {
+                            document.body.removeChild(overlay);
+                        }, 300);
+                    });
+                    
+                    // title
+                    const popupTitle = document.createElement('h2');
+                    popupTitle.textContent = 'APPLICATION PORTAL';
+                    popupTitle.style.color = 'white';
+                    popupTitle.style.fontSize = '2rem';
+                    popupTitle.style.textAlign = 'center';
+                    popupTitle.style.marginBottom = '30px';
+                    popupTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                    
+                    // email icon
+                    const emailIcon = document.createElement('div');
+                    emailIcon.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="rgba(0, 128, 255, 0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    `;
+                    emailIcon.style.display = 'flex';
+                    emailIcon.style.justifyContent = 'center';
+                    emailIcon.style.marginBottom = '20px';
+                    
+                    // message
+                    const messageText = document.createElement('p');
+                    messageText.textContent = 'To apply for a position with The Elysium Initiative, please send your application and credentials to:';
+                    messageText.style.color = 'rgb(209, 213, 219)';
+                    messageText.style.fontSize = '1.1rem';
+                    messageText.style.textAlign = 'center';
+                    messageText.style.lineHeight = '1.6';
+                    messageText.style.marginBottom = '20px';
+                    messageText.style.fontFamily = 'Source Code Pro, sans-serif';
+                    
+                    // email
+                    const emailAddress = document.createElement('div');
+                    emailAddress.textContent = 'support@elysiuminitiative.com';
+                    emailAddress.style.color = 'rgba(0, 128, 255, 0.9)';
+                    emailAddress.style.fontSize = '1.2rem';
+                    emailAddress.style.fontWeight = 'bold';
+                    emailAddress.style.textAlign = 'center';
+                    emailAddress.style.padding = '15px';
+                    emailAddress.style.margin = '0 auto 25px auto';
+                    emailAddress.style.backgroundColor = 'rgba(0, 128, 255, 0.1)';
+                    emailAddress.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+                    emailAddress.style.borderRadius = '6px';
+                    emailAddress.style.maxWidth = '350px';
+                    emailAddress.style.fontFamily = 'Source Code Pro, monospace';
+                    emailAddress.style.animation = 'glowPulse 4s infinite';
+                    
+                    // disclaimer
+                    const disclaimerText = document.createElement('p');
+                    disclaimerText.textContent = 'By submitting an application, you acknowledge The Elysium Initiative\'s right to neural data collection and waive all claims to anonymity upon acceptance.';
+                    disclaimerText.style.color = 'rgba(209, 213, 219, 0.6)';
+                    disclaimerText.style.fontSize = '0.8rem';
+                    disclaimerText.style.textAlign = 'center';
+                    disclaimerText.style.marginTop = '20px';
+                    disclaimerText.style.fontStyle = 'italic';
+                    disclaimerText.style.fontFamily = 'Source Code Pro, sans-serif';
+                    
+                    popup.appendChild(closeButton);
+                    popup.appendChild(popupTitle);
+                    popup.appendChild(emailIcon);
+                    popup.appendChild(messageText);
+                    popup.appendChild(emailAddress);
+                    popup.appendChild(disclaimerText);
+                    overlay.appendChild(popup);
+                    document.body.appendChild(overlay);
                 });
-                
-                
                 
                 // footer
                 const footer = document.createElement('div');
@@ -2166,7 +2370,7 @@ decommissioning, reallocating resources toward higher-value celestial investment
                 footer.style.paddingTop = '2rem';
                 
                 const footerText = document.createElement('p');
-                footerText.textContent = "© 2152 The Elysium Initiative. All rights reserved across known space.";
+                footerText.textContent = "© 2202 The Elysium Initiative. All rights reserved across the spacetime continuum.";
                 footerText.style.fontSize = '0.9rem';
                 footerText.style.fontFamily = 'Source Code Pro, sans-serif';
                 footerText.style.color = 'rgba(209, 213, 219, 0.6)';
@@ -2624,9 +2828,7 @@ decommissioning, reallocating resources toward higher-value celestial investment
 
         const closeButton = sidebar.querySelector('.sidebar-close');
         closeButton.addEventListener('click', () => {
-            const closeSound = new Audio('close.mp3');
-            closeSound.volume = 0.4;
-            closeSound.play();
+            playCloseSound();
             sidebar.classList.remove('active');
         });
 
