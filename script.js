@@ -1838,8 +1838,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             title.style.fontFamily = 'Havelock Titling Light, sans-serif';
                             title.style.fontSize = '1.7rem';
                             title.style.position = 'absolute';
-                            title.style.bottom = '20px';
-                            title.style.left = '1.5rem';
+                            title.style.bottom = '0px';
+                            title.style.left = '30px';
                             title.style.zIndex = '2';
                             title.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.5)';
                             cardCollapsed.appendChild(title);
