@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const ambientSound = new Audio('ambience.mp3');
     ambientSound.loop = true;
-    ambientSound.volume = 0.2;
+    ambientSound.volume = 0;
     ambientSound.play();
 
     // functions
@@ -65,6 +65,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fontStyle = document.createElement('style');
     fontStyle.textContent = `
+        @font-face {
+            font-family: 'Havelock Titling Light';
+            src: url('havelock_titling_light.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
         @font-face {
             font-family: 'Havelock Titling Medium';
             src: url('havelock_titling_medium.ttf') format('truetype');
@@ -919,20 +925,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         closeAllPages();
                         sidebar.classList.remove('active');
                         container.style.display = 'none';
-
+                
                         // page switch fix (remove existing index page)
                         const existingPage = document.getElementById('index-page');
                         if (existingPage) {
                             existingPage.remove();
                         }
-
+                
                         const indexPage = document.createElement('div');
                         indexPage.id = 'index-page';
                         indexPage.style.minHeight = '100vh';
                         indexPage.style.height = '100%';
                         indexPage.style.backgroundColor = 'black';
                         indexPage.style.color = 'white';
-                        indexPage.style.padding = '6rem 0 2rem 0';
+                        indexPage.style.padding = '120px 0rem 2rem 0rem'; // DON'T CHANGE THIRD VALUE TO 0, IT MAKES THE SCROLL BAR DISAPPEAR (??)
                         indexPage.style.display = 'flex';
                         indexPage.style.justifyContent = 'center';
                         indexPage.style.position = 'fixed';
@@ -941,25 +947,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         indexPage.style.right = '0';
                         indexPage.style.bottom = '0';
                         indexPage.style.width = '100%';
-                        indexPage.style.overflowY = 'overlay';
-
+                        indexPage.style.overflowY = 'auto';
+                
                         const content = document.createElement('div');
                         content.style.maxWidth = '1600px';
                         content.style.width = '100%';
-                        content.style.margin = '0 auto 65rem auto';
-                        content.style.position = 'relative';
-
+                
                         const title = document.createElement('h1');
-                        title.textContent = "Resource Index";
+                        title.textContent = "Resource Market Index";
                         title.style.textAlign = 'center';
-                        title.style.fontSize = '5rem';
+                        title.style.fontSize = '4rem';
                         title.style.marginBottom = '4rem';
                         title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
                         title.style.color = 'white';
                         
                         const resourceSection = document.createElement('div');
                         resourceSection.style.marginBottom = '3rem';
-
+                
                         const chartContainer = document.createElement('div');
                         chartContainer.id = 'resource-chart-container';
                         chartContainer.style.width = '100%';
@@ -971,13 +975,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         chartContainer.style.marginBottom = '2rem';
                         chartContainer.style.margin = '0 auto 2rem auto';
                         chartContainer.style.maxWidth = '1500px';
-
+                
                         const buttonContainer = document.createElement('div');
                         buttonContainer.style.display = 'flex';
                         buttonContainer.style.justifyContent = 'center';
                         buttonContainer.style.gap = '30px';
-                        buttonContainer.style.marginBottom = '20px';
-
+                        buttonContainer.style.marginBottom = '8rem';
+                
                         const resources = [
                             { name: 'Iron', color: 'rgb(183, 65, 14)' },
                             { name: 'Silicon', color: 'rgb(31, 117, 24)' },
@@ -989,7 +993,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             { name: 'Carbon', color: 'rgb(13, 76, 192)' },
                             { name: 'Platinum', color: 'rgb(84, 178, 255)' },
                         ];
-
+                
                         resources.forEach(resource => {
                             const button = document.createElement('button');
                             button.textContent = resource.name;
@@ -1024,13 +1028,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         resourceSection.appendChild(buttonContainer);
                         content.appendChild(title);
                         content.appendChild(resourceSection);
-
+                
                         const canvas = document.createElement('canvas');
                         canvas.id = 'resourceValueChart';
                         canvas.style.width = '100%';
                         canvas.style.height = '100%';
                         chartContainer.appendChild(canvas);
-
+                
                         const tooltip = document.createElement('div');
                         tooltip.style.position = 'absolute';
                         tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
@@ -1044,10 +1048,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         tooltip.style.fontSize = '14px';
                         tooltip.style.zIndex = '10';
                         chartContainer.appendChild(tooltip);
-
+                
                         let currentChart = null;
                         let currentResource = 'Iron';
-
+                
                         // resource index chart math
                         function generateResourceData(resourceName) {
                             const years = [];
@@ -1062,7 +1066,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // resource chart maths
                                 switch(resourceName) {
                                     case 'Iron':
-                                        baseValue += i - 50;
+                                        baseValue += (i - 50) * 2;
                                         baseValue *= Math.pow(1.08, i/10);
                                         baseValue += Math.sin(i * 0.1) * (baseValue * 0.2);
                                         baseValue += Math.sin(i * 0.8) * (baseValue * 0.05);
@@ -1078,9 +1082,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                         baseValue = Math.max(baseValue, 10);
                                         baseValue = Math.round(baseValue * 100) / 100;
                                         break;
-
+                
                                     case 'Silicon':
-                                        baseValue += i * 1.2 - 50;
+                                        baseValue += (i * 1.2 - 50) * 3;
                                         baseValue *= Math.pow(1.065, i/10);
                                         baseValue += Math.sin(i * 0.09) * (baseValue * 0.22);
                                         baseValue += Math.sin(i * 0.75) * (baseValue * 0.06);
@@ -1096,9 +1100,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                         baseValue = Math.max(baseValue, 10);
                                         baseValue = Math.round(baseValue * 100) / 100;
                                         break;
-
+                
                                     case 'Magnesium':
-                                        baseValue += i * 0.9 - 50;
+                                        baseValue += (i * 0.9 - 50) * 3;
                                         baseValue *= Math.pow(1.095, i/10);
                                         baseValue += Math.sin(i * 0.11) * (baseValue * 0.18);
                                         baseValue += Math.sin(i * 0.9) * (baseValue * 0.04);
@@ -1114,7 +1118,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         baseValue = Math.max(baseValue, 10);
                                         baseValue = Math.round(baseValue * 100) / 100;
                                         break;
-
+                
                                     case 'Sulfur':
                                         baseValue += i * 1.1 - 50;
                                         baseValue *= Math.pow(1.07, i/10);
@@ -1132,9 +1136,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                         baseValue = Math.max(baseValue, 10);
                                         baseValue = Math.round(baseValue * 100) / 100;
                                         break;
-
+                
                                     case 'Nickel':
-                                        baseValue += i * 1.3;
+                                        baseValue += (i * 1.3) * 4;
                                         baseValue *= Math.pow(1.09, i/10);
                                         baseValue += Math.sin(i * 0.08) * (baseValue * 0.21);
                                         baseValue += Math.sin(i * 0.85) * (baseValue * 0.05);
@@ -1150,7 +1154,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         baseValue = Math.max(baseValue, 10);
                                         baseValue = Math.round(baseValue * 100) / 100;
                                         break;
-
+                
                                     case 'Calcium':
                                         baseValue += i * 0.8 - 50;
                                         baseValue *= Math.pow(1.085, i/10);
@@ -1168,9 +1172,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                         baseValue = Math.max(baseValue, 10);
                                         baseValue = Math.round(baseValue * 100) / 100;
                                         break;
-
+                
                                     case 'Aluminum':
-                                        baseValue += i * 1.15 - 50;
+                                        baseValue += (i * 1.15 - 50) * 2;
                                         baseValue *= Math.pow(1.075, i/10);
                                         baseValue += Math.sin(i * 0.11) * (baseValue * 0.23);
                                         baseValue += Math.sin(i * 0.85) * (baseValue * 0.05);
@@ -1186,9 +1190,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                         baseValue = Math.max(baseValue, 10);
                                         baseValue = Math.round(baseValue * 100) / 100;
                                         break;
-
+                
                                     case 'Carbon':
-                                        baseValue += i * 1.05;
+                                        baseValue += (i * 1.05) * 4;
                                         baseValue *= Math.pow(1.1, i/10);
                                         baseValue += Math.sin(i * 0.09) * (baseValue * 0.22);
                                         baseValue += Math.sin(i * 0.8) * (baseValue * 0.045);
@@ -1204,9 +1208,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                         baseValue = Math.max(baseValue, 10);
                                         baseValue = Math.round(baseValue * 100) / 100;
                                         break;
-
+                
                                     case 'Platinum':
-                                        baseValue += i * 1.4;
+                                        baseValue += (i * 1.4) * 6;
                                         baseValue *= Math.pow(1.1, i/10);
                                         baseValue += Math.sin(i * 0.12) * (baseValue * 0.25);
                                         baseValue += Math.sin(i * 0.9) * (baseValue * 0.07);
@@ -1229,7 +1233,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             return { years, values };
                         }
-
+                
                         // make the chart
                         function createResourceChart(resourceName) {
                             const ctx = document.getElementById('resourceValueChart').getContext('2d');
@@ -1371,12 +1375,212 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             return currentChart;
                         }
-
+                
                         function updateChart(resourceName) {
                             currentResource = resourceName;
                             createResourceChart(resourceName);
                         }
+                
+                        // resource table data
+                        const resourcesTableData = [
+                            {
+                                material: "Iron",
+                                category: "Metal",
+                                value: 2,
+                                applications: "Structural components, machinery, power transmission, electromagnetic shielding, terraforming equipment"
+                            },
+                            {
+                                material: "Silicon",
+                                category: "Metalloid",
+                                value: 3,
+                                applications: "Computing substrates, photovoltaics, quantum processors, artificial intelligence cores, construction materials"
+                            },
+                            {
+                                material: "Magnesium",
+                                category: "Metal",
+                                value: 3,
+                                applications: "Lightweight alloys, energy storage, biological systems, radiation shielding, atmospheric processors"
+                            },
+                            {
+                                material: "Sulfur",
+                                category: "Nonmetal",
+                                value: 1,
+                                applications: "Chemical synthesis, power cells, atmosphere regulation, biological applications, preservatives"
+                            },
+                            {
+                                material: "Nickel",
+                                category: "Metal",
+                                value: 4,
+                                applications: "High-temperature alloys, battery technology, catalysts, advanced propulsion components, corrosion resistance"
+                            },
+                            {
+                                material: "Calcium",
+                                category: "Metal",
+                                value: 1,
+                                applications: "Biological systems, construction materials, signal processing, water purification, nutrient synthesis"
+                            },
+                            {
+                                material: "Aluminum",
+                                category: "Metal",
+                                value: 2,
+                                applications: "Aerospace structures, radiation reflection, heat dissipation, lightweight transportation, habitat construction"
+                            },
+                            {
+                                material: "Carbon",
+                                category: "Nonmetal",
+                                value: 4,
+                                applications: "Nanotubes, diamond computing, graphene structures, life support systems, carbon sequestration"
+                            },
+                            {
+                                material: "Platinum",
+                                category: "Metal",
+                                value: 6,
+                                applications: "Quantum circuit fabrication, advanced catalysts, neural interfaces, molecular manipulation, fusion control systems"
+                            }
+                        ];
+                
+                        // resource info table
+                        const resourceTableSection = document.createElement('div');
+                        resourceTableSection.style.marginTop = '4rem';
+                        resourceTableSection.style.marginBottom = '6rem';
+                        resourceTableSection.style.padding = '2rem';
+                        resourceTableSection.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                        resourceTableSection.style.borderRadius = '8px';
+                        resourceTableSection.style.maxWidth = '1000px';
+                        resourceTableSection.style.margin = '4rem auto 6rem auto';
+                
+                        const resourceTableTitle = document.createElement('h2');
+                        resourceTableTitle.textContent = "RESOURCE APPLICATIONS";
+                        resourceTableTitle.style.fontSize = '1.75rem';
+                        resourceTableTitle.style.marginBottom = '2rem';
+                        resourceTableTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        resourceTableTitle.style.color = 'white';
+                        resourceTableTitle.style.textAlign = 'center';
+                
+                        const resourceTableText = document.createElement('p');
+                        resourceTableText.style.fontSize = '1.1rem';
+                        resourceTableText.style.marginBottom = '3rem';
+                        resourceTableText.style.lineHeight = '1.75';
+                        resourceTableText.style.fontFamily = 'Source Code Pro, sans-serif';
+                        resourceTableText.style.color = 'rgb(209, 213, 219)';
+                        resourceTableText.style.textAlign = 'center';
+                        resourceTableText.textContent = "The Elysium Initiative's resource valuation depends upon factors such as rarity, abundance, and utility. The following data provides further context to the above market figures.";
+                
+                        const resourcesTableContainer = document.createElement('div');
+                        resourcesTableContainer.style.width = '100%';
+                        resourcesTableContainer.style.overflowX = 'auto';
+                
+                        const table = document.createElement('table');
+                        table.style.width = '100%';
+                        table.style.borderCollapse = 'separate';
+                        table.style.borderSpacing = '0';
+                        table.style.fontFamily = 'Source Code Pro, sans-serif';
+                
+                        const thead = document.createElement('thead');
+                        thead.style.backgroundColor = 'rgba(66, 66, 66, 0.7)';
+                        thead.style.color = 'white';
+                
+                        const headerRow = document.createElement('tr');
+                
+                        const headers = ["Material", "Category", "Relative Value", "Primary Applications"];
+                
+                        headers.forEach(headerText => {
+                            const header = document.createElement('th');
+                            header.textContent = headerText;
+                            header.style.padding = '1rem';
+                            header.style.textAlign = 'left';
+                            header.style.fontWeight = 'bold';
+                            
+                            if (headerText === "Relative Value") {
+                                header.style.textAlign = 'center';
+                            }
+                            
+                            headerRow.appendChild(header);
+                        });
+                
+                        thead.appendChild(headerRow);
+                        table.appendChild(thead);
+                
+                        const tbody = document.createElement('tbody');
+                
+                        resourcesTableData.forEach((resource, index) => {
+                            const row = document.createElement('tr');
+                            row.style.backgroundColor = index % 2 === 0 ? 'rgba(16, 16, 16, 0.4)' : 'rgba(16, 16, 16, 0.6)';
+                            row.style.transition = 'background-color 0.3s ease';
+                            
+                            row.addEventListener('mouseenter', () => {
+                                row.style.backgroundColor = 'rgba(82, 82, 82, 0.2)';
+                            });
+                            
+                            row.addEventListener('mouseleave', () => {
+                                row.style.backgroundColor = index % 2 === 0 ? 'rgba(16, 16, 16, 0.4)' : 'rgba(16, 16, 16, 0.6)';
+                            });
+                            
+                            // material cells
+                            const materialCell = document.createElement('td');
+                            materialCell.textContent = resource.material;
+                            materialCell.style.padding = '1rem';
+                            materialCell.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
+                            materialCell.style.fontWeight = 'bold';
+                            materialCell.style.color = 'white';
+                            
+                            // category cells
+                            const categoryCell = document.createElement('td');
+                            categoryCell.textContent = resource.category;
+                            categoryCell.style.padding = '1rem';
+                            categoryCell.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
+                            categoryCell.style.color = 'rgb(209, 213, 219)';
+                            
+                            // value cells
+                            const valueCell = document.createElement('td');
+                            valueCell.style.padding = '1rem';
+                            valueCell.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
+                            valueCell.style.textAlign = 'center';
+                            
+                            const starsContainer = document.createElement('div');
+                            starsContainer.style.display = 'flex';
+                            starsContainer.style.justifyContent = 'center';
+                            starsContainer.style.gap = '4px';
+                            
+                            for (let i = 0; i < 6; i++) {
+                                const star = document.createElement('span');
+                                if (i < resource.value) {
+                                    star.innerHTML = '★';
+                                    star.style.color = 'rgba(0, 128, 255, 0.9)';
+                                } else {
+                                    star.innerHTML = '☆';
+                                    star.style.color = 'rgba(0, 128, 255, 0.3)';
+                                }
+                                starsContainer.appendChild(star);
+                            }
+                            valueCell.appendChild(starsContainer);
+                            
+                            // applications cells
+                            const applicationsCell = document.createElement('td');
+                            applicationsCell.textContent = resource.applications;
+                            applicationsCell.style.padding = '1rem';
+                            applicationsCell.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
+                            applicationsCell.style.color = 'rgb(209, 213, 219)';
+                            applicationsCell.style.maxWidth = '500px';
+                            applicationsCell.style.whiteSpace = 'normal';
+                            applicationsCell.style.wordBreak = 'break-word';
+                            applicationsCell.style.lineHeight = '1.4';
+                            
+                            row.appendChild(materialCell);
+                            row.appendChild(categoryCell);
+                            row.appendChild(valueCell);
+                            row.appendChild(applicationsCell);
+                            
+                            tbody.appendChild(row);
+                        });
 
+                        table.appendChild(tbody);
+                        resourcesTableContainer.appendChild(table);
+                        resourceTableSection.appendChild(resourceTableTitle);
+                        resourceTableSection.appendChild(resourceTableText);
+                        resourceTableSection.appendChild(resourcesTableContainer);
+
+                        content.appendChild(resourceTableSection);
                         indexPage.appendChild(content);
 
                         loadChartJsScript(() => {
@@ -1387,54 +1591,614 @@ document.addEventListener('DOMContentLoaded', () => {
                             });
                         });
 
+                        // footer
+                        const footer = document.createElement('div');
+                        footer.style.textAlign = 'center';
+                        footer.style.marginTop = '4rem';
+                        footer.style.paddingBottom = '2rem';
+                        footer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
+                        footer.style.paddingTop = '2rem';
+                        
+                        const footerText = document.createElement('p');
+                        footerText.textContent = "© 2202 The Elysium Initiative. All rights reserved across the spacetime continuum.";
+                        footerText.style.fontSize = '0.9rem';
+                        footerText.style.fontFamily = 'Source Code Pro, sans-serif';
+                        footerText.style.color = 'rgba(209, 213, 219, 0.6)';
+                        footerText.style.marginBottom = '200px';
+
+                        content.appendChild(footer);
+                        footer.appendChild(footerText);
+
                         document.body.appendChild(indexPage);
                     }
                 },
-                { 
-                    name: 'Extraction',
+                {
+                    name: 'Catalog',
                     action: () => {
                         sidebar.classList.remove('active');
                         container.style.display = 'none';
-                        
-                        const extractionPage = document.createElement('div');
-                        extractionPage.id = 'extraction-page';
-                        extractionPage.style.minHeight = '100vh';
-                        extractionPage.style.height = '100%';
-                        extractionPage.style.backgroundColor = 'black';
-                        extractionPage.style.color = 'white';
-                        extractionPage.style.padding = '120px 2rem 2rem 2rem';
-                        extractionPage.style.display = 'flex';
-                        extractionPage.style.justifyContent = 'center';
-                        extractionPage.style.position = 'fixed';
-                        extractionPage.style.top = '0';
-                        extractionPage.style.left = '0';
-                        extractionPage.style.right = '0';
-                        extractionPage.style.bottom = '0';
-                        extractionPage.style.overflowY = 'scroll';
-                
+                       
+                        const catalogPage = document.createElement('div');
+                        catalogPage.id = 'extraction-page';
+                        catalogPage.style.minHeight = '100vh';
+                        catalogPage.style.height = '100%';
+                        catalogPage.style.backgroundColor = 'black';
+                        catalogPage.style.color = 'white';
+                        catalogPage.style.padding = '120px 2rem 2rem 2rem';
+                        catalogPage.style.display = 'flex';
+                        catalogPage.style.justifyContent = 'center';
+                        catalogPage.style.position = 'fixed';
+                        catalogPage.style.top = '0';
+                        catalogPage.style.left = '0';
+                        catalogPage.style.right = '0';
+                        catalogPage.style.bottom = '0';
+                        catalogPage.style.overflowY = 'scroll';
+                       
                         const content = document.createElement('div');
                         content.style.maxWidth = '1060px';
                         content.style.width = '100%';
+
+                        const techSection = document.createElement('div');
+                        techSection.style.marginTop = '8rem';
+                        techSection.style.marginBottom = '8rem';
+
+                        const techTitle = document.createElement('h2');
+                        techTitle.textContent = "TECHNOLOGIES CATALOG";
+                        techTitle.style.fontSize = '4rem';
+                        techTitle.style.marginTop = '-5rem';
+                        techTitle.style.marginBottom = '4rem';
+                        techTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        techTitle.style.color = 'white';
+                        techTitle.style.textAlign = 'center';
+
+                        const techGrid = document.createElement('div');
+                        techGrid.style.display = 'grid';
+                        techGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                        techGrid.style.gap = '2rem';
+                        techGrid.style.width = '100%';
+                        techGrid.style.maxWidth = '1000px';
+                        techGrid.style.margin = '0 auto';
+                        techGrid.style.transition = 'all 0.5s ease';
+
+                        const techMediaQuery = window.matchMedia('(max-width: 768px)');
+                        function handleTechScreenChange(e) {
+                            if (e.matches) {
+                                techGrid.style.gridTemplateColumns = '1fr';
+                            } else {
+                                techGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                            }
+                        }
+                        handleTechScreenChange(techMediaQuery);
+                        techMediaQuery.addEventListener('change', handleTechScreenChange);
+
+                        const technologies = [
+                            {
+                                id: 'Aero Skimmers',
+                                title: 'Aero Skimmers',
+                                target: 'Planetary Atmospheres',
+                                description: 'Converts atmospheric gases directly into usable resources via molecular reconfiguration. Operates with minimal energy input due to advanced catalytic processes.',
+                                details: [
+                                    'Deployment: Self-assembling aerial nodes form a network that processes thousands of cubic kilometers per day',
+                                    'Efficiency: 99.98% capture rate of targeted molecules with zero waste byproducts',
+                                    'Applications: Produces breathable air for habitation domes, fuel for portable fusion reactors, and raw elements for manufacturing',
+                                    'Duration: Complete atmospheric harvesting of Venus-sized planets in approximately 5.8 years'
+                                ],
+                                color: 'rgba(125, 215, 250, 0.8)',
+                                image: 'aero-skimmer.png'
+                            },
+                            {
+                                id: 'mining-swarms',
+                                title: 'Mining Swarms',
+                                target: 'Planetary Surfaces',
+                                description: 'Self-replicating hexapod machines that consume terrain and separate elements at the molecular level. Each unit functions both as harvester and processor.',
+                                details: [
+                                    'Deployment: Initial seed units reproduce using planetary materials, growing to billions of units within weeks',
+                                    'Efficiency: Advanced quantum sorters enable 99.97% extraction purity with minimal energy expenditure',
+                                    'Applications: Surface material processing, artifact recovery, and terrain leveling for construction',
+                                    'Duration: Complete surface processing of Earth-sized planets in approximately 8.3 years'
+                                ],
+                                color: 'rgba(190, 160, 110, 0.8)',
+                                image: 'mining-swarm.png'
+                            },
+                            {
+                                id: 'hydro-siphons',
+                                title: 'Hydro Siphons',
+                                target: 'Liquid Resources',
+                                description: 'Quantum-stabilized extraction tubes that can separate, purify, and transport liquid resources across vast distances with zero molecular degradation.',
+                                details: [
+                                    'Deployment: Central processing hub with extending collection tubes that branch fractally across oceanic bodies',
+                                    'Efficiency: Complete molecular filtration enabling 100% separation of valuable compounds and elements',
+                                    'Applications: Water extraction, nutrient harvesting, and recovery of rare dissolved minerals',
+                                    'Duration: Complete oceanic processing of Earth-sized planets in approximately 2.1 years'
+                                ],
+                                color: 'rgba(50, 150, 255, 0.8)',
+                                image: 'hydro-siphon.png'
+                            },
+                            {
+                                id: 'frost-maws',
+                                title: 'Frost Maws',
+                                target: 'Ice Formations',
+                                description: 'Thermal inversion systems that efficiently excavate and process frozen materials without state change, preserving volatile compounds.',
+                                details: [
+                                    'Deployment: Central thermal regulation unit with extending fractal harvesting tendrils that maintain cryogenic conditions',
+                                    'Efficiency: 99.95% recovery of frozen volatiles with negligible sublimation',
+                                    'Applications: Water ice recovery, methane extraction, and harvesting of frozen noble gases',
+                                    'Duration: Complete ice cap processing of Mars-sized planets in approximately 1.7 years'
+                                ],
+                                color: 'rgba(220, 240, 255, 0.8)',
+                                image: 'frost-maw.png'
+                            },
+                            {
+                                id: 'mantle-bores',
+                                title: 'Mantle Bores',
+                                target: 'Planetary Mantles',
+                                description: 'Gravity-manipulation drilling systems that create self-stabilizing tunnels through semi-liquid planetary interiors, extracting elements without structural collapse.',
+                                details: [
+                                    'Deployment: Central bore with radial extraction tunnels that can penetrate to depths of 6,000 km',
+                                    'Efficiency: Selective extraction allows targeted element recovery with 94% purity in initial extraction',
+                                    'Applications: Rare earth elements, precious metals, and high-pressure mineral formations',
+                                    'Duration: Complete mantle processing of Earth-sized planets in approximately 15.3 years'
+                                ],
+                                color: 'rgba(255, 140, 50, 0.8)',
+                                image: 'mantle-bore.png'
+                            },
+                            {
+                                id: 'core-shredders',
+                                title: 'Core Shredders',
+                                target: 'Planetary Cores',
+                                description: 'Micro-singularity containment systems that safely dismantle planetary cores by manipulating gravitational forces to extract heavy elements.',
+                                details: [
+                                    'Deployment: Central containment facility generates controlled micro-singularities that selectively target core materials',
+                                    'Efficiency: 99.99% recovery of valuable heavy elements from planetary cores',
+                                    'Applications: Iron, nickel, and other heavy metals, plus extraction of naturally occurring fissile materials',
+                                    'Duration: Complete core processing of Earth-sized planets in approximately 6.2 years'
+                                ],
+                                color: 'rgba(255, 100, 80, 0.8)',
+                                image: 'core-shredder.png'
+                            },
+                            {
+                                id: 'vortex-converters',
+                                title: 'Vortex Converters',
+                                target: 'Gas Giants',
+                                description: 'Massive energy-matter conversion arrays that transform gaseous elements into stable solid forms through gravitational compression and quantum stabilization.',
+                                details: [
+                                    'Deployment: Orbital facility generates a controlled gravitational vortex that selectively funnels atmospheric gases',
+                                    'Efficiency: 95% conversion rate from gaseous to solid state with minimal energy loss',
+                                    'Applications: Hydrogen extraction, helium-3 mining, and rare gas collection for fusion fuel',
+                                    'Duration: Partial gas giant processing (outer layers) in approximately 25 years'
+                                ],
+                                color: 'rgba(255, 220, 150, 0.8)',
+                                image: 'vortex-converter.png'
+                            },
+                            {
+                                id: 'quantum-nexus',
+                                title: 'Quantum Nexus',
+                                target: 'Material Transport',
+                                description: 'Revolutionary matter-energy conversion network that enables instantaneous transport of extracted resources across interstellar distances without physical vessels.',
+                                details: [
+                                    'Deployment: Paired quantum entanglement nodes placed at extraction sites and delivery destinations',
+                                    'Efficiency: 99.9999% transmission accuracy with zero material loss during transport',
+                                    'Applications: Immediate delivery of extracted resources to manufacturing centers throughout controlled space',
+                                    'Capacity: Can transmit up to 50,000 tons of processed material per second when operating at full capacity'
+                                ],
+                                color: 'rgba(180, 130, 255, 0.8)',
+                                image: 'quantum-nexus.png'
+                            }
+                        ];
+
+                        let expandedCardId = null;
+
+                        technologies.forEach(tech => {
+                            const card = document.createElement('div');
+                            card.id = tech.id;
+                            card.className = 'tech-card';
+                            card.style.backgroundColor = 'rgba(16, 16, 16, 0.6)';
+                            card.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+                            card.style.borderRadius = '8px';
+                            card.style.overflow = 'hidden';
+                            card.style.transition = 'all 0.5s ease-in-out';
+                            card.style.cursor = 'pointer';
+                            card.style.position = 'relative';
+                            card.style.gridColumn = 'span 1';
+                            card.style.maxHeight = '200px';
+                            
+                            const cardCollapsed = document.createElement('div');
+                            cardCollapsed.className = 'card-collapsed';
+                            cardCollapsed.style.display = 'flex';
+                            cardCollapsed.style.alignItems = 'center';
+                            cardCollapsed.style.height = '200px';
+                            cardCollapsed.style.padding = '0';
+                            cardCollapsed.style.position = 'relative';
+                            
+                            const cardGradient = document.createElement('div');
+                            cardGradient.style.position = 'absolute';
+                            cardGradient.style.top = '0';
+                            cardGradient.style.left = '0';
+                            cardGradient.style.right = '0';
+                            cardGradient.style.bottom = '0';
+                            cardGradient.style.background = `linear-gradient(to right, rgba(0, 0, 0, 0.7), transparent), linear-gradient(to bottom, ${tech.color}, rgba(0, 0, 0, 0.7))`;
+                            cardGradient.style.opacity = '0.8';
+                            cardGradient.style.transition = 'opacity 0.3s ease';
+                            cardCollapsed.appendChild(cardGradient);
+                            
+                            const image = document.createElement('img');
+                            image.src = `swoop.png`;
+                            image.style.width = 'auto';
+                            image.style.height = '62%';
+                            image.style.opacity = '0.3';
+                            image.style.objectFit = 'fill';
+                            image.style.position = 'absolute';
+                            image.style.top = '20px';
+                            image.style.left = '-24px';
+                            cardCollapsed.appendChild(image);
+                            
+                            const title = document.createElement('h3');
+                            title.textContent = tech.title;
+                            title.style.color = 'white';
+                            title.style.fontFamily = 'Havelock Titling Light, sans-serif';
+                            title.style.fontSize = '1.7rem';
+                            title.style.position = 'absolute';
+                            title.style.bottom = '20px';
+                            title.style.left = '1.5rem';
+                            title.style.zIndex = '2';
+                            title.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.5)';
+                            cardCollapsed.appendChild(title);
+                            
+                            const cardExpanded = document.createElement('div');
+                            cardExpanded.className = 'card-expanded';
+                            cardExpanded.style.padding = '2rem';
+                            cardExpanded.style.display = 'none';
+                            
+                            const expandedHeader = document.createElement('div');
+                            expandedHeader.style.display = 'flex';
+                            expandedHeader.style.justifyContent = 'space-between';
+                            expandedHeader.style.alignItems = 'center';
+                            expandedHeader.style.marginBottom = '1.5rem';
+                            
+                            const expandedTitle = document.createElement('h3');
+                            expandedTitle.textContent = tech.title;
+                            expandedTitle.style.color = 'white';
+                            expandedTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            expandedTitle.style.fontSize = '1.5rem';
+                            expandedTitle.style.margin = '0';
+                            expandedHeader.appendChild(expandedTitle);
+                            
+                            const closeButton = document.createElement('button');
+                            closeButton.innerHTML = '&times;';
+                            closeButton.style.background = 'transparent';
+                            closeButton.style.border = 'none';
+                            closeButton.style.color = 'white';
+                            closeButton.style.fontSize = '1.5rem';
+                            closeButton.style.cursor = 'pointer';
+                            closeButton.style.width = '40px';
+                            closeButton.style.height = '40px';
+                            closeButton.style.borderRadius = '50%';
+                            closeButton.style.display = 'flex';
+                            closeButton.style.justifyContent = 'center';
+                            closeButton.style.alignItems = 'center';
+                            closeButton.style.transition = 'background 0.3s ease';
+                            
+                            closeButton.addEventListener('mouseenter', () => {
+                                closeButton.style.background = 'rgba(255, 255, 255, 0.1)';
+                            });
+                            
+                            closeButton.addEventListener('mouseleave', () => {
+                                closeButton.style.background = 'transparent';
+                            });
+                            
+                            closeButton.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                playCloseSound();
+                                collapseCard(card);
+                            });
+                            
+                            expandedHeader.appendChild(closeButton);
+                            cardExpanded.appendChild(expandedHeader);
+                            
+                            const techIllustration = document.createElement('div');
+                            techIllustration.style.width = '100%';
+                            techIllustration.style.marginBottom = '1.5rem';
+                            techIllustration.style.display = 'flex';
+                            techIllustration.style.justifyContent = 'center';
+                            techIllustration.style.alignItems = 'center';
+                            
+                            const techImage = document.createElement('img');
+                            techImage.src = tech.image;
+                            techImage.alt = `${tech.title} illustration`;
+                            techImage.style.maxWidth = '100%';
+                            techImage.style.height = 'auto';
+                            techImage.style.maxHeight = '180px';
+                            techImage.style.borderRadius = '6px';
+                            techImage.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
+                            techImage.style.border = `1px solid ${tech.color}`;
+                            
+                            techIllustration.appendChild(techImage);
+                            cardExpanded.appendChild(techIllustration);
+                            
+                            const targetInfo = document.createElement('div');
+                            targetInfo.style.display = 'flex';
+                            targetInfo.style.alignItems = 'center';
+                            targetInfo.style.marginBottom = '1.5rem';
+                            targetInfo.style.padding = '1rem';
+                            targetInfo.style.borderRadius = '6px';
+                            targetInfo.style.backgroundColor = 'rgba(0, 128, 255, 0.1)';
+                            targetInfo.style.border = '1px solid rgba(0, 128, 255, 0.2)';
+                            
+                            const targetLabel = document.createElement('div');
+                            targetLabel.textContent = 'TARGET:';
+                            targetLabel.style.fontFamily = 'Source Code Pro, sans-serif';
+                            targetLabel.style.fontWeight = 'bold';
+                            targetLabel.style.fontSize = '0.9rem';
+                            targetLabel.style.color = 'rgba(0, 128, 255, 0.9)';
+                            targetLabel.style.marginRight = '1rem';
+                            targetInfo.appendChild(targetLabel);
+                            
+                            const targetValue = document.createElement('div');
+                            targetValue.textContent = tech.target;
+                            targetValue.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            targetValue.style.fontWeight = 'bold';
+                            targetValue.style.fontSize = '1.1rem';
+                            targetValue.style.color = 'white';
+                            targetInfo.appendChild(targetValue);
+                            
+                            cardExpanded.appendChild(targetInfo);
+                            
+                            const description = document.createElement('p');
+                            description.textContent = tech.description;
+                            description.style.color = 'rgb(200, 200, 200)';
+                            description.style.fontFamily = 'Source Code Pro, sans-serif';
+                            description.style.lineHeight = '1.6';
+                            description.style.marginBottom = '2rem';
+                            cardExpanded.appendChild(description);
+                            
+                            const detailsContainer = document.createElement('div');
+                            detailsContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+                            detailsContainer.style.padding = '1.5rem';
+                            detailsContainer.style.borderRadius = '8px';
+                            detailsContainer.style.marginBottom = '1rem';
+                            
+                            const detailsTitle = document.createElement('h4');
+                            detailsTitle.textContent = 'TECHNICAL SPECIFICATIONS';
+                            detailsTitle.style.color = 'white';
+                            detailsTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            detailsTitle.style.fontSize = '1rem';
+                            detailsTitle.style.marginTop = '0';
+                            detailsTitle.style.marginBottom = '1rem';
+                            detailsContainer.appendChild(detailsTitle);
+                            
+                            const detailsList = document.createElement('ul');
+                            detailsList.style.padding = '0 0 0 1.5rem';
+                            detailsList.style.margin = '0';
+                            
+                            tech.details.forEach(detail => {
+                                const detailItem = document.createElement('li');
+                                detailItem.textContent = detail;
+                                detailItem.style.color = 'rgb(180, 180, 180)';
+                                detailItem.style.fontFamily = 'Source Code Pro, sans-serif';
+                                detailItem.style.marginBottom = '0.75rem';
+                                detailItem.style.lineHeight = '1.5';
+                                detailsList.appendChild(detailItem);
+                            });
+                            
+                            detailsContainer.appendChild(detailsList);
+                            cardExpanded.appendChild(detailsContainer);
+                            
+                            card.appendChild(cardCollapsed);
+                            card.appendChild(cardExpanded);
+                            
+                            card.addEventListener('mouseenter', () => {
+                                if (expandedCardId !== card.id) {
+                                    playHoverSound2();
+                                    cardGradient.style.opacity = '0.6';
+                                }
+                            });
+                            
+                            card.addEventListener('mouseleave', () => {
+                                if (expandedCardId !== card.id) {
+                                    cardGradient.style.opacity = '0.8';
+                                }
+                            });
+                            
+                            card.addEventListener('click', () => {
+                                if (expandedCardId !== card.id) {
+                                    playClickSound();
+                                    expandCard(card);
+                                }
+                            });
+                            
+                            techGrid.appendChild(card);
+                        });
+
+                        // function to expand cards
+                        function expandCard(card) {
+                            // if another card is already expanded, collapse it first
+                            if (expandedCardId) {
+                                const previousCard = document.getElementById(expandedCardId);
+                                collapseCard(previousCard, false);
+                            }
+                            expandedCardId = card.id;
+                            
+                            // expand card
+                            card.style.gridColumn = 'span 2';
+                            card.style.maxHeight = '800px';
+                            card.style.zIndex = '2';
+                            card.style.boxShadow = '0 10px 30px rgba(0, 0, 128, 0.3)';
+                            
+                            //show expanded content
+                            const cardCollapsed = card.querySelector('.card-collapsed');
+                            const cardExpanded = card.querySelector('.card-expanded');
+                            
+                            cardCollapsed.style.display = 'none';
+                            cardExpanded.style.display = 'block';
+                            
+                            // scroll to the card
+                            setTimeout(() => {
+                                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        }
+
+                        // function to collapse cards
+                        function collapseCard(card, playSound = true) {
+                            expandedCardId = null;
+                            
+                            // collapse card
+                            card.style.gridColumn = 'span 1';
+                            card.style.maxHeight = '200px';
+                            card.style.zIndex = '1';
+                            card.style.boxShadow = 'none';
+                            
+                            // hide content
+                            const cardCollapsed = card.querySelector('.card-collapsed');
+                            const cardExpanded = card.querySelector('.card-expanded');
+                            
+                            cardCollapsed.style.display = 'flex';
+                            cardExpanded.style.display = 'none';
+                        }
+
+                        techSection.appendChild(techTitle);
+                        techSection.appendChild(techGrid);
+
+                        content.appendChild(techSection);
                         
-                        const title = document.createElement('h1');
-                        title.textContent = "Extraction Operations";
-                        title.style.fontSize = '2.5rem';
-                        title.style.marginBottom = '2rem';
-                        title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
-                        title.style.color = 'white';
-                
-                        const text = document.createElement('p');
-                        text.style.fontSize = '1.25rem';
-                        text.style.marginBottom = '2rem';
-                        text.style.lineHeight = '1.75';
-                        text.style.fontFamily = 'Source Code Pro, sans-serif';
-                        text.style.color = 'rgb(209, 213, 219)';
-                        text.textContent = "[Placeholder]";
-                
-                        content.appendChild(title);
-                        content.appendChild(text);
-                        extractionPage.appendChild(content);
-                        document.body.appendChild(extractionPage);
+                        // efficiency metrics
+                        const metricsSection = document.createElement('div');
+                        metricsSection.style.marginTop = '6rem';
+                        metricsSection.style.marginBottom = '6rem';
+                        
+                        const metricsTitle = document.createElement('h2');
+                        metricsTitle.textContent = "EXTRACTION EFFICIENCY METRICS";
+                        metricsTitle.style.fontSize = '1.75rem';
+                        metricsTitle.style.marginBottom = '3rem';
+                        metricsTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        metricsTitle.style.color = 'white';
+                        metricsTitle.style.textAlign = 'center';
+                        
+                        const metricsGrid = document.createElement('div');
+                        metricsGrid.style.display = 'grid';
+                        metricsGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                        metricsGrid.style.gap = '2rem';
+                        
+                        const metricsMediaQuery = window.matchMedia('(max-width: 768px)');
+                        
+                        function handleMetricsScreenChange(e) {
+                            if (e.matches) {
+                                metricsGrid.style.gridTemplateColumns = '1fr';
+                            } else {
+                                metricsGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                            }
+                        }
+                        
+                        handleMetricsScreenChange(metricsMediaQuery);
+                        metricsMediaQuery.addEventListener('change', handleMetricsScreenChange);
+                        
+                        const metrics = [
+                            {
+                                value: "99.97%",
+                                label: "Resource Recovery Rate",
+                                description: "Our extraction operations achieve near-perfect recovery rates across all material types."
+                            },
+                            {
+                                value: "10,458",
+                                label: "Celestial Bodies Processed",
+                                description: "Total number of planets, moons, and asteroids fully harvested since operations began."
+                            },
+                            {
+                                value: "47 Days",
+                                label: "Average Processing Time",
+                                description: "Typical duration for complete extraction of a terrestrial planet's resources."
+                            },
+                            {
+                                value: "6.3×10²³ Tons",
+                                label: "Materials Harvested",
+                                description: "Total raw resources extracted and processed for stakeholder benefit to date."
+                            },
+                            {
+                                value: "0.0004%",
+                                label: "Operational Overhead",
+                                description: "Industry-leading efficiency ratio of operational costs to resource value."
+                            },
+                            {
+                                value: "6,752",
+                                label: "Active Harvesting Fleets",
+                                description: "Number of fully autonomous extraction operations currently in progress."
+                            }
+                        ];
+                        
+                        metrics.forEach(metric => {
+                            const metricCard = document.createElement('div');
+                            metricCard.style.backgroundColor = 'rgba(16, 16, 16, 0.6)';
+                            metricCard.style.border = '1px solid rgba(0, 128, 255, 0.2)';
+                            metricCard.style.borderRadius = '8px';
+                            metricCard.style.padding = '2rem';
+                            metricCard.style.display = 'flex';
+                            metricCard.style.flexDirection = 'column';
+                            metricCard.style.alignItems = 'center';
+                            metricCard.style.textAlign = 'center';
+                            metricCard.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+                            
+                            metricCard.addEventListener('mouseenter', () => {
+                                metricCard.style.transform = 'translateY(-10px)';
+                                metricCard.style.boxShadow = '0 15px 30px rgba(0, 128, 255, 0.2)';
+                            });
+                            
+                            metricCard.addEventListener('mouseleave', () => {
+                                metricCard.style.transform = 'translateY(0)';
+                                metricCard.style.boxShadow = 'none';
+                            });
+                            
+                            const metricValue = document.createElement('h3');
+                            metricValue.textContent = metric.value;
+                            metricValue.style.fontSize = '2.5rem';
+                            metricValue.style.marginBottom = '0.5rem';
+                            metricValue.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            metricValue.style.color = 'rgba(0, 128, 255, 0.9)';
+                            
+                            const metricLabel = document.createElement('h4');
+                            metricLabel.textContent = metric.label;
+                            metricLabel.style.fontSize = '1.1rem';
+                            metricLabel.style.marginBottom = '1rem';
+                            metricLabel.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            metricLabel.style.color = 'white';
+                            
+                            const metricDesc = document.createElement('p');
+                            metricDesc.textContent = metric.description;
+                            metricDesc.style.fontSize = '0.9rem';
+                            metricDesc.style.lineHeight = '1.6';
+                            metricDesc.style.fontFamily = 'Source Code Pro, sans-serif';
+                            metricDesc.style.color = 'rgb(209, 213, 219)';
+                            
+                            metricCard.appendChild(metricValue);
+                            metricCard.appendChild(metricLabel);
+                            metricCard.appendChild(metricDesc);
+                            
+                            metricsGrid.appendChild(metricCard);
+                        });
+                        
+                        metricsSection.appendChild(metricsTitle);
+                        metricsSection.appendChild(metricsGrid);
+                        
+                        // footer
+                        const footer = document.createElement('div');
+                        footer.style.textAlign = 'center';
+                        footer.style.marginTop = '4rem';
+                        footer.style.paddingBottom = '2rem';
+                        footer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
+                        footer.style.paddingTop = '2rem';
+                        
+                        const footerText = document.createElement('p');
+                        footerText.textContent = "© 2202 The Elysium Initiative. All rights reserved across the spacetime continuum.";
+                        footerText.style.fontSize = '0.9rem';
+                        footerText.style.fontFamily = 'Source Code Pro, sans-serif';
+                        footerText.style.color = 'rgba(209, 213, 219, 0.6)';
+                        footerText.style.marginBottom = '200px';
+                        
+                        footer.appendChild(footerText);
+                        
+                        content.appendChild(metricsSection);
+                        content.appendChild(footer);
+                        
+                        catalogPage.appendChild(content);
+                        document.body.appendChild(catalogPage);
                     }
                 }
             ]
@@ -1858,7 +2622,7 @@ decommissioning, reallocating resources toward higher-value celestial investment
                     },
                     {
                         year: "2202",
-                        title: "PRESENT DAY: THE GRAND RECLEMATION",
+                        title: "PRESENT DAY: THE GRAND RECLAMATION",
                         description: "With over 1,000 star systems under management and V.A.S.T. 9.0 directing our autonomous harvesting operations, The Elysium Initiative stands unchallenged as humanity's path to destined prosperity."
                     },
                 ];
@@ -2136,6 +2900,7 @@ decommissioning, reallocating resources toward higher-value celestial investment
                 });
 
                 prevArrow.addEventListener('click', () => {
+                    playHoverSound();
                     if (currentTestimonial > 0) {
                         currentTestimonial--;
                         updateTestimonialSlider();
@@ -2143,6 +2908,7 @@ decommissioning, reallocating resources toward higher-value celestial investment
                 });
 
                 nextArrow.addEventListener('click', () => {
+                    playHoverSound();
                     if (currentTestimonial < testimonials.length - 1) {
                         currentTestimonial++;
                         updateTestimonialSlider();
@@ -2449,7 +3215,13 @@ a place for you in humanity's greatest endeavor.";
                         dropdownItem.action();
                     }
                 });
-                dropdownElement.addEventListener('mouseenter', playHoverSound);
+                dropdownElement.addEventListener('mouseenter', () => {
+                    const opacity = window.getComputedStyle(dropdownElement).getPropertyValue('opacity');
+                    // only play if opacity is greater than 0
+                    if (parseFloat(opacity) > 0) {
+                        playHoverSound();
+                    }
+                });
                 
                 if (dropdownItem.nestedDropdown && dropdownItem.nestedDropdown.length > 0) {
                     const nestedDropdown = document.createElement('div');
@@ -2468,7 +3240,13 @@ a place for you in humanity's greatest endeavor.";
                                 nestedItem.action();
                             }
                         });
-                        nestedElement.addEventListener('mouseenter', playHoverSound);
+                        nestedElement.addEventListener('mouseenter', () => {
+                            const opacity = window.getComputedStyle(nestedElement).getPropertyValue('opacity');
+                            // only play if opacity is greater than 0
+                            if (parseFloat(opacity) > 0) {
+                                playHoverSound();
+                            }
+                        });
                         
                         nestedDropdown.appendChild(nestedElement);
                     });
