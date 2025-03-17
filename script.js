@@ -1646,10 +1646,199 @@ document.addEventListener('DOMContentLoaded', () => {
                         techTitle.textContent = "TECHNOLOGIES CATALOG";
                         techTitle.style.fontSize = '4rem';
                         techTitle.style.marginTop = '-5rem';
-                        techTitle.style.marginBottom = '4rem';
+                        techTitle.style.marginBottom = '2rem';
                         techTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
                         techTitle.style.color = 'white';
                         techTitle.style.textAlign = 'center';
+
+                        const introText = document.createElement('p');
+                        introText.style.fontSize = '1.2rem';
+                        introText.style.lineHeight = '1.8';
+                        introText.style.marginBottom = '3rem';
+                        introText.style.fontFamily = 'Source Code Pro, sans-serif';
+                        introText.style.color = 'rgb(209, 213, 219)';
+                        introText.style.textAlign = 'center';
+                        introText.style.maxWidth = '800px';
+                        introText.style.margin = '0 auto 0 auto';
+                        introText.style.padding = '2rem';
+                        introText.style.backgroundColor = 'rgba(0, 28, 55, 0.5)';
+                        introText.style.borderRadius = '12px';
+                        introText.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+                        introText.style.whiteSpace = 'pre-wrap';
+                        introText.textContent = 'The Elysium Initiative offers comprehensive solutions for all cataloged technologies. Extraction \
+yields may vary based on celestial body composition and local constants. Secured financing solutions are available for qualified stakeholders. \
+For detailed specifications, personalized quotes, or further information, contact us here:';
+
+                        const buttonContainer = document.createElement('div');
+                        buttonContainer.style.textAlign = 'center';
+                        buttonContainer.style.marginTop = '2rem';
+                        buttonContainer.style.marginBottom = '5rem';
+
+                        const requestQuoteButton = document.createElement('button');
+                        requestQuoteButton.textContent = "Request a quote";
+                        requestQuoteButton.style.padding = '1rem 2.5rem';
+                        requestQuoteButton.style.fontSize = '1.3rem';
+                        requestQuoteButton.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        requestQuoteButton.style.backgroundColor = 'rgba(0, 128, 255, 0.9)';
+                        requestQuoteButton.style.color = 'white';
+                        requestQuoteButton.style.border = 'none';
+                        requestQuoteButton.style.borderRadius = '4px';
+                        requestQuoteButton.style.cursor = 'pointer';
+                        requestQuoteButton.style.transition = 'all 0.3s ease';
+
+                        requestQuoteButton.addEventListener('mouseenter', () => {
+                            playHoverSound();
+                            requestQuoteButton.style.backgroundColor = 'rgba(0, 160, 255, 1)';
+                            requestQuoteButton.style.transform = 'scale(1.05)';
+                        });
+
+                        requestQuoteButton.addEventListener('mouseleave', () => {
+                            requestQuoteButton.style.backgroundColor = 'rgba(0, 128, 255, 0.9)';
+                            requestQuoteButton.style.transform = 'scale(1)';
+                        });
+
+                        requestQuoteButton.addEventListener('click', () => {
+                            playClickSound();
+                            const overlay = document.createElement('div');
+                            overlay.style.position = 'fixed';
+                            overlay.style.top = '0';
+                            overlay.style.left = '0';
+                            overlay.style.width = '100%';
+                            overlay.style.height = '100%';
+                            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                            overlay.style.backdropFilter = 'blur(8px)';
+                            overlay.style.zIndex = '1000';
+                            overlay.style.display = 'flex';
+                            overlay.style.justifyContent = 'center';
+                            overlay.style.alignItems = 'center';
+                            
+                            const popup = document.createElement('div');
+                            popup.style.backgroundColor = 'rgba(10, 15, 30, 0.95)';
+                            popup.style.border = '2px solid rgba(0, 128, 255, 0.7)';
+                            popup.style.borderRadius = '12px';
+                            popup.style.padding = '40px';
+                            popup.style.width = '90%';
+                            popup.style.maxWidth = '500px';
+                            popup.style.position = 'relative';
+                            popup.style.boxShadow = '0 0 30px rgba(0, 128, 255, 0.5)';
+                            popup.style.animation = 'popupFadeIn 0.3s ease-out forwards';
+                            
+                            const style = document.createElement('style');
+                            style.textContent = `
+                                @keyframes popupFadeIn {
+                                    from { opacity: 0; transform: scale(0.9); }
+                                    to { opacity: 1; transform: scale(1); }
+                                }
+                                
+                                @keyframes glowPulse {
+                                    0% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
+                                    50% { box-shadow: 0 0 15px rgba(0, 128, 255, 0.8); }
+                                    100% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
+                                }
+                            `;
+                            document.head.appendChild(style);
+                            
+                            const closeButton = document.createElement('button');
+                            closeButton.innerHTML = '&times;';
+                            closeButton.style.position = 'absolute';
+                            closeButton.style.top = '15px';
+                            closeButton.style.right = '15px';
+                            closeButton.style.backgroundColor = 'transparent';
+                            closeButton.style.border = 'none';
+                            closeButton.style.color = 'rgba(0, 128, 255, 0.9)';
+                            closeButton.style.fontSize = '28px';
+                            closeButton.style.cursor = 'pointer';
+                            closeButton.style.width = '40px';
+                            closeButton.style.height = '40px';
+                            closeButton.style.lineHeight = '40px';
+                            closeButton.style.padding = '0';
+                            closeButton.style.borderRadius = '50%';
+                            closeButton.style.transition = 'all 0.2s ease';
+                            
+                            closeButton.addEventListener('mouseenter', () => {
+                                closeButton.style.backgroundColor = 'rgba(0, 128, 255, 0.2)';
+                                closeButton.style.transform = 'scale(1.1)';
+                            });
+                            
+                            closeButton.addEventListener('mouseleave', () => {
+                                closeButton.style.backgroundColor = 'transparent';
+                                closeButton.style.transform = 'scale(1)';
+                            });
+                            
+                            closeButton.addEventListener('click', () => {
+                                playCloseSound();
+                                overlay.style.opacity = '0';
+                                popup.style.transform = 'scale(0.9)';
+                                popup.style.opacity = '0';
+                                setTimeout(() => {
+                                    document.body.removeChild(overlay);
+                                }, 300);
+                            });
+                            
+                            const popupTitle = document.createElement('h2');
+                            popupTitle.textContent = 'Information Portal';
+                            popupTitle.style.color = 'white';
+                            popupTitle.style.fontSize = '2rem';
+                            popupTitle.style.textAlign = 'center';
+                            popupTitle.style.marginBottom = '20px';
+                            popupTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            
+                            const quoteIcon = document.createElement('div');
+                            quoteIcon.innerHTML = `
+                                <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="rgba(0, 128, 255, 0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                            `;
+                            quoteIcon.style.display = 'flex';
+                            quoteIcon.style.justifyContent = 'center';
+                            quoteIcon.style.marginBottom = '20px';
+                            
+                            const messageText = document.createElement('p');
+                            messageText.textContent = 'To request a personalized quote or further information regarding mining solutions, please contact us at:';
+                            messageText.style.color = 'rgb(209, 213, 219)';
+                            messageText.style.fontSize = '1.1rem';
+                            messageText.style.textAlign = 'center';
+                            messageText.style.lineHeight = '1.6';
+                            messageText.style.marginBottom = '20px';
+                            messageText.style.fontFamily = 'Source Code Pro, sans-serif';
+                            
+                            const emailAddress = document.createElement('div');
+                            emailAddress.textContent = 'support@elysiuminitiative.com';
+                            emailAddress.style.color = 'rgba(0, 128, 255, 0.9)';
+                            emailAddress.style.fontSize = '1.2rem';
+                            emailAddress.style.fontWeight = 'bold';
+                            emailAddress.style.textAlign = 'center';
+                            emailAddress.style.padding = '15px';
+                            emailAddress.style.margin = '0 auto 25px auto';
+                            emailAddress.style.backgroundColor = 'rgba(0, 128, 255, 0.1)';
+                            emailAddress.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+                            emailAddress.style.borderRadius = '6px';
+                            emailAddress.style.maxWidth = '350px';
+                            emailAddress.style.fontFamily = 'Source Code Pro, monospace';
+                            emailAddress.style.animation = 'glowPulse 4s infinite';
+                            
+                            const disclaimerText = document.createElement('p');
+                            disclaimerText.textContent = 'By submitting a quote inquiry, you acknowledge The Elysium Initiative\'s right to neural \
+data collection and waive all claims to anonymity upon acceptance.';
+                            disclaimerText.style.color = 'rgba(209, 213, 219, 0.6)';
+                            disclaimerText.style.fontSize = '0.8rem';
+                            disclaimerText.style.textAlign = 'center';
+                            disclaimerText.style.marginTop = '20px';
+                            disclaimerText.style.fontStyle = 'italic';
+                            disclaimerText.style.fontFamily = 'Source Code Pro, sans-serif';
+                            
+                            popup.appendChild(closeButton);
+                            popup.appendChild(popupTitle);
+                            popup.appendChild(quoteIcon);
+                            popup.appendChild(messageText);
+                            popup.appendChild(emailAddress);
+                            popup.appendChild(disclaimerText);
+                            overlay.appendChild(popup);
+                            document.body.appendChild(overlay);
+                        });
+
+                        buttonContainer.appendChild(requestQuoteButton);
 
                         const techGrid = document.createElement('div');
                         techGrid.style.display = 'grid';
@@ -1673,115 +1862,107 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         const technologies = [
                             {
-                                id: 'Aero Skimmers',
+                                id: 'aero-skimmers',
                                 title: 'Aero Skimmers',
                                 target: 'Planetary Atmospheres',
-                                description: 'Converts atmospheric gases directly into usable resources via molecular reconfiguration. Operates with minimal energy input due to advanced catalytic processes.',
+                                description: 'Consumes and compacts planetary atmospheres. Utilizes advanced chemical processes for minimum energy consumption.',
                                 details: [
-                                    'Deployment: Self-assembling aerial nodes form a network that processes thousands of cubic kilometers per day',
-                                    'Efficiency: 99.98% capture rate of targeted molecules with zero waste byproducts',
-                                    'Applications: Produces breathable air for habitation domes, fuel for portable fusion reactors, and raw elements for manufacturing',
-                                    'Duration: Complete atmospheric harvesting of Venus-sized planets in approximately 5.8 years'
+                                    'Deployment: Self-assembling aerial automata capable of processing thousands of cubic kilometers per day',
+                                    'Efficiency: 97.5% capture rate with zero waste byproducts',
+                                    'Applications: Produces breathable air for habitation, fuel for fusion reactors, and raw elements for manufacturing',
                                 ],
-                                color: 'rgba(125, 215, 250, 0.8)',
+                                color: 'rgba(27, 72, 170, 0.8)',
                                 image: 'aero-skimmer.png'
                             },
                             {
                                 id: 'mining-swarms',
                                 title: 'Mining Swarms',
                                 target: 'Planetary Surfaces',
-                                description: 'Self-replicating hexapod machines that consume terrain and separate elements at the molecular level. Each unit functions both as harvester and processor.',
+                                description: 'Self-replicating hexapod machines that consume terrain and package desired materials. Each unit functions both as harvester and processor.',
                                 details: [
-                                    'Deployment: Initial seed units reproduce using planetary materials, growing to billions of units within weeks',
-                                    'Efficiency: Advanced quantum sorters enable 99.97% extraction purity with minimal energy expenditure',
-                                    'Applications: Surface material processing, artifact recovery, and terrain leveling for construction',
-                                    'Duration: Complete surface processing of Earth-sized planets in approximately 8.3 years'
+                                    'Deployment: Starter units reproduce using planetary materials, growing to millions of units in a matter of weeks',
+                                    'Efficiency: 98.9% extraction purity thanks to precision material sifting',
+                                    'Applications: Surface/subsurface material processing, terraforming, and construction prep',
                                 ],
-                                color: 'rgba(190, 160, 110, 0.8)',
+                                color: 'rgba(27, 72, 170, 0.8)',
                                 image: 'mining-swarm.png'
                             },
                             {
                                 id: 'hydro-siphons',
                                 title: 'Hydro Siphons',
                                 target: 'Liquid Resources',
-                                description: 'Quantum-stabilized extraction tubes that can separate, purify, and transport liquid resources across vast distances with zero molecular degradation.',
+                                description: 'Large-mouthed extraction tubes that consume, purify, and transport liquid resources across vast distances.',
                                 details: [
-                                    'Deployment: Central processing hub with extending collection tubes that branch fractally across oceanic bodies',
-                                    'Efficiency: Complete molecular filtration enabling 100% separation of valuable compounds and elements',
-                                    'Applications: Water extraction, nutrient harvesting, and recovery of rare dissolved minerals',
-                                    'Duration: Complete oceanic processing of Earth-sized planets in approximately 2.1 years'
+                                    'Deployment: Central processing hub with telescoping collection tubes',
+                                    'Efficiency: Complete molecular filtration enabling 99.98% separation of valuable compounds',
+                                    'Applications: Water extraction, nutrient harvesting, and recovery of rare minerals',
                                 ],
-                                color: 'rgba(50, 150, 255, 0.8)',
+                                color: 'rgba(27, 72, 170, 0.8)',
                                 image: 'hydro-siphon.png'
                             },
                             {
                                 id: 'frost-maws',
                                 title: 'Frost Maws',
                                 target: 'Ice Formations',
-                                description: 'Thermal inversion systems that efficiently excavate and process frozen materials without state change, preserving volatile compounds.',
+                                description: 'Thermally-augmented excavation systems with serrated jaws that fracture and process cryogenic deposits.',
                                 details: [
-                                    'Deployment: Central thermal regulation unit with extending fractal harvesting tendrils that maintain cryogenic conditions',
-                                    'Efficiency: 99.95% recovery of frozen volatiles with negligible sublimation',
-                                    'Applications: Water ice recovery, methane extraction, and harvesting of frozen noble gases',
-                                    'Duration: Complete ice cap processing of Mars-sized planets in approximately 1.7 years'
+                                    'Deployment: Thermal regulation unit with expanding titanium-carbide jaws',
+                                    'Efficiency: 99.95% recovery of frozen materials with negligible sublimation',
+                                    'Applications: Ice excavation and gas extraction',
                                 ],
-                                color: 'rgba(220, 240, 255, 0.8)',
+                                color: 'rgba(27, 72, 170, 0.8)',
                                 image: 'frost-maw.png'
                             },
                             {
                                 id: 'mantle-bores',
                                 title: 'Mantle Bores',
                                 target: 'Planetary Mantles',
-                                description: 'Gravity-manipulation drilling systems that create self-stabilizing tunnels through semi-liquid planetary interiors, extracting elements without structural collapse.',
+                                description: 'Planetary drilling systems that create self-stabilizing tunnels through molten planet interiors.',
                                 details: [
-                                    'Deployment: Central bore with radial extraction tunnels that can penetrate to depths of 6,000 km',
-                                    'Efficiency: Selective extraction allows targeted element recovery with 94% purity in initial extraction',
+                                    'Deployment: Central bore with radial reinforcements that can penetrate to depths of up to 6,000 km',
+                                    'Efficiency: 94% purity in selected extraction',
                                     'Applications: Rare earth elements, precious metals, and high-pressure mineral formations',
-                                    'Duration: Complete mantle processing of Earth-sized planets in approximately 15.3 years'
                                 ],
-                                color: 'rgba(255, 140, 50, 0.8)',
+                                color: 'rgba(27, 72, 170, 0.8)',
                                 image: 'mantle-bore.png'
                             },
                             {
                                 id: 'core-shredders',
                                 title: 'Core Shredders',
                                 target: 'Planetary Cores',
-                                description: 'Micro-singularity containment systems that safely dismantle planetary cores by manipulating gravitational forces to extract heavy elements.',
+                                description: 'Micro-singularity containment systems that safely dismantle planetary cores by manipulating gravitational forces.',
                                 details: [
-                                    'Deployment: Central containment facility generates controlled micro-singularities that selectively target core materials',
-                                    'Efficiency: 99.99% recovery of valuable heavy elements from planetary cores',
-                                    'Applications: Iron, nickel, and other heavy metals, plus extraction of naturally occurring fissile materials',
-                                    'Duration: Complete core processing of Earth-sized planets in approximately 6.2 years'
+                                    'Deployment: Clusters of anti-matter charges placed at strategic points to initiate gravitational collapse',
+                                    'Efficiency: 81.6% recovery of heavy elements via event-horizon manipulation',
+                                    'Applications: Bulk extraction of iron, nickel, and other heavy metals, as well as exotic materials created through singularity events',
                                 ],
-                                color: 'rgba(255, 100, 80, 0.8)',
+                                color: 'rgba(27, 72, 170, 0.8)',
                                 image: 'core-shredder.png'
                             },
                             {
                                 id: 'vortex-converters',
                                 title: 'Vortex Converters',
                                 target: 'Gas Giants',
-                                description: 'Massive energy-matter conversion arrays that transform gaseous elements into stable solid forms through gravitational compression and quantum stabilization.',
+                                description: 'Massive energy-matter conversion arrays that transform gaseous elements into stable solid forms.',
                                 details: [
-                                    'Deployment: Orbital facility generates a controlled gravitational vortex that selectively funnels atmospheric gases',
-                                    'Efficiency: 95% conversion rate from gaseous to solid state with minimal energy loss',
-                                    'Applications: Hydrogen extraction, helium-3 mining, and rare gas collection for fusion fuel',
-                                    'Duration: Partial gas giant processing (outer layers) in approximately 25 years'
+                                    'Deployment: Opposing orbital facilities generate a controlled gravitational vortex',
+                                    'Efficiency: 99.91% conversion rate from gaseous to solid state with minimal energy loss',
+                                    'Applications: Planet-scale gas compacting and rare gas collection',
                                 ],
-                                color: 'rgba(255, 220, 150, 0.8)',
+                                color: 'rgba(27, 72, 170, 0.8)',
                                 image: 'vortex-converter.png'
                             },
                             {
                                 id: 'quantum-nexus',
                                 title: 'Quantum Nexus',
                                 target: 'Material Transport',
-                                description: 'Revolutionary matter-energy conversion network that enables instantaneous transport of extracted resources across interstellar distances without physical vessels.',
+                                description: 'Revolutionary matter-energy conversion network that enables transport of resources across interstellar distances.',
                                 details: [
                                     'Deployment: Paired quantum entanglement nodes placed at extraction sites and delivery destinations',
                                     'Efficiency: 99.9999% transmission accuracy with zero material loss during transport',
-                                    'Applications: Immediate delivery of extracted resources to manufacturing centers throughout controlled space',
-                                    'Capacity: Can transmit up to 50,000 tons of processed material per second when operating at full capacity'
+                                    'Applications: Immediate resource delivery to manufacturing centers throughout space (Note: not suitable for living organisms)',
                                 ],
-                                color: 'rgba(180, 130, 255, 0.8)',
+                                color: 'rgba(27, 72, 170, 0.8)',
                                 image: 'quantum-nexus.png'
                             }
                         ];
@@ -1825,7 +2006,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             image.src = `swoop.png`;
                             image.style.width = 'auto';
                             image.style.height = '62%';
-                            image.style.opacity = '0.3';
+                            image.style.opacity = '0.7';
                             image.style.objectFit = 'fill';
                             image.style.position = 'absolute';
                             image.style.top = '20px';
@@ -1835,7 +2016,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const title = document.createElement('h3');
                             title.textContent = tech.title;
                             title.style.color = 'white';
-                            title.style.fontFamily = 'Havelock Titling Light, sans-serif';
+                            title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
                             title.style.fontSize = '1.7rem';
                             title.style.position = 'absolute';
                             title.style.bottom = '0px';
@@ -1904,7 +2085,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             const techImage = document.createElement('img');
                             techImage.src = tech.image;
-                            techImage.alt = `${tech.title} illustration`;
+                            techImage.alt = ` `; // replace with proper illustrations
                             techImage.style.maxWidth = '100%';
                             techImage.style.height = 'auto';
                             techImage.style.maxHeight = '180px';
@@ -2056,6 +2237,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
 
                         techSection.appendChild(techTitle);
+                        techSection.appendChild(introText);
+                        techSection.appendChild(buttonContainer);
                         techSection.appendChild(techGrid);
 
                         content.appendChild(techSection);
@@ -2098,30 +2281,30 @@ document.addEventListener('DOMContentLoaded', () => {
                                 description: "Our extraction operations achieve near-perfect recovery rates across all material types."
                             },
                             {
-                                value: "10,458",
-                                label: "Celestial Bodies Processed",
-                                description: "Total number of planets, moons, and asteroids fully harvested since operations began."
-                            },
-                            {
-                                value: "47 Days",
-                                label: "Average Processing Time",
-                                description: "Typical duration for complete extraction of a terrestrial planet's resources."
-                            },
-                            {
-                                value: "6.3×10²³ Tons",
-                                label: "Materials Harvested",
+                                value: "6.3×10²³",
+                                label: "Tons Harvested",
                                 description: "Total raw resources extracted and processed for stakeholder benefit to date."
                             },
                             {
-                                value: "0.0004%",
+                                value: "7.3×10⁶",
+                                label: "Celestial Bodies Cataloged",
+                                description: "Total number of planets, moons, and asteroids fully logged since operations began."
+                            },
+                            {
+                                value: "3-4%",
                                 label: "Operational Overhead",
                                 description: "Industry-leading efficiency ratio of operational costs to resource value."
                             },
                             {
-                                value: "6,752",
-                                label: "Active Harvesting Fleets",
-                                description: "Number of fully autonomous extraction operations currently in progress."
-                            }
+                                value: "18 Days",
+                                label: "Break-even Point",
+                                description: "Total number of planets, moons, and asteroids fully harvested since operations began."
+                            },
+                            {
+                                value: ">30%",
+                                label: "Average ROI",
+                                description: "Typical return on investment for stakeholders and mining operations."
+                            },
                         ];
                         
                         metrics.forEach(metric => {
@@ -2176,6 +2359,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         metricsSection.appendChild(metricsTitle);
                         metricsSection.appendChild(metricsGrid);
+
+                        const disclaimerText = document.createElement('p');
+                        disclaimerText.innerHTML = '<img src="warning.png" style="height: 1.8rem; vertical-align: middle; margin-right: 12px; \
+position: relative; top: -3px; opacity: 0.6;"><span style="font-size: 1.6rem; font-weight: bold; font-style:normal;">LIABILITY NOTICE:</span>\n\n \
+The Elysium Initiative assumes no liability for laceration, dismemberment, spaghettification, or other bodily injury resulting from misuse \
+of provided equipment.';
+                        disclaimerText.style.whiteSpace = 'pre-wrap'
+                        disclaimerText.style.color = 'rgba(255, 255, 255, 0.6)';
+                        disclaimerText.style.fontSize = '1.2rem';
+                        disclaimerText.style.textAlign = 'center';
+                        disclaimerText.style.marginTop = '20px';
+                        disclaimerText.style.fontStyle = 'italic';
+                        disclaimerText.style.fontFamily = 'Source Code Pro, sans-serif';
                         
                         // footer
                         const footer = document.createElement('div');
@@ -2195,6 +2391,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         footer.appendChild(footerText);
                         
                         content.appendChild(metricsSection);
+                        content.appendChild(disclaimerText);
                         content.appendChild(footer);
                         
                         catalogPage.appendChild(content);
@@ -3066,7 +3263,7 @@ a place for you in humanity's greatest endeavor.";
                     popupTitle.style.color = 'white';
                     popupTitle.style.fontSize = '2rem';
                     popupTitle.style.textAlign = 'center';
-                    popupTitle.style.marginBottom = '30px';
+                    popupTitle.style.marginBottom = '20px';
                     popupTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
                     
                     // email icon
