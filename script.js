@@ -24,22 +24,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function createHoverSound() {
         const sound = new Audio('hover.mp3');
-        sound.volume = 0.25;
+        sound.volume = 0.2;
         return sound;
     }
     function createHoverSound2() {
         const sound = new Audio('hover_2.mp3');
+        sound.volume = 0.25;
+        return sound;
+    }
+    function createHoverSound3() {
+        const sound = new Audio('hover_3.mp3');
         sound.volume = 0.4;
         return sound;
     }
     function createClickSound() {
         const sound = new Audio('click.mp3');
-        sound.volume = 0.2;
+        sound.volume = 0.15;
         return sound;
     }
     function createCloseSound() {
         const sound = new Audio('close.mp3');
-        sound.volume = 0.4;
+        sound.volume = 0.2;
         return sound;
     }
     function playHoverSound() {
@@ -48,6 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function playHoverSound2() {
         const sound = createHoverSound2();
+        sound.play();
+    }
+    function playHoverSound3() {
+        const sound = createHoverSound3();
         sound.play();
     }
     function playClickSound() {
@@ -926,19 +935,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         sidebar.classList.remove('active');
                         container.style.display = 'none';
                 
-                        // page switch fix (remove existing index page)
-                        const existingPage = document.getElementById('index-page');
-                        if (existingPage) {
-                            existingPage.remove();
-                        }
-                
                         const indexPage = document.createElement('div');
                         indexPage.id = 'index-page';
                         indexPage.style.minHeight = '100vh';
                         indexPage.style.height = '100%';
                         indexPage.style.backgroundColor = 'black';
                         indexPage.style.color = 'white';
-                        indexPage.style.padding = '120px 0rem 2rem 0rem'; // DON'T CHANGE THIRD VALUE TO 0, IT MAKES THE SCROLL BAR DISAPPEAR (??)
+                        indexPage.style.padding = '120px 0rem 2rem 0rem'; // DON'T CHANGE THIRD VALUE TO 0, IT MAKES THE SCROLL BAR DISAPPEAR (for some fucking reason)
                         indexPage.style.display = 'flex';
                         indexPage.style.justifyContent = 'center';
                         indexPage.style.position = 'fixed';
@@ -953,13 +956,30 @@ document.addEventListener('DOMContentLoaded', () => {
                         content.style.maxWidth = '1600px';
                         content.style.width = '100%';
                 
-                        const title = document.createElement('h1');
-                        title.textContent = "Resource Market Index";
-                        title.style.textAlign = 'center';
-                        title.style.fontSize = '4rem';
-                        title.style.marginBottom = '4rem';
-                        title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
-                        title.style.color = 'white';
+                        const indexTitle = document.createElement('h1');
+                        indexTitle.textContent = "RESOURCE MARKET INDEX";
+                        indexTitle.style.textAlign = 'center';
+                        indexTitle.style.fontSize = '4rem';
+                        indexTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        indexTitle.style.color = 'white';
+                        indexTitle.style.textAlign = 'center';
+                        indexTitle.style.maxWidth = '1000px';
+                        indexTitle.style.margin = '3rem auto 2rem auto';
+
+                        const indexDivider = document.createElement('div');
+                        indexDivider.style.width = '160px';
+                        indexDivider.style.height = '4px';
+                        indexDivider.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                        indexDivider.style.margin = '2rem auto 3rem auto';
+
+                        const indexSubtitle = document.createElement('div');
+                        indexSubtitle.textContent = 'View the current market index for the most common resources across the galaxy.';
+                        indexSubtitle.style.fontSize = '1rem';
+                        indexSubtitle.style.fontFamily = 'Source Code Pro, sans-serif';
+                        indexSubtitle.style.color = 'rgb(209, 213, 219)';
+                        indexSubtitle.style.textAlign = 'center';
+                        indexSubtitle.style.maxWidth = '600px';
+                        indexSubtitle.style.margin = '3rem auto 1.5rem auto';
                         
                         const resourceSection = document.createElement('div');
                         resourceSection.style.marginBottom = '3rem';
@@ -968,8 +988,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         chartContainer.id = 'resource-chart-container';
                         chartContainer.style.width = '100%';
                         chartContainer.style.height = '600px';
-                        chartContainer.style.backgroundColor = 'rgba(30, 30, 30, 0.7)';
+                        chartContainer.style.backgroundColor = 'rgba(0, 128, 255, 0.07)';
                         chartContainer.style.borderRadius = '8px';
+                        chartContainer.style.border = '2px solid rgba(0, 128, 255, 0.8)';
+                        chartContainer.style.boxShadow = '0 0 15px rgba(0, 128, 255, 0.69)';
                         chartContainer.style.padding = '20px';
                         chartContainer.style.position = 'relative';
                         chartContainer.style.marginBottom = '2rem';
@@ -980,7 +1002,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         buttonContainer.style.display = 'flex';
                         buttonContainer.style.justifyContent = 'center';
                         buttonContainer.style.gap = '30px';
-                        buttonContainer.style.marginBottom = '8rem';
+                        buttonContainer.style.margin = '3rem auto 2.5rem auto';
                 
                         const resources = [
                             { name: 'Iron', color: 'rgb(183, 65, 14)' },
@@ -993,13 +1015,17 @@ document.addEventListener('DOMContentLoaded', () => {
                             { name: 'Carbon', color: 'rgb(13, 76, 192)' },
                             { name: 'Platinum', color: 'rgb(84, 178, 255)' },
                         ];
-                
+
+                        // selected resource
+                        let selectedResource = 'Iron';
+
                         resources.forEach(resource => {
                             const button = document.createElement('button');
                             button.textContent = resource.name;
+                            button.dataset.resource = resource.name;
                             button.style.fontSize = '16px';
                             button.style.padding = '8px 32px';
-                            button.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                            button.style.backgroundColor = resource.name === selectedResource ? 'rgba(0, 128, 255, 0.8)' : 'rgba(255, 255, 255, 0.1)';
                             button.style.color = 'white';
                             button.style.border = 'none';
                             button.style.borderRadius = '4px';
@@ -1008,25 +1034,42 @@ document.addEventListener('DOMContentLoaded', () => {
                             button.style.transition = 'transform 0.2s, opacity 0.2s';
                             
                             button.onmouseover = () => {
-                                playHoverSound2();
-                                button.style.opacity = '0.8';
-                                button.style.transform = 'scale(1.05)';
+                                if (resource.name !== selectedResource) {
+                                    playHoverSound2();
+                                    button.style.opacity = '0.8';
+                                    button.style.transform = 'scale(1.05)';
+                                }
                             };
                             button.onmouseout = () => {
-                                button.style.opacity = '1';
-                                button.style.transform = 'scale(1)';
+                                if (resource.name !== selectedResource) {
+                                    button.style.opacity = '1';
+                                    button.style.transform = 'scale(1)';
+                                }
                             };
                             
                             button.onclick = () => {
-                                playClickSound();
+                                playHoverSound3();
+                                
+                                selectedResource = resource.name;
+                                
+                                document.querySelectorAll('[data-resource]').forEach(btn => {
+                                    if (btn.dataset.resource === selectedResource) {
+                                        btn.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                                    } else {
+                                        btn.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                                    }
+                                });
+                                
                                 updateChart(resource.name);
                             };
                             
                             buttonContainer.appendChild(button);
                         });
-                        resourceSection.appendChild(chartContainer);
                         resourceSection.appendChild(buttonContainer);
-                        content.appendChild(title);
+                        resourceSection.appendChild(chartContainer);
+                        content.appendChild(indexTitle);
+                        content.appendChild(indexDivider);
+                        content.appendChild(indexSubtitle);
                         content.appendChild(resourceSection);
                 
                         const canvas = document.createElement('canvas');
@@ -1509,7 +1552,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             row.style.transition = 'background-color 0.3s ease';
                             
                             row.addEventListener('mouseenter', () => {
-                                row.style.backgroundColor = 'rgba(82, 82, 82, 0.2)';
+                                playHoverSound2();
+                                row.style.backgroundColor = 'rgba(0, 128, 255, 0.15)';
                             });
                             
                             row.addEventListener('mouseleave', () => {
@@ -1612,12 +1656,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.body.appendChild(indexPage);
                     }
                 },
-                {
+                { 
                     name: 'Catalog',
                     action: () => {
+                        closeAllPages();
                         sidebar.classList.remove('active');
                         container.style.display = 'none';
-                       
+                    
                         const catalogPage = document.createElement('div');
                         catalogPage.id = 'extraction-page';
                         catalogPage.style.minHeight = '100vh';
@@ -1633,39 +1678,53 @@ document.addEventListener('DOMContentLoaded', () => {
                         catalogPage.style.right = '0';
                         catalogPage.style.bottom = '0';
                         catalogPage.style.overflowY = 'scroll';
-                       
+                    
                         const content = document.createElement('div');
                         content.style.maxWidth = '1060px';
                         content.style.width = '100%';
 
                         const techSection = document.createElement('div');
-                        techSection.style.marginTop = '8rem';
-                        techSection.style.marginBottom = '8rem';
+                        techSection.style.maxWidth = '1000px';
+                        techSection.style.margin = '0 auto 5rem auto';
 
                         const techTitle = document.createElement('h2');
                         techTitle.textContent = "TECHNOLOGIES CATALOG";
                         techTitle.style.fontSize = '4rem';
-                        techTitle.style.marginTop = '-5rem';
-                        techTitle.style.marginBottom = '2rem';
                         techTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
                         techTitle.style.color = 'white';
                         techTitle.style.textAlign = 'center';
+                        techTitle.style.margin = '3rem auto 2rem auto';
 
-                        const introText = document.createElement('p');
-                        introText.style.fontSize = '1.2rem';
-                        introText.style.lineHeight = '1.8';
-                        introText.style.marginBottom = '3rem';
-                        introText.style.fontFamily = 'Source Code Pro, sans-serif';
-                        introText.style.color = 'rgb(209, 213, 219)';
-                        introText.style.textAlign = 'center';
-                        introText.style.maxWidth = '800px';
-                        introText.style.margin = '0 auto 0 auto';
-                        introText.style.padding = '2rem';
-                        introText.style.backgroundColor = 'rgba(0, 28, 55, 0.5)';
-                        introText.style.borderRadius = '12px';
-                        introText.style.border = '1px solid rgba(0, 128, 255, 0.3)';
-                        introText.style.whiteSpace = 'pre-wrap';
-                        introText.textContent = 'The Elysium Initiative offers comprehensive solutions for all cataloged technologies. Extraction \
+                        const techDivider = document.createElement('div');
+                        techDivider.style.width = '160px';
+                        techDivider.style.height = '4px';
+                        techDivider.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                        techDivider.style.margin = '2rem auto 3rem auto';
+
+                        const techSubtitle = document.createElement('div');
+                        techSubtitle.textContent = 'Browse our incredible selection of planetary mining, energy production, and material transport solutions.';
+                        techSubtitle.style.fontSize = '1rem';
+                        techSubtitle.style.fontFamily = 'Source Code Pro, sans-serif';
+                        techSubtitle.style.color = 'rgb(209, 213, 219)';
+                        techSubtitle.style.textAlign = 'center';
+                        techSubtitle.style.maxWidth = '800px';
+                        techSubtitle.style.margin = '3rem auto 3.5rem auto';
+
+                        const descriptionText = document.createElement('p');
+                        descriptionText.style.fontSize = '1.2rem';
+                        descriptionText.style.lineHeight = '1.8';
+                        descriptionText.style.marginBottom = '3rem';
+                        descriptionText.style.fontFamily = 'Source Code Pro, sans-serif';
+                        descriptionText.style.color = 'rgb(209, 213, 219)';
+                        descriptionText.style.textAlign = 'center';
+                        descriptionText.style.maxWidth = '800px';
+                        descriptionText.style.margin = '0 auto 0 auto';
+                        descriptionText.style.padding = '2rem';
+                        descriptionText.style.backgroundColor = 'rgba(0, 28, 55, 0.5)';
+                        descriptionText.style.borderRadius = '12px';
+                        descriptionText.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+                        descriptionText.style.whiteSpace = 'pre-wrap';
+                        descriptionText.textContent = 'The Elysium Initiative offers comprehensive solutions for all cataloged technologies. Extraction \
 yields may vary based on celestial body composition and local constants. Secured financing solutions are available for qualified stakeholders. \
 For detailed specifications, personalized quotes, or further information, contact us here:';
 
@@ -1685,6 +1744,7 @@ For detailed specifications, personalized quotes, or further information, contac
                         requestQuoteButton.style.borderRadius = '4px';
                         requestQuoteButton.style.cursor = 'pointer';
                         requestQuoteButton.style.transition = 'all 0.3s ease';
+                        requestQuoteButton.style.margin = '0.5rem auto 3rem auto';
 
                         requestQuoteButton.addEventListener('mouseenter', () => {
                             playHoverSound();
@@ -1820,7 +1880,7 @@ For detailed specifications, personalized quotes, or further information, contac
                             
                             const disclaimerText = document.createElement('p');
                             disclaimerText.textContent = 'By submitting a quote inquiry, you acknowledge The Elysium Initiative\'s right to neural \
-data collection and waive all claims to anonymity upon acceptance.';
+                data collection and waive all claims to anonymity upon acceptance.';
                             disclaimerText.style.color = 'rgba(209, 213, 219, 0.6)';
                             disclaimerText.style.fontSize = '0.8rem';
                             disclaimerText.style.textAlign = 'center';
@@ -1846,7 +1906,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                         techGrid.style.gap = '2rem';
                         techGrid.style.width = '100%';
                         techGrid.style.maxWidth = '1000px';
-                        techGrid.style.margin = '0 auto';
+                        techGrid.style.margin = '0 0 2rem 0';
                         techGrid.style.transition = 'all 0.5s ease';
 
                         const techMediaQuery = window.matchMedia('(max-width: 768px)');
@@ -1872,7 +1932,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                                     'Applications: Produces breathable air for habitation, fuel for fusion reactors, and raw elements for manufacturing',
                                 ],
                                 color: 'rgba(27, 72, 170, 0.8)',
-                                image: 'aero-skimmer.png'
+                                image: 'aero_skimmers.jpg'
                             },
                             {
                                 id: 'mining-swarms',
@@ -1885,7 +1945,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                                     'Applications: Surface/subsurface material processing, terraforming, and construction prep',
                                 ],
                                 color: 'rgba(27, 72, 170, 0.8)',
-                                image: 'mining-swarm.png'
+                                image: 'mining_swarm.jpg'
                             },
                             {
                                 id: 'hydro-siphons',
@@ -1898,7 +1958,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                                     'Applications: Water extraction, nutrient harvesting, and recovery of rare minerals',
                                 ],
                                 color: 'rgba(27, 72, 170, 0.8)',
-                                image: 'hydro-siphon.png'
+                                image: 'hydro_siphon.jpg'
                             },
                             {
                                 id: 'frost-maws',
@@ -1911,7 +1971,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                                     'Applications: Ice excavation and gas extraction',
                                 ],
                                 color: 'rgba(27, 72, 170, 0.8)',
-                                image: 'frost-maw.png'
+                                image: 'frost_maw.jpg'
                             },
                             {
                                 id: 'mantle-bores',
@@ -1924,7 +1984,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                                     'Applications: Rare earth elements, precious metals, and high-pressure mineral formations',
                                 ],
                                 color: 'rgba(27, 72, 170, 0.8)',
-                                image: 'mantle-bore.png'
+                                image: 'mantle_bore.jpg'
                             },
                             {
                                 id: 'core-shredders',
@@ -1937,7 +1997,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                                     'Applications: Bulk extraction of iron, nickel, and other heavy metals, as well as exotic materials created through singularity events',
                                 ],
                                 color: 'rgba(27, 72, 170, 0.8)',
-                                image: 'core-shredder.png'
+                                image: 'core_shredder.jpg'
                             },
                             {
                                 id: 'vortex-converters',
@@ -1950,7 +2010,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                                     'Applications: Planet-scale gas compacting and rare gas collection',
                                 ],
                                 color: 'rgba(27, 72, 170, 0.8)',
-                                image: 'vortex-converter.png'
+                                image: 'vortex_converter.jpg'
                             },
                             {
                                 id: 'quantum-nexus',
@@ -1963,7 +2023,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                                     'Applications: Immediate resource delivery to manufacturing centers throughout space (Note: not suitable for living organisms)',
                                 ],
                                 color: 'rgba(27, 72, 170, 0.8)',
-                                image: 'quantum-nexus.png'
+                                image: 'quantum_nexus.jpg'
                             }
                         ];
 
@@ -1981,54 +2041,124 @@ data collection and waive all claims to anonymity upon acceptance.';
                             card.style.cursor = 'pointer';
                             card.style.position = 'relative';
                             card.style.gridColumn = 'span 1';
-                            card.style.maxHeight = '200px';
+                            card.style.maxHeight = '260px';
                             
                             const cardCollapsed = document.createElement('div');
                             cardCollapsed.className = 'card-collapsed';
                             cardCollapsed.style.display = 'flex';
-                            cardCollapsed.style.alignItems = 'center';
-                            cardCollapsed.style.height = '200px';
+                            cardCollapsed.style.flexDirection = 'column';
+                            cardCollapsed.style.height = '260px';
                             cardCollapsed.style.padding = '0';
                             cardCollapsed.style.position = 'relative';
                             
-                            const cardGradient = document.createElement('div');
-                            cardGradient.style.position = 'absolute';
-                            cardGradient.style.top = '0';
-                            cardGradient.style.left = '0';
-                            cardGradient.style.right = '0';
-                            cardGradient.style.bottom = '0';
-                            cardGradient.style.background = `linear-gradient(to right, rgba(0, 0, 0, 0.7), transparent), linear-gradient(to bottom, ${tech.color}, rgba(0, 0, 0, 0.7))`;
-                            cardGradient.style.opacity = '0.8';
-                            cardGradient.style.transition = 'opacity 0.3s ease';
-                            cardCollapsed.appendChild(cardGradient);
+                            // card image container
+                            const imageContainer = document.createElement('div');
+                            imageContainer.style.position = 'relative';
+                            imageContainer.style.width = '100%';
+                            imageContainer.style.height = '150px';
+                            imageContainer.style.overflow = 'hidden';
                             
-                            const image = document.createElement('img');
-                            image.src = `swoop.png`;
-                            image.style.width = 'auto';
-                            image.style.height = '62%';
-                            image.style.opacity = '0.7';
-                            image.style.objectFit = 'fill';
-                            image.style.position = 'absolute';
-                            image.style.top = '20px';
-                            image.style.left = '-24px';
-                            cardCollapsed.appendChild(image);
+                            // card image
+                            const cardImage = document.createElement('img');
+                            cardImage.src = tech.image;
+                            cardImage.style.width = '100%';
+                            cardImage.style.height = '100%';
+                            cardImage.style.objectFit = 'cover';
+                            cardImage.style.transition = 'transform 0.5s ease';
+                            imageContainer.appendChild(cardImage);
+                            
+                            // image overlay gradient
+                            const imageOverlay = document.createElement('div');
+                            imageOverlay.style.position = 'absolute';
+                            imageOverlay.style.top = '0';
+                            imageOverlay.style.left = '0';
+                            imageOverlay.style.width = '100%';
+                            imageOverlay.style.height = '100%';
+                            imageOverlay.style.background = `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7))`;
+                            imageContainer.appendChild(imageOverlay);
+                            
+                            // target badge
+                            const targetBadge = document.createElement('div');
+                            targetBadge.textContent = tech.target;
+                            targetBadge.style.position = 'absolute';
+                            targetBadge.style.top = '10px';
+                            targetBadge.style.right = '10px';
+                            targetBadge.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                            targetBadge.style.color = 'white';
+                            targetBadge.style.padding = '5px 10px';
+                            targetBadge.style.borderRadius = '4px';
+                            targetBadge.style.fontSize = '0.7rem';
+                            targetBadge.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            targetBadge.style.fontWeight = 'bold';
+                            targetBadge.style.zIndex = '2';
+                            imageContainer.appendChild(targetBadge);
+                            
+                            cardCollapsed.appendChild(imageContainer);
+                            
+                            // content container
+                            const contentContainer = document.createElement('div');
+                            contentContainer.style.padding = '15px 20px';
+                            contentContainer.style.flex = '1';
+                            contentContainer.style.display = 'flex';
+                            contentContainer.style.flexDirection = 'column';
+                            contentContainer.style.justifyContent = 'space-between';
+                            contentContainer.style.position = 'relative';
+                            contentContainer.style.background = 'linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4))';
                             
                             const title = document.createElement('h3');
                             title.textContent = tech.title;
                             title.style.color = 'white';
                             title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
-                            title.style.fontSize = '1.7rem';
-                            title.style.position = 'absolute';
-                            title.style.bottom = '0px';
-                            title.style.left = '30px';
-                            title.style.zIndex = '2';
+                            title.style.fontSize = '1.4rem';
+                            title.style.margin = '0 0 8px 0';
                             title.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.5)';
-                            cardCollapsed.appendChild(title);
+                            contentContainer.appendChild(title);
+                            
+                            // short preview description
+                            const preview = document.createElement('p');
+                            preview.textContent = tech.description.split('.')[0] + '...'; // just the first sentence
+                            preview.style.fontSize = '0.9rem';
+                            preview.style.color = 'rgba(255, 255, 255, 0.8)';
+                            preview.style.margin = '0';
+                            preview.style.fontFamily = 'Source Code Pro, sans-serif';
+                            contentContainer.appendChild(preview);
+                            
+                            // click to expand
+                            const expandPrompt = document.createElement('div');
+                            expandPrompt.textContent = 'Click to expand';
+                            expandPrompt.style.color = 'rgba(0, 128, 255, 0.9)';
+                            expandPrompt.style.fontSize = '0.8rem';
+                            expandPrompt.style.fontStyle = 'italic';
+                            expandPrompt.style.marginTop = '10px';
+                            expandPrompt.style.fontFamily = 'Source Code Pro, sans-serif';
+                            contentContainer.appendChild(expandPrompt);
+                            
+                            cardCollapsed.appendChild(contentContainer);
                             
                             const cardExpanded = document.createElement('div');
                             cardExpanded.className = 'card-expanded';
                             cardExpanded.style.padding = '2rem';
                             cardExpanded.style.display = 'none';
+                            cardExpanded.style.position = 'relative';
+                            cardExpanded.style.backgroundImage = `url('${tech.image}')`;
+                            cardExpanded.style.backgroundSize = 'cover';
+                            cardExpanded.style.backgroundPosition = 'center';
+                            
+                            // add overlay for readability
+                            const expandedOverlay = document.createElement('div');
+                            expandedOverlay.style.position = 'absolute';
+                            expandedOverlay.style.top = '0';
+                            expandedOverlay.style.left = '0';
+                            expandedOverlay.style.width = '100%';
+                            expandedOverlay.style.height = '100%';
+                            expandedOverlay.style.background = 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 1) 100%)';
+                            expandedOverlay.style.zIndex = '1';
+                            cardExpanded.appendChild(expandedOverlay);
+                            
+                            // content wrapper to sit above the overlay
+                            const contentWrapper = document.createElement('div');
+                            contentWrapper.style.position = 'relative';
+                            contentWrapper.style.zIndex = '2';
                             
                             const expandedHeader = document.createElement('div');
                             expandedHeader.style.display = 'flex';
@@ -2060,7 +2190,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                             closeButton.style.transition = 'background 0.3s ease';
                             
                             closeButton.addEventListener('mouseenter', () => {
-                                closeButton.style.background = 'rgba(255, 255, 255, 0.1)';
+                                closeButton.style.background = 'rgba(0, 128, 255, 0.8)';
                             });
                             
                             closeButton.addEventListener('mouseleave', () => {
@@ -2074,27 +2204,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                             });
                             
                             expandedHeader.appendChild(closeButton);
-                            cardExpanded.appendChild(expandedHeader);
-                            
-                            const techIllustration = document.createElement('div');
-                            techIllustration.style.width = '100%';
-                            techIllustration.style.marginBottom = '1.5rem';
-                            techIllustration.style.display = 'flex';
-                            techIllustration.style.justifyContent = 'center';
-                            techIllustration.style.alignItems = 'center';
-                            
-                            const techImage = document.createElement('img');
-                            techImage.src = tech.image;
-                            techImage.alt = ` `; // replace with proper illustrations
-                            techImage.style.maxWidth = '100%';
-                            techImage.style.height = 'auto';
-                            techImage.style.maxHeight = '180px';
-                            techImage.style.borderRadius = '6px';
-                            techImage.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
-                            techImage.style.border = `1px solid ${tech.color}`;
-                            
-                            techIllustration.appendChild(techImage);
-                            cardExpanded.appendChild(techIllustration);
+                            contentWrapper.appendChild(expandedHeader);
                             
                             const targetInfo = document.createElement('div');
                             targetInfo.style.display = 'flex';
@@ -2102,7 +2212,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                             targetInfo.style.marginBottom = '1.5rem';
                             targetInfo.style.padding = '1rem';
                             targetInfo.style.borderRadius = '6px';
-                            targetInfo.style.backgroundColor = 'rgba(0, 128, 255, 0.1)';
+                            targetInfo.style.backgroundColor = 'rgba(0, 128, 255, 0.3)';
                             targetInfo.style.border = '1px solid rgba(0, 128, 255, 0.2)';
                             
                             const targetLabel = document.createElement('div');
@@ -2110,7 +2220,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                             targetLabel.style.fontFamily = 'Source Code Pro, sans-serif';
                             targetLabel.style.fontWeight = 'bold';
                             targetLabel.style.fontSize = '0.9rem';
-                            targetLabel.style.color = 'rgba(0, 128, 255, 0.9)';
+                            targetLabel.style.color = 'rgb(106, 180, 255)';
                             targetLabel.style.marginRight = '1rem';
                             targetInfo.appendChild(targetLabel);
                             
@@ -2122,7 +2232,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                             targetValue.style.color = 'white';
                             targetInfo.appendChild(targetValue);
                             
-                            cardExpanded.appendChild(targetInfo);
+                            contentWrapper.appendChild(targetInfo);
                             
                             const description = document.createElement('p');
                             description.textContent = tech.description;
@@ -2130,10 +2240,10 @@ data collection and waive all claims to anonymity upon acceptance.';
                             description.style.fontFamily = 'Source Code Pro, sans-serif';
                             description.style.lineHeight = '1.6';
                             description.style.marginBottom = '2rem';
-                            cardExpanded.appendChild(description);
+                            contentWrapper.appendChild(description);
                             
                             const detailsContainer = document.createElement('div');
-                            detailsContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+                            detailsContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
                             detailsContainer.style.padding = '1.5rem';
                             detailsContainer.style.borderRadius = '8px';
                             detailsContainer.style.marginBottom = '1rem';
@@ -2162,21 +2272,84 @@ data collection and waive all claims to anonymity upon acceptance.';
                             });
                             
                             detailsContainer.appendChild(detailsList);
-                            cardExpanded.appendChild(detailsContainer);
+                            contentWrapper.appendChild(detailsContainer);
+                            
+                            // spec readout
+                            const specReadout = document.createElement('div');
+                            specReadout.style.display = 'flex';
+                            specReadout.style.justifyContent = 'space-between';
+                            specReadout.style.marginTop = '1.5rem';
+                            specReadout.style.marginBottom = '0.5rem';
+                            
+                            // spec indicators
+                            const specIndicators = [
+                                { label: 'POWER', value: Math.floor(Math.random() * 30) + 70 }, // 70-99%
+                                { label: 'EFFICIENCY', value: Math.floor(Math.random() * 15) + 85 }, // 85-99%
+                                { label: 'DURABILITY', value: Math.floor(Math.random() * 20) + 80 } // 80-99%
+                            ];
+                            
+                            specIndicators.forEach(spec => {
+                                const specItem = document.createElement('div');
+                                specItem.style.flex = '1';
+                                specItem.style.padding = '0 10px';
+                                specItem.style.textAlign = 'center';
+                                
+                                const specLabel = document.createElement('div');
+                                specLabel.textContent = spec.label;
+                                specLabel.style.color = 'rgba(200, 200, 200, 0.8)';
+                                specLabel.style.fontSize = '0.8rem';
+                                specLabel.style.fontFamily = 'Source Code Pro, sans-serif';
+                                specLabel.style.marginBottom = '5px';
+                                specItem.appendChild(specLabel);
+                                
+                                const specBarContainer = document.createElement('div');
+                                specBarContainer.style.width = '100%';
+                                specBarContainer.style.height = '4px';
+                                specBarContainer.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                                specBarContainer.style.borderRadius = '2px';
+                                specBarContainer.style.overflow = 'hidden';
+                                specBarContainer.style.marginBottom = '5px';
+                                
+                                const specBar = document.createElement('div');
+                                specBar.style.width = '0%';
+                                specBar.style.height = '100%';
+                                specBar.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                                specBar.style.borderRadius = '2px';
+                                specBarContainer.appendChild(specBar);
+                                specItem.appendChild(specBarContainer);
+                                
+                                const specValue = document.createElement('div');
+                                specValue.textContent = '0%';
+                                specValue.style.color = 'rgba(0, 128, 255, 0.9)';
+                                specValue.style.fontSize = '1rem';
+                                specValue.style.fontFamily = 'Source Code Pro, sans-serif';
+                                specValue.style.fontWeight = 'bold';
+                                specItem.appendChild(specValue);
+                                
+                                specReadout.appendChild(specItem);
+                                
+                                specBar.style.transition = "none";
+                                specBar.style.width = `${spec.value}%`;
+                                specValue.textContent = `${Math.floor(spec.value)}%`;
+                            });
+                            
+                            contentWrapper.appendChild(specReadout);
+                            cardExpanded.appendChild(contentWrapper);
                             
                             card.appendChild(cardCollapsed);
                             card.appendChild(cardExpanded);
                             
+                            // hover effects for collapsed card
                             card.addEventListener('mouseenter', () => {
                                 if (expandedCardId !== card.id) {
-                                    playHoverSound2();
-                                    cardGradient.style.opacity = '0.6';
+                                    playHoverSound3();
+                                    cardImage.style.transform = 'scale(1.1)';
                                 }
                             });
                             
                             card.addEventListener('mouseleave', () => {
                                 if (expandedCardId !== card.id) {
-                                    cardGradient.style.opacity = '0.8';
+                                    cardImage.style.transform = 'scale(1)';
                                 }
                             });
                             
@@ -2189,7 +2362,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                             
                             techGrid.appendChild(card);
                         });
-
+                        
                         // function to expand cards
                         function expandCard(card) {
                             // if another card is already expanded, collapse it first
@@ -2201,7 +2374,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                             
                             // expand card
                             card.style.gridColumn = 'span 2';
-                            card.style.maxHeight = '800px';
+                            card.style.maxHeight = '900px';
                             card.style.zIndex = '2';
                             card.style.boxShadow = '0 10px 30px rgba(0, 0, 128, 0.3)';
                             
@@ -2217,14 +2390,14 @@ data collection and waive all claims to anonymity upon acceptance.';
                                 card.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             }, 100);
                         }
-
+                        
                         // function to collapse cards
                         function collapseCard(card, playSound = true) {
                             expandedCardId = null;
                             
                             // collapse card
                             card.style.gridColumn = 'span 1';
-                            card.style.maxHeight = '200px';
+                            card.style.maxHeight = '260px';
                             card.style.zIndex = '1';
                             card.style.boxShadow = 'none';
                             
@@ -2237,15 +2410,16 @@ data collection and waive all claims to anonymity upon acceptance.';
                         }
 
                         techSection.appendChild(techTitle);
-                        techSection.appendChild(introText);
-                        techSection.appendChild(buttonContainer);
+                        techSection.appendChild(techDivider);
+                        techSection.appendChild(techSubtitle);
                         techSection.appendChild(techGrid);
+                        techSection.appendChild(descriptionText);
+                        techSection.appendChild(buttonContainer);
 
                         content.appendChild(techSection);
                         
                         // efficiency metrics
                         const metricsSection = document.createElement('div');
-                        metricsSection.style.marginTop = '6rem';
                         metricsSection.style.marginBottom = '6rem';
                         
                         const metricsTitle = document.createElement('h2');
@@ -2320,6 +2494,7 @@ data collection and waive all claims to anonymity upon acceptance.';
                             metricCard.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
                             
                             metricCard.addEventListener('mouseenter', () => {
+                                playHoverSound3();
                                 metricCard.style.transform = 'translateY(-10px)';
                                 metricCard.style.boxShadow = '0 15px 30px rgba(0, 128, 255, 0.2)';
                             });
@@ -2372,6 +2547,12 @@ of provided equipment.';
                         disclaimerText.style.marginTop = '20px';
                         disclaimerText.style.fontStyle = 'italic';
                         disclaimerText.style.fontFamily = 'Source Code Pro, sans-serif';
+                        disclaimerText.style.backgroundColor = 'rgba(51, 51, 51, 0.1)';
+                        disclaimerText.style.padding = '2rem';
+                        disclaimerText.style.borderRadius = '8px';
+                        disclaimerText.style.border = '2px solid rgba(255, 50, 50, 0.2)';
+                        disclaimerText.style.maxWidth = '800px';
+                        disclaimerText.style.margin = '3rem auto';
                         
                         // footer
                         const footer = document.createElement('div');
@@ -2406,6 +2587,7 @@ of provided equipment.';
                 { 
                     name: 'Getaways',
                     action: () => {
+                        closeAllPages();
                         sidebar.classList.remove('active');
                         container.style.display = 'none';
                         
@@ -2415,38 +2597,1171 @@ of provided equipment.';
                         getawaysPage.style.height = '100%';
                         getawaysPage.style.backgroundColor = 'black';
                         getawaysPage.style.color = 'white';
-                        getawaysPage.style.padding = '120px 2rem 2rem 2rem';
+                        getawaysPage.style.padding = '120px 0 0 0';
                         getawaysPage.style.display = 'flex';
-                        getawaysPage.style.justifyContent = 'center';
+                        getawaysPage.style.flexDirection = 'column';
+                        getawaysPage.style.alignItems = 'center';
                         getawaysPage.style.position = 'fixed';
                         getawaysPage.style.top = '0';
                         getawaysPage.style.left = '0';
                         getawaysPage.style.right = '0';
                         getawaysPage.style.bottom = '0';
-                        getawaysPage.style.overflowY = 'scroll';
-                
-                        const content = document.createElement('div');
-                        content.style.maxWidth = '1060px';
-                        content.style.width = '100%';
+                        getawaysPage.style.overflowY = 'auto';
                         
-                        const title = document.createElement('h1');
-                        title.textContent = "Luxury Getaways";
-                        title.style.fontSize = '2.5rem';
-                        title.style.marginBottom = '2rem';
-                        title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
-                        title.style.color = 'white';
-                
-                        const text = document.createElement('p');
-                        text.style.fontSize = '1.25rem';
-                        text.style.marginBottom = '2rem';
-                        text.style.lineHeight = '1.75';
-                        text.style.fontFamily = 'Source Code Pro, sans-serif';
-                        text.style.color = 'rgb(209, 213, 219)';
-                        text.textContent = "[Placeholder]";
-                
-                        content.appendChild(title);
-                        content.appendChild(text);
-                        getawaysPage.appendChild(content);
+                        // destination section
+                        const destinationSection = document.createElement('div');
+                        destinationSection.id = 'destination-section';
+                        
+                        const destinationHeader = document.createElement('div');
+                        destinationHeader.style.maxWidth = '1400px';
+                        destinationHeader.style.margin = '0 auto 2rem auto';
+
+                        const destinationTitle = document.createElement('h2');
+                        destinationTitle.textContent = 'EXTRAORDINARY DESTINATIONS';
+                        destinationTitle.style.fontSize = '4rem';
+                        destinationTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        destinationTitle.style.color = 'white';
+                        destinationTitle.style.textAlign = 'center';
+                        destinationTitle.style.maxWidth = '1000px';
+                        destinationTitle.style.margin = '3rem auto 2rem auto';
+                        
+                        const destinationDivider = document.createElement('div');
+                        destinationDivider.style.width = '160px';
+                        destinationDivider.style.height = '4px';
+                        destinationDivider.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                        destinationDivider.style.margin = '2rem auto 2rem auto';
+
+                        const destinationSubtitle = document.createElement('div');
+                        destinationSubtitle.textContent = 'Book your next vacation at one of our stunning synthetic planets, made entirely of recycled material surplus.';
+                        destinationSubtitle.style.fontSize = '1rem';
+                        destinationSubtitle.style.fontFamily = 'Source Code Pro, sans-serif';
+                        destinationSubtitle.style.color = 'rgb(209, 213, 219)';
+                        destinationSubtitle.style.textAlign = 'center';
+                        destinationSubtitle.style.maxWidth = '700px';
+                        destinationSubtitle.style.margin = '3rem auto 1.5rem auto';
+                        
+                        destinationHeader.appendChild(destinationTitle);
+                        destinationHeader.appendChild(destinationDivider);
+                        destinationHeader.appendChild(destinationSubtitle);
+                        
+                        // category filter
+                        const filterContainer = document.createElement('div');
+                        filterContainer.style.display = 'flex';
+                        filterContainer.style.justifyContent = 'center';
+                        filterContainer.style.margin = '3rem auto 0 auto';
+                        filterContainer.style.flexWrap = 'wrap';
+                        filterContainer.style.gap = '1rem';
+                        
+                        const filterCategories = [
+                            { id: 'all', name: 'ALL DESTINATIONS' },
+                            { id: 'adventure', name: 'ADVENTURE TOURS' },
+                            { id: 'dream', name: 'DREAM WORLDS' },
+                            { id: 'elite', name: 'ELITE COLLECTION' }
+                        ];
+                        
+                        let activeFilter = 'all';
+                        
+                        filterCategories.forEach(category => {
+                            const filterButton = document.createElement('button');
+                            filterButton.textContent = category.name;
+                            filterButton.dataset.category = category.id;
+                            filterButton.style.padding = '0.75rem 1.5rem';
+                            filterButton.style.fontSize = '0.9rem';
+                            filterButton.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            filterButton.style.backgroundColor = category.id === 'all' ? 'rgba(0, 128, 255, 0.8)' : 'rgba(255, 255, 255, 0.1)';
+                            filterButton.style.color = 'white';
+                            filterButton.style.border = 'none';
+                            filterButton.style.borderRadius = '4px';
+                            filterButton.style.cursor = 'pointer';
+                            filterButton.style.transition = 'all 0.3s ease';
+                            filterButton.style.margin = '0.5rem';
+                            
+                            filterButton.addEventListener('mouseenter', () => {
+                                if (filterButton.dataset.category !== activeFilter) {
+                                    playHoverSound2();
+                                    filterButton.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                                }
+                            });
+                            
+                            filterButton.addEventListener('mouseleave', () => {
+                                if (filterButton.dataset.category !== activeFilter) {
+                                    filterButton.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                                }
+                            });
+                            
+                            filterButton.addEventListener('click', () => {
+                                if (filterButton.dataset.category !== activeFilter) {
+                                    playHoverSound3();
+                                    
+                                    // update active filter
+                                    document.querySelectorAll('[data-category]').forEach(btn => {
+                                        if (btn.dataset.category === filterButton.dataset.category) {
+                                            btn.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                                        } else {
+                                            btn.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                                        }
+                                    });
+                                    
+                                    activeFilter = filterButton.dataset.category;
+                                    
+                                    // filter destinations
+                                    const destinations = document.querySelectorAll('.destination-card');
+                                    destinations.forEach(card => {
+                                        if (activeFilter === 'all' || card.dataset.categories.includes(activeFilter)) {
+                                            card.style.display = 'block';
+                                        } else {
+                                            card.style.display = 'none';
+                                        }
+                                    });
+                                }
+                            });
+                            
+                            filterContainer.appendChild(filterButton);
+                        });
+                        
+                        destinationHeader.appendChild(filterContainer);
+                        destinationSection.appendChild(destinationHeader);
+                        
+                        // destinations grid
+                        const destinationsGrid = document.createElement('div');
+                        destinationsGrid.style.display = 'grid';
+                        destinationsGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(350px, 1fr))';
+                        destinationsGrid.style.gap = '2rem';
+                        destinationsGrid.style.maxWidth = '1200px';
+                        destinationsGrid.style.margin = '0 auto';
+                        
+                        // destination data
+                        const destinations = [
+                            {
+                                name: "Elysium Prime",
+                                description: "[description]",
+                                image: "elysium_prime.jpg",
+                                price: 1200000,
+                                rating: 5,
+                                categories: ["elite"],
+                                features: ["[features]"]
+                            },
+                            {
+                                name: "Neochroma",
+                                description: "[description]",
+                                image: "neochroma.jpg",
+                                price: 750000,
+                                rating: 4.8,
+                                categories: ["dream"],
+                                features: ["[features]"]
+                            },
+                            {
+                                name: "Cerula Polaris",
+                                description: "[description]",
+                                image: "cerula_polaris.jpg",
+                                price: 680000,
+                                rating: 4.7,
+                                categories: ["dream"],
+                                features: ["[features]"]
+                            },
+                            {
+                                name: "Syluna",
+                                description: "[description]",
+                                image: "syluna.jpg",
+                                price: 840000,
+                                rating: 4.6,
+                                categories: ["dream"],
+                                features: ["[features]"]
+                            },
+                            {
+                                name: "Edenvale",
+                                description: "[description]",
+                                image: "edenvale.jpg",
+                                price: 1500000,
+                                rating: 5,
+                                categories: ["adventure", "elite"],
+                                features: ["[features]"]
+                            },
+                            {
+                                name: "Umbra Solace",
+                                description: "[description]",
+                                image: "umbra_solace.jpg",
+                                price: 590000,
+                                rating: 4.5,
+                                categories: ["dream"],
+                                features: ["[features]"]
+                            },
+                            {
+                                name: "Halios Deep",
+                                description: "[description]",
+                                image: "halios_deep.jpg",
+                                price: 2200000,
+                                rating: 4.9,
+                                categories: ["adventure", "elite"],
+                                features: ["[features]"]
+                            },
+                            {
+                                name: "Seraph Vesa",
+                                description: "[description]",
+                                image: "seraph_vesa.jpg",
+                                price: 480000,
+                                rating: 4.4,
+                                categories: ["dream"],
+                                features: ["[features]"]
+                            },
+                            {
+                                name: "Pyraxis",
+                                description: "[description]",
+                                image: "pyraxis.jpg",
+                                price: 3500000,
+                                rating: 5,
+                                categories: ["elite"],
+                                features: ["[features]"]
+                            }
+                        ];
+                        
+                        // create destination cards
+                        destinations.forEach(dest => {
+                            const card = document.createElement('div');
+                            card.className = 'destination-card';
+                            card.dataset.categories = JSON.stringify(dest.categories);
+                            card.style.backgroundColor = 'rgba(5, 15, 30, 0.8)';
+                            card.style.borderRadius = '8px';
+                            card.style.overflow = 'hidden';
+                            card.style.boxShadow = '0 15px 40px rgba(0, 0, 0, 0.3)';
+                            card.style.transition = 'box-shadow 0.3s ease';
+                            card.style.cursor = 'pointer';
+                            card.style.position = 'relative';
+                            card.style.transform = 'translateY(0)';
+
+                            card.addEventListener('mouseenter', () => {
+                                playHoverSound3();
+                                card.style.transform = 'translateY(-10px)';
+                                card.style.boxShadow = '0 20px 50px rgba(0, 128, 255, 0.2)';
+                            });
+
+                            card.addEventListener('mouseleave', () => {
+                                card.style.transform = 'translateY(0)';
+                                card.style.boxShadow = '0 15px 40px rgba(0, 0, 0, 0.3)';
+                            });
+
+                            card.addEventListener('click', (e) => {
+                                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                                    return;
+                                }
+                                playClickSound();
+                                showDestinationDetails(dest);
+                            });
+                            
+                            // image container with gradient overlay
+                            const imageContainer = document.createElement('div');
+                            imageContainer.style.position = 'relative';
+                            imageContainer.style.height = '220px';
+                            imageContainer.style.overflow = 'hidden';
+                            
+                            const image = document.createElement('img');
+                            image.src = dest.image;
+                            image.alt = dest.name;
+                            image.style.width = '100%';
+                            image.style.height = '100%';
+                            image.style.objectFit = 'cover';
+                            image.style.transition = 'transform 0.5s ease';
+                            
+                            card.addEventListener('mouseenter', () => {
+                                image.style.transform = 'scale(1.1)';
+                            });
+                            
+                            card.addEventListener('mouseleave', () => {
+                                image.style.transform = 'scale(1)';
+                            });
+                            
+                            const overlay = document.createElement('div');
+                            overlay.style.position = 'absolute';
+                            overlay.style.top = '0';
+                            overlay.style.left = '0';
+                            overlay.style.width = '100%';
+                            overlay.style.height = '100%';
+                            overlay.style.background = 'linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%)';
+                            
+                            // badge for elite destinations
+                            if (dest.categories.includes('elite')) {
+                                const eliteBadge = document.createElement('div');
+                                eliteBadge.textContent = 'ELITE';
+                                eliteBadge.style.position = 'absolute';
+                                eliteBadge.style.top = '1rem';
+                                eliteBadge.style.right = '1rem';
+                                eliteBadge.style.backgroundColor = 'rgba(255, 215, 0, 0.9)';
+                                eliteBadge.style.color = '#000';
+                                eliteBadge.style.padding = '0.3rem 0.8rem';
+                                eliteBadge.style.fontSize = '0.8rem';
+                                eliteBadge.style.fontWeight = 'bold';
+                                eliteBadge.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                                eliteBadge.style.borderRadius = '4px';
+                                eliteBadge.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.5)';
+                                eliteBadge.style.zIndex = '5';
+                                imageContainer.appendChild(eliteBadge);
+                            }
+                            
+                            imageContainer.appendChild(image);
+                            imageContainer.appendChild(overlay);
+                            card.appendChild(imageContainer);
+                            
+                            // card content
+                            const content = document.createElement('div');
+                            content.style.padding = '1.5rem';
+                            
+                            // title and rating
+                            const titleRow = document.createElement('div');
+                            titleRow.style.display = 'flex';
+                            titleRow.style.justifyContent = 'space-between';
+                            titleRow.style.alignItems = 'center';
+                            titleRow.style.marginBottom = '0.5rem';
+                            
+                            const title = document.createElement('h3');
+                            title.textContent = dest.name;
+                            title.style.margin = '0';
+                            title.style.fontSize = '1.4rem';
+                            title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            title.style.color = 'white';
+                            
+                            const ratingContainer = document.createElement('div');
+                            ratingContainer.style.display = 'flex';
+                            ratingContainer.style.alignItems = 'center';
+                            
+                            // generate stars based on rating
+                            const fullStars = Math.floor(dest.rating);
+                            const hasHalfStar = dest.rating % 1 >= 0.5;
+                            
+                            for (let i = 0; i < 5; i++) {
+                                const star = document.createElement('span');
+                                if (i < fullStars) {
+                                    star.innerHTML = '★'; // full star
+                                    star.style.color = 'rgba(255, 215, 0, 0.9)';
+                                } else if (i === fullStars && hasHalfStar) {
+                                    star.innerHTML = '★'; // half star
+                                    star.style.color = 'rgba(255, 215, 0, 0.5)';
+                                } else {
+                                    star.innerHTML = '★'; // empty star
+                                    star.style.color = 'rgba(255, 255, 255, 0.2)';
+                                }
+                                star.style.fontSize = '1rem';
+                                ratingContainer.appendChild(star);
+                            }
+                            
+                            titleRow.appendChild(title);
+                            titleRow.appendChild(ratingContainer);
+                            content.appendChild(titleRow);
+                            
+                            // description
+                            const description = document.createElement('p');
+                            description.textContent = dest.description;
+                            description.style.margin = '0 0 1.5rem 0';
+                            description.style.fontSize = '0.9rem';
+                            description.style.lineHeight = '1.5';
+                            description.style.color = 'rgba(255, 255, 255, 0.7)';
+                            description.style.fontFamily = 'Source Code Pro, sans-serif';
+                            content.appendChild(description);
+                            
+                            // price and button row
+                            const actionRow = document.createElement('div');
+                            actionRow.style.display = 'flex';
+                            actionRow.style.justifyContent = 'space-between';
+                            actionRow.style.alignItems = 'center';
+                            
+                            const price = document.createElement('div');
+                            price.innerHTML = `<span style="font-size: 1.5rem; font-weight: bold; color: white;">${dest.price.toLocaleString()}</span> <span style="color: rgba(255, 255, 255, 0.5); font-size: 0.8rem;">SCS™/week</span>`;
+                            price.style.fontFamily = 'Source Code Pro, sans-serif';
+                            
+                            const viewButton = document.createElement('button');
+                            viewButton.textContent = 'VIEW';
+                            viewButton.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                            viewButton.style.color = 'white';
+                            viewButton.style.border = 'none';
+                            viewButton.style.borderRadius = '4px';
+                            viewButton.style.padding = '0.5rem 1.5rem';
+                            viewButton.style.fontSize = '0.9rem';
+                            viewButton.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            viewButton.style.cursor = 'pointer';
+                            viewButton.style.transition = 'all 0.3s ease';
+                            
+                            viewButton.addEventListener('mouseenter', (e) => {
+                                e.stopPropagation();
+                                playHoverSound2();
+                                viewButton.style.backgroundColor = 'rgba(0, 160, 255, 1)';
+                                viewButton.style.transform = 'scale(1.05)';
+                            });
+                            
+                            viewButton.addEventListener('mouseleave', (e) => {
+                                e.stopPropagation();
+                                viewButton.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                                viewButton.style.transform = 'scale(1)';
+                            });
+                            
+                            viewButton.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                playClickSound();
+                                showDestinationDetails(dest);
+                            });
+                            
+                            actionRow.appendChild(price);
+                            actionRow.appendChild(viewButton);
+                            content.appendChild(actionRow);
+                            
+                            card.appendChild(content);
+                            destinationsGrid.appendChild(card);
+                        });
+                        
+                        destinationSection.appendChild(destinationsGrid);
+                        getawaysPage.appendChild(destinationSection);
+                        
+                        // featured experience section
+                        const featuredSection = document.createElement('div');
+                        featuredSection.style.position = 'relative';
+                        featuredSection.style.padding = '8rem 2rem';
+                        
+                        // featured overlay
+                        const featuredOverlay = document.createElement('div');
+                        featuredOverlay.style.position = 'absolute';
+                        featuredOverlay.style.top = '0';
+                        featuredOverlay.style.left = '0';
+                        featuredOverlay.style.width = '100%';
+                        featuredOverlay.style.height = '100%';
+                        featuredOverlay.style.backgroundColor = 'transparent';
+                        featuredOverlay.style.zIndex = '1';
+                        
+                        const featuredContent = document.createElement('div');
+                        featuredContent.style.position = 'relative';
+                        featuredContent.style.zIndex = '2';
+                        featuredContent.style.maxWidth = '800px';
+                        featuredContent.style.margin = '0 auto';
+                        featuredContent.style.textAlign = 'center';
+                        
+                        const featuredLabel = document.createElement('div');
+                        featuredLabel.textContent = 'FEATURED EXPERIENCE';
+                        featuredLabel.style.color = 'rgba(0, 128, 255, 0.9)';
+                        featuredLabel.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        featuredLabel.style.fontSize = '1.75rem';
+                        featuredLabel.style.marginBottom = '1rem';
+                        featuredLabel.style.letterSpacing = '2px';
+                        
+                        const featuredTitle = document.createElement('h2');
+                        featuredTitle.textContent = 'ELYSIUM PRIME';
+                        featuredTitle.style.color = 'white';
+                        featuredTitle.style.fontFamily = 'Havelock Titling Bold, sans-serif';
+                        featuredTitle.style.fontSize = '3rem';
+                        featuredTitle.style.marginBottom = '2rem';
+                        featuredTitle.style.textShadow = '0 0 20px rgba(0, 128, 255, 0.4)';
+                        
+                        const featuredDescription = document.createElement('p');
+                        featuredDescription.textContent = 'Our most beautiful synthetic planet to date, Elysium Prime is the pinnacle of 23rd century astroengineering. Relax on pristine beaches, explore lush parks, and enjoy the finest in luxury accommodations on this one-of-a-kind world.';
+                        featuredDescription.style.color = 'rgba(255, 255, 255, 0.9)';
+                        featuredDescription.style.fontFamily = 'Source Code Pro, sans-serif';
+                        featuredDescription.style.fontSize = '1.2rem';
+                        featuredDescription.style.lineHeight = '1.8';
+                        featuredDescription.style.marginBottom = '3rem';
+                        
+                        const featuredButton = document.createElement('button');
+                        featuredButton.textContent = 'BOOK TODAY';
+                        featuredButton.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                        featuredButton.style.color = 'white';
+                        featuredButton.style.border = 'none';
+                        featuredButton.style.borderRadius = '4px';
+                        featuredButton.style.padding = '1rem 2.5rem';
+                        featuredButton.style.fontSize = '1.2rem';
+                        featuredButton.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        featuredButton.style.cursor = 'pointer';
+                        featuredButton.style.transition = 'all 0.3s ease';
+                        featuredButton.style.boxShadow = '0 0 20px rgba(0, 128, 255, 0.4)';
+                        
+                        featuredButton.addEventListener('mouseenter', () => {
+                            playHoverSound();
+                            featuredButton.style.backgroundColor = 'rgba(0, 160, 255, 1)';
+                            featuredButton.style.transform = 'scale(1.05)';
+                            featuredButton.style.boxShadow = '0 0 30px rgba(0, 160, 255, 0.6)';
+                        });
+                        
+                        featuredButton.addEventListener('mouseleave', () => {
+                            featuredButton.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                            featuredButton.style.transform = 'scale(1)';
+                            featuredButton.style.boxShadow = '0 0 20px rgba(0, 128, 255, 0.4)';
+                        });
+                        
+                        featuredButton.addEventListener('click', () => {
+                            playClickSound();
+                            // popup overlay
+                            const overlay = document.createElement('div');
+                            overlay.style.position = 'fixed';
+                            overlay.style.top = '0';
+                            overlay.style.left = '0';
+                            overlay.style.width = '100%';
+                            overlay.style.height = '100%';
+                            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                            overlay.style.backdropFilter = 'blur(8px)';
+                            overlay.style.zIndex = '1000';
+                            overlay.style.display = 'flex';
+                            overlay.style.justifyContent = 'center';
+                            overlay.style.alignItems = 'center';
+                            
+                            // popup container
+                            const popup = document.createElement('div');
+                            popup.style.backgroundColor = 'rgba(10, 15, 30, 0.95)';
+                            popup.style.border = '2px solid rgba(0, 128, 255, 0.7)';
+                            popup.style.borderRadius = '12px';
+                            popup.style.padding = '40px';
+                            popup.style.width = '90%';
+                            popup.style.maxWidth = '500px';
+                            popup.style.position = 'relative';
+                            popup.style.boxShadow = '0 0 30px rgba(0, 128, 255, 0.5)';
+                            popup.style.animation = 'popupFadeIn 0.3s ease-out forwards';
+                            
+                            // Create animation keyframes
+                            const style = document.createElement('style');
+                            style.textContent = `
+                                @keyframes popupFadeIn {
+                                    from { opacity: 0; transform: scale(0.9); }
+                                    to { opacity: 1; transform: scale(1); }
+                                }
+                                
+                                @keyframes glowPulse {
+                                    0% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
+                                    50% { box-shadow: 0 0 15px rgba(0, 128, 255, 0.8); }
+                                    100% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
+                                }
+                            `;
+                            document.head.appendChild(style);
+                            
+                            // close button
+                            const closeButton = document.createElement('button');
+                            closeButton.innerHTML = '&times;';
+                            closeButton.style.position = 'absolute';
+                            closeButton.style.top = '15px';
+                            closeButton.style.right = '15px';
+                            closeButton.style.backgroundColor = 'transparent';
+                            closeButton.style.border = 'none';
+                            closeButton.style.color = 'rgba(0, 128, 255, 0.9)';
+                            closeButton.style.fontSize = '28px';
+                            closeButton.style.cursor = 'pointer';
+                            closeButton.style.width = '40px';
+                            closeButton.style.height = '40px';
+                            closeButton.style.lineHeight = '40px';
+                            closeButton.style.padding = '0';
+                            closeButton.style.borderRadius = '50%';
+                            closeButton.style.transition = 'all 0.2s ease';
+                            
+                            closeButton.addEventListener('mouseenter', () => {
+                                closeButton.style.backgroundColor = 'rgba(0, 128, 255, 0.2)';
+                                closeButton.style.transform = 'scale(1.1)';
+                            });
+                            
+                            closeButton.addEventListener('mouseleave', () => {
+                                closeButton.style.backgroundColor = 'transparent';
+                                closeButton.style.transform = 'scale(1)';
+                            });
+                            
+                            closeButton.addEventListener('click', () => {
+                                playCloseSound();
+                                overlay.style.opacity = '0';
+                                popup.style.transform = 'scale(0.9)';
+                                popup.style.opacity = '0';
+                                setTimeout(() => {
+                                    document.body.removeChild(overlay);
+                                }, 300);
+                            });
+                            
+                            // title
+                            const popupTitle = document.createElement('h2');
+                            popupTitle.textContent = 'BOOKING PORTAL';
+                            popupTitle.style.color = 'white';
+                            popupTitle.style.fontSize = '2rem';
+                            popupTitle.style.textAlign = 'center';
+                            popupTitle.style.marginBottom = '20px';
+                            popupTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            
+                            // email icon
+                            const emailIcon = document.createElement('div');
+                            emailIcon.innerHTML = `
+                                <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="rgba(0, 128, 255, 0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                            `;
+                            emailIcon.style.display = 'flex';
+                            emailIcon.style.justifyContent = 'center';
+                            emailIcon.style.marginBottom = '20px';
+                            
+                            // message
+                            const messageText = document.createElement('p');
+                            messageText.textContent = 'Please forward your booking request to our customer support for details:';
+                            messageText.style.color = 'rgb(209, 213, 219)';
+                            messageText.style.fontSize = '1.1rem';
+                            messageText.style.textAlign = 'center';
+                            messageText.style.lineHeight = '1.6';
+                            messageText.style.marginBottom = '20px';
+                            messageText.style.fontFamily = 'Source Code Pro, sans-serif';
+                            
+                            // email
+                            const emailAddress = document.createElement('div');
+                            emailAddress.textContent = 'support@elysiuminitiative.com';
+                            emailAddress.style.color = 'rgba(0, 128, 255, 0.9)';
+                            emailAddress.style.fontSize = '1.2rem';
+                            emailAddress.style.fontWeight = 'bold';
+                            emailAddress.style.textAlign = 'center';
+                            emailAddress.style.padding = '15px';
+                            emailAddress.style.margin = '0 auto 25px auto';
+                            emailAddress.style.backgroundColor = 'rgba(0, 128, 255, 0.1)';
+                            emailAddress.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+                            emailAddress.style.borderRadius = '6px';
+                            emailAddress.style.maxWidth = '350px';
+                            emailAddress.style.fontFamily = 'Source Code Pro, monospace';
+                            emailAddress.style.animation = 'glowPulse 4s infinite';
+                            
+                            // disclaimer
+                            const disclaimerText = document.createElement('p');
+                            disclaimerText.textContent = 'By booking a destination, you acknowledge The Elysium Initiative\'s right to neural data collection and waive all claims to anonymity upon acceptance.';
+                            disclaimerText.style.color = 'rgba(209, 213, 219, 0.6)';
+                            disclaimerText.style.fontSize = '0.8rem';
+                            disclaimerText.style.textAlign = 'center';
+                            disclaimerText.style.marginTop = '20px';
+                            disclaimerText.style.fontStyle = 'italic';
+                            disclaimerText.style.fontFamily = 'Source Code Pro, sans-serif';
+                            
+                            popup.appendChild(closeButton);
+                            popup.appendChild(popupTitle);
+                            popup.appendChild(emailIcon);
+                            popup.appendChild(messageText);
+                            popup.appendChild(emailAddress);
+                            popup.appendChild(disclaimerText);
+                            overlay.appendChild(popup);
+                            document.body.appendChild(overlay);
+                        });
+                        
+                        featuredContent.appendChild(featuredLabel);
+                        featuredContent.appendChild(featuredTitle);
+                        featuredContent.appendChild(featuredDescription);
+                        featuredContent.appendChild(featuredButton);
+                        
+                        featuredSection.appendChild(featuredOverlay);
+                        featuredSection.appendChild(featuredContent);
+                        
+                        getawaysPage.appendChild(featuredSection);
+                        
+                        // footer
+                        const footer = document.createElement('div');
+                        footer.style.textAlign = 'center';
+                        footer.style.marginTop = '4rem';
+                        footer.style.paddingBottom = '2rem';
+                        footer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
+                        footer.style.paddingTop = '2rem';
+                        
+                        const footerText = document.createElement('p');
+                        footerText.textContent = "© 2202 The Elysium Initiative. All rights reserved across the spacetime continuum.";
+                        footerText.style.fontSize = '0.9rem';
+                        footerText.style.fontFamily = 'Source Code Pro, sans-serif';
+                        footerText.style.color = 'rgba(209, 213, 219, 0.6)';
+                        footerText.style.marginBottom = '200px';
+                        
+                        footer.appendChild(footerText);
+                        
+                        getawaysPage.appendChild(footer);
+                        
+                        // destination modal
+                        function showDestinationDetails(destination) {
+                            // create overlay
+                            const overlay = document.createElement('div');
+                            overlay.className = 'destination-overlay';
+                            overlay.style.position = 'fixed';
+                            overlay.style.top = '0';
+                            overlay.style.left = '0';
+                            overlay.style.width = '100%';
+                            overlay.style.height = '100%';
+                            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+                            overlay.style.backdropFilter = 'blur(10px)';
+                            overlay.style.zIndex = '1000';
+                            overlay.style.display = 'flex';
+                            overlay.style.justifyContent = 'center';
+                            overlay.style.alignItems = 'center';
+                            overlay.style.padding = '2rem';
+                            overlay.style.opacity = '0';
+                            overlay.style.transition = 'opacity 0.3s ease';
+                            
+                            // modal container
+                            const modal = document.createElement('div');
+                            modal.className = 'destination-modal';
+                            modal.style.backgroundColor = 'rgba(5, 15, 30, 0.9)';
+                            modal.style.borderRadius = '8px';
+                            modal.style.width = '100%';
+                            modal.style.maxWidth = '1000px';
+                            modal.style.maxHeight = '90vh';
+                            modal.style.overflowY = 'auto';
+                            modal.style.overflowX = 'hidden';
+                            modal.style.position = 'relative';
+                            modal.style.boxShadow = '0 20px 80px rgba(0, 0, 0, 0.5)';
+                            modal.style.transform = 'scale(0.9)';
+                            modal.style.transition = 'transform 0.3s ease';
+                            
+                            // close button
+                            const closeButton = document.createElement('button');
+                            closeButton.innerHTML = '&times;';
+                            closeButton.style.position = 'absolute';
+                            closeButton.style.top = '1rem';
+                            closeButton.style.right = '1rem';
+                            closeButton.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                            closeButton.style.color = 'white';
+                            closeButton.style.border = 'none';
+                            closeButton.style.borderRadius = '50%';
+                            closeButton.style.width = '40px';
+                            closeButton.style.height = '40px';
+                            closeButton.style.fontSize = '1.5rem';
+                            closeButton.style.cursor = 'pointer';
+                            closeButton.style.zIndex = '10';
+                            closeButton.style.display = 'flex';
+                            closeButton.style.justifyContent = 'center';
+                            closeButton.style.alignItems = 'center';
+                            closeButton.style.transition = 'all 0.3s ease';
+                            
+                            closeButton.addEventListener('mouseenter', () => {
+                                closeButton.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                                closeButton.style.transform = 'scale(1.1)';
+                            });
+                            
+                            closeButton.addEventListener('mouseleave', () => {
+                                closeButton.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                                closeButton.style.transform = 'scale(1)';
+                            });
+                            
+                            closeButton.addEventListener('click', () => {
+                                playCloseSound();
+                                overlay.style.opacity = '0';
+                                modal.style.transform = 'scale(0.9)';
+                                
+                                setTimeout(() => {
+                                    document.body.removeChild(overlay);
+                                }, 300);
+                            });
+                            
+                            // hero image
+                            const heroImage = document.createElement('div');
+                            heroImage.style.height = '400px';
+                            heroImage.style.backgroundImage = `url('${destination.image}')`;
+                            heroImage.style.backgroundSize = 'cover';
+                            heroImage.style.backgroundPosition = 'center';
+                            heroImage.style.position = 'relative';
+                            heroImage.style.borderTopLeftRadius = '8px';
+                            heroImage.style.borderTopRightRadius = '8px';
+                            
+                            // overlay gradient
+                            const heroOverlay = document.createElement('div');
+                            heroOverlay.style.position = 'absolute';
+                            heroOverlay.style.top = '0';
+                            heroOverlay.style.left = '0';
+                            heroOverlay.style.width = '100%';
+                            heroOverlay.style.height = '100%';
+                            heroOverlay.style.background = 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%)';
+                            
+                            // title container
+                            const titleContainer = document.createElement('div');
+                            titleContainer.style.position = 'absolute';
+                            titleContainer.style.bottom = '0';
+                            titleContainer.style.left = '0';
+                            titleContainer.style.width = '100%';
+                            titleContainer.style.padding = '2rem';
+                            
+                            // title
+                            const title = document.createElement('h2');
+                            title.textContent = destination.name;
+                            title.style.color = 'white';
+                            title.style.fontFamily = 'Havelock Titling Bold, sans-serif';
+                            title.style.fontSize = '3rem';
+                            title.style.margin = '0 0 1rem 0';
+                            title.style.textShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
+                            
+                            // rating
+                            const ratingContainer = document.createElement('div');
+                            ratingContainer.style.display = 'flex';
+                            ratingContainer.style.alignItems = 'center';
+                            ratingContainer.style.gap = '0.5rem';
+                            ratingContainer.style.marginBottom = '1rem';
+                            
+                            // generate stars based on rating
+                            const fullStars = Math.floor(destination.rating);
+                            const hasHalfStar = destination.rating % 1 >= 0.5;
+                            
+                            for (let i = 0; i < 5; i++) {
+                                const star = document.createElement('span');
+                                if (i < fullStars) {
+                                    star.innerHTML = '★'; // full star
+                                    star.style.color = 'rgba(255, 215, 0, 0.9)';
+                                } else if (i === fullStars && hasHalfStar) {
+                                    star.innerHTML = '★'; // half star
+                                    star.style.color = 'rgba(255, 215, 0, 0.5)';
+                                } else {
+                                    star.innerHTML = '★'; // empty star
+                                    star.style.color = 'rgba(255, 255, 255, 0.2)';
+                                }
+                                star.style.fontSize = '1.2rem';
+                                ratingContainer.appendChild(star);
+                            }
+                            
+                            const ratingText = document.createElement('span');
+                            ratingText.textContent = `${destination.rating.toFixed(1)} / 5.0`;
+                            ratingText.style.color = 'white';
+                            ratingText.style.fontFamily = 'Source Code Pro, sans-serif';
+                            ratingText.style.fontSize = '1rem';
+                            ratingContainer.appendChild(ratingText);
+                            
+                            titleContainer.appendChild(title);
+                            titleContainer.appendChild(ratingContainer);
+                            
+                            // badge container
+                            const badgeContainer = document.createElement('div');
+                            badgeContainer.style.display = 'flex';
+                            badgeContainer.style.gap = '1rem';
+                            badgeContainer.style.marginBottom = '1rem';
+                            
+                            // category badges
+                            if (destination.categories.includes('elite')) {
+                                const eliteBadge = document.createElement('div');
+                                eliteBadge.textContent = 'ELITE';
+                                eliteBadge.style.backgroundColor = 'rgba(255, 215, 0, 0.9)';
+                                eliteBadge.style.color = '#000';
+                                eliteBadge.style.padding = '0.3rem 0.8rem';
+                                eliteBadge.style.fontSize = '0.8rem';
+                                eliteBadge.style.fontWeight = 'bold';
+                                eliteBadge.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                                eliteBadge.style.borderRadius = '4px';
+                                eliteBadge.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.5)';
+                                badgeContainer.appendChild(eliteBadge);
+                            }
+                            
+                            if (destination.categories.includes('natural')) {
+                                const naturalBadge = document.createElement('div');
+                                naturalBadge.textContent = 'NATURAL';
+                                naturalBadge.style.backgroundColor = 'rgba(0, 180, 0, 0.9)';
+                                naturalBadge.style.color = 'white';
+                                naturalBadge.style.padding = '0.3rem 0.8rem';
+                                naturalBadge.style.fontSize = '0.8rem';
+                                naturalBadge.style.fontWeight = 'bold';
+                                naturalBadge.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                                naturalBadge.style.borderRadius = '4px';
+                                naturalBadge.style.boxShadow = '0 0 10px rgba(0, 180, 0, 0.5)';
+                                badgeContainer.appendChild(naturalBadge);
+                            }
+                            
+                            titleContainer.appendChild(badgeContainer);
+                            heroImage.appendChild(heroOverlay);
+                            heroImage.appendChild(titleContainer);
+                            
+                            // content container
+                            const contentContainer = document.createElement('div');
+                            contentContainer.style.padding = '2rem';
+                            
+                            // two-column layout
+                            const columns = document.createElement('div');
+                            columns.style.display = 'grid';
+                            columns.style.gridTemplateColumns = '2fr 1fr';
+                            columns.style.gap = '2rem';
+                            
+                            // left column (description and features)
+                            const leftColumn = document.createElement('div');
+                            
+                            // description section
+                            const descriptionSection = document.createElement('div');
+                            descriptionSection.style.marginBottom = '2rem';
+                            
+                            const descriptionTitle = document.createElement('h3');
+                            descriptionTitle.textContent = 'OVERVIEW';
+                            descriptionTitle.style.color = 'white';
+                            descriptionTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            descriptionTitle.style.fontSize = '1.5rem';
+                            descriptionTitle.style.marginBottom = '1rem';
+                            
+                            const description = document.createElement('p');
+                            description.textContent = destination.description;
+                            description.style.color = 'rgba(255, 255, 255, 0.8)';
+                            description.style.fontFamily = 'Source Code Pro, sans-serif';
+                            description.style.fontSize = '1.1rem';
+                            description.style.lineHeight = '1.8';
+                            
+                            // extended description based on destination type
+                            const extendedDescription = document.createElement('p');
+                            
+                            if (destination.categories.includes('synthetic')) {
+                                extendedDescription.textContent = `As one of our premium synthetic destinations, ${destination.name} represents the pinnacle of our terraforming and environmental engineering capabilities. Built from materials harvested across multiple solar systems, every aspect of this experience has been meticulously crafted for maximum luxury and unique sensory stimulation.`;
+                            } else if (destination.categories.includes('natural')) {
+                                extendedDescription.textContent = `${destination.name} showcases the raw, untamed beauty of natural celestial bodies, enhanced with our luxury accommodations and safety systems. We've carefully integrated our facilities to preserve the authentic character of this destination while ensuring uncompromising comfort.`;
+                            }
+                            
+                            extendedDescription.style.color = 'rgba(255, 255, 255, 0.8)';
+                            extendedDescription.style.fontFamily = 'Source Code Pro, sans-serif';
+                            extendedDescription.style.fontSize = '1.1rem';
+                            extendedDescription.style.lineHeight = '1.8';
+                            extendedDescription.style.marginTop = '1rem';
+                            
+                            descriptionSection.appendChild(descriptionTitle);
+                            descriptionSection.appendChild(description);
+                            descriptionSection.appendChild(extendedDescription);
+                            
+                            // features section
+                            const featuresSection = document.createElement('div');
+                            featuresSection.style.marginBottom = '2rem';
+                            
+                            const featuresTitle = document.createElement('h3');
+                            featuresTitle.textContent = 'EXCLUSIVE FEATURES';
+                            featuresTitle.style.color = 'white';
+                            featuresTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            featuresTitle.style.fontSize = '1.5rem';
+                            featuresTitle.style.marginBottom = '1rem';
+                            
+                            const featuresList = document.createElement('ul');
+                            featuresList.style.paddingLeft = '1.5rem';
+                            featuresList.style.marginBottom = '1.5rem';
+                            
+                            destination.features.forEach(feature => {
+                                const featureItem = document.createElement('li');
+                                featureItem.textContent = feature;
+                                featureItem.style.color = 'rgba(255, 255, 255, 0.8)';
+                                featureItem.style.fontFamily = 'Source Code Pro, sans-serif';
+                                featureItem.style.fontSize = '1.1rem';
+                                featureItem.style.marginBottom = '0.5rem';
+                                featureItem.style.lineHeight = '1.5';
+                                featuresList.appendChild(featureItem);
+                            });
+                            
+                            featuresSection.appendChild(featuresTitle);
+                            featuresSection.appendChild(featuresList);
+                            
+                            leftColumn.appendChild(descriptionSection);
+                            leftColumn.appendChild(featuresSection);
+                            
+                            // right column
+                            const rightColumn = document.createElement('div');
+                            
+                            // price box
+                            const priceBox = document.createElement('div');
+                            priceBox.style.backgroundColor = 'rgba(0, 25, 50, 0.5)';
+                            priceBox.style.borderRadius = '8px';
+                            priceBox.style.padding = '1.5rem';
+                            priceBox.style.marginBottom = '2rem';
+                            
+                            const priceTitle = document.createElement('h4');
+                            priceTitle.textContent = 'PRICING';
+                            priceTitle.style.color = 'white';
+                            priceTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            priceTitle.style.fontSize = '1.2rem';
+                            priceTitle.style.marginBottom = '1rem';
+                            
+                            const priceValue = document.createElement('div');
+                            priceValue.innerHTML = `<span style="font-size: 2.5rem; font-weight: bold; color: rgba(0, 128, 255, 0.9);">${destination.price.toLocaleString()}</span> <span style="color: rgba(255, 255, 255, 0.7); font-size: 1rem;">SCS™</span>`;
+                            priceValue.style.fontFamily = 'Source Code Pro, sans-serif';
+                            priceValue.style.marginBottom = '0.5rem';
+                            
+                            const priceSubtext = document.createElement('div');
+                            priceSubtext.textContent = 'per week, all inclusive';
+                            priceSubtext.style.color = 'rgba(255, 255, 255, 0.6)';
+                            priceSubtext.style.fontFamily = 'Source Code Pro, sans-serif';
+                            priceSubtext.style.fontSize = '0.9rem';
+                            priceSubtext.style.marginBottom = '1.5rem';
+                            
+                            const priceInfo = document.createElement('ul');
+                            priceInfo.style.listStyle = 'none';
+                            priceInfo.style.padding = '0';
+                            priceInfo.style.margin = '0';
+                            
+                            const bookingButton = document.createElement('button');
+                            bookingButton.textContent = 'BOOK NOW';
+                            bookingButton.style.width = '100%';
+                            bookingButton.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                            bookingButton.style.color = 'white';
+                            bookingButton.style.border = 'none';
+                            bookingButton.style.borderRadius = '4px';
+                            bookingButton.style.padding = '1rem 2rem';
+                            bookingButton.style.fontSize = '1.1rem';
+                            bookingButton.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            bookingButton.style.cursor = 'pointer';
+                            bookingButton.style.transition = 'all 0.3s ease';
+                            
+                            bookingButton.addEventListener('mouseenter', () => {
+                                playHoverSound();
+                                bookingButton.style.backgroundColor = 'rgba(0, 160, 255, 1)';
+                                bookingButton.style.transform = 'scale(1.03)';
+                            });
+                            
+                            bookingButton.addEventListener('mouseleave', () => {
+                                bookingButton.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                                bookingButton.style.transform = 'scale(1)';
+                            });
+                            
+                            bookingButton.addEventListener('click', () => {
+                                playClickSound();
+                                // popup overlay
+                                const overlay = document.createElement('div');
+                                overlay.style.position = 'fixed';
+                                overlay.style.top = '0';
+                                overlay.style.left = '0';
+                                overlay.style.width = '100%';
+                                overlay.style.height = '100%';
+                                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                                overlay.style.backdropFilter = 'blur(8px)';
+                                overlay.style.zIndex = '1000';
+                                overlay.style.display = 'flex';
+                                overlay.style.justifyContent = 'center';
+                                overlay.style.alignItems = 'center';
+                                
+                                // popup container
+                                const popup = document.createElement('div');
+                                popup.style.backgroundColor = 'rgba(10, 15, 30, 0.95)';
+                                popup.style.border = '2px solid rgba(0, 128, 255, 0.7)';
+                                popup.style.borderRadius = '12px';
+                                popup.style.padding = '40px';
+                                popup.style.width = '90%';
+                                popup.style.maxWidth = '500px';
+                                popup.style.position = 'relative';
+                                popup.style.boxShadow = '0 0 30px rgba(0, 128, 255, 0.5)';
+                                popup.style.animation = 'popupFadeIn 0.3s ease-out forwards';
+                                
+                                // Create animation keyframes
+                                const style = document.createElement('style');
+                                style.textContent = `
+                                    @keyframes popupFadeIn {
+                                        from { opacity: 0; transform: scale(0.9); }
+                                        to { opacity: 1; transform: scale(1); }
+                                    }
+                                    
+                                    @keyframes glowPulse {
+                                        0% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
+                                        50% { box-shadow: 0 0 15px rgba(0, 128, 255, 0.8); }
+                                        100% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
+                                    }
+                                `;
+                                document.head.appendChild(style);
+                                
+                                // close button
+                                const closeButton = document.createElement('button');
+                                closeButton.innerHTML = '&times;';
+                                closeButton.style.position = 'absolute';
+                                closeButton.style.top = '15px';
+                                closeButton.style.right = '15px';
+                                closeButton.style.backgroundColor = 'transparent';
+                                closeButton.style.border = 'none';
+                                closeButton.style.color = 'rgba(0, 128, 255, 0.9)';
+                                closeButton.style.fontSize = '28px';
+                                closeButton.style.cursor = 'pointer';
+                                closeButton.style.width = '40px';
+                                closeButton.style.height = '40px';
+                                closeButton.style.lineHeight = '40px';
+                                closeButton.style.padding = '0';
+                                closeButton.style.borderRadius = '50%';
+                                closeButton.style.transition = 'all 0.2s ease';
+                                
+                                closeButton.addEventListener('mouseenter', () => {
+                                    closeButton.style.backgroundColor = 'rgba(0, 128, 255, 0.2)';
+                                    closeButton.style.transform = 'scale(1.1)';
+                                });
+                                
+                                closeButton.addEventListener('mouseleave', () => {
+                                    closeButton.style.backgroundColor = 'transparent';
+                                    closeButton.style.transform = 'scale(1)';
+                                });
+                                
+                                closeButton.addEventListener('click', () => {
+                                    playCloseSound();
+                                    overlay.style.opacity = '0';
+                                    popup.style.transform = 'scale(0.9)';
+                                    popup.style.opacity = '0';
+                                    setTimeout(() => {
+                                        document.body.removeChild(overlay);
+                                    }, 300);
+                                });
+                                
+                                // title
+                                const popupTitle = document.createElement('h2');
+                                popupTitle.textContent = 'BOOKING PORTAL';
+                                popupTitle.style.color = 'white';
+                                popupTitle.style.fontSize = '2rem';
+                                popupTitle.style.textAlign = 'center';
+                                popupTitle.style.marginBottom = '20px';
+                                popupTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                                
+                                // email icon
+                                const emailIcon = document.createElement('div');
+                                emailIcon.innerHTML = `
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="rgba(0, 128, 255, 0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
+                                `;
+                                emailIcon.style.display = 'flex';
+                                emailIcon.style.justifyContent = 'center';
+                                emailIcon.style.marginBottom = '20px';
+                                
+                                // message
+                                const messageText = document.createElement('p');
+                                messageText.textContent = 'Please forward your booking request to our customer support for details:';
+                                messageText.style.color = 'rgb(209, 213, 219)';
+                                messageText.style.fontSize = '1.1rem';
+                                messageText.style.textAlign = 'center';
+                                messageText.style.lineHeight = '1.6';
+                                messageText.style.marginBottom = '20px';
+                                messageText.style.fontFamily = 'Source Code Pro, sans-serif';
+                                
+                                // email
+                                const emailAddress = document.createElement('div');
+                                emailAddress.textContent = 'support@elysiuminitiative.com';
+                                emailAddress.style.color = 'rgba(0, 128, 255, 0.9)';
+                                emailAddress.style.fontSize = '1.2rem';
+                                emailAddress.style.fontWeight = 'bold';
+                                emailAddress.style.textAlign = 'center';
+                                emailAddress.style.padding = '15px';
+                                emailAddress.style.margin = '0 auto 25px auto';
+                                emailAddress.style.backgroundColor = 'rgba(0, 128, 255, 0.1)';
+                                emailAddress.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+                                emailAddress.style.borderRadius = '6px';
+                                emailAddress.style.maxWidth = '350px';
+                                emailAddress.style.fontFamily = 'Source Code Pro, monospace';
+                                emailAddress.style.animation = 'glowPulse 4s infinite';
+                                
+                                // disclaimer
+                                const disclaimerText = document.createElement('p');
+                                disclaimerText.textContent = 'By booking a destination, you acknowledge The Elysium Initiative\'s right to neural data collection and waive all claims to anonymity upon acceptance.';
+                                disclaimerText.style.color = 'rgba(209, 213, 219, 0.6)';
+                                disclaimerText.style.fontSize = '0.8rem';
+                                disclaimerText.style.textAlign = 'center';
+                                disclaimerText.style.marginTop = '20px';
+                                disclaimerText.style.fontStyle = 'italic';
+                                disclaimerText.style.fontFamily = 'Source Code Pro, sans-serif';
+                                
+                                popup.appendChild(closeButton);
+                                popup.appendChild(popupTitle);
+                                popup.appendChild(emailIcon);
+                                popup.appendChild(messageText);
+                                popup.appendChild(emailAddress);
+                                popup.appendChild(disclaimerText);
+                                overlay.appendChild(popup);
+                                document.body.appendChild(overlay);
+                            });
+                            
+                            priceBox.appendChild(priceTitle);
+                            priceBox.appendChild(priceValue);
+                            priceBox.appendChild(priceSubtext);
+                            priceBox.appendChild(priceInfo);
+                            priceBox.appendChild(bookingButton);
+                            
+                            rightColumn.appendChild(priceBox);
+                            
+                            columns.appendChild(leftColumn);
+                            columns.appendChild(rightColumn);
+                            
+                            contentContainer.appendChild(columns);
+                            
+                            modal.appendChild(closeButton);
+                            modal.appendChild(heroImage);
+                            modal.appendChild(contentContainer);
+                            
+                            overlay.appendChild(modal);
+                            document.body.appendChild(overlay);
+                            
+                            // animation
+                            setTimeout(() => {
+                                overlay.style.opacity = '1';
+                                modal.style.transform = 'scale(1)';
+                            }, 10);
+                        }
+                        
                         document.body.appendChild(getawaysPage);
                     }
                 },
@@ -2549,6 +3864,7 @@ of provided equipment.';
         {
             title: 'About',
             action: () => {
+                closeAllPages();
                 sidebar.classList.remove('active');
                 container.style.display = 'none';
         
@@ -2678,6 +3994,7 @@ decommissioning, reallocating resources toward higher-value celestial investment
                     leaderCard.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
                     
                     leaderCard.addEventListener('mouseenter', () => {
+                        playHoverSound3();
                         leaderCard.style.transform = 'translateY(-10px)';
                         leaderCard.style.boxShadow = '0 15px 30px rgba(0, 128, 255, 0.2)';
                     });
@@ -2862,6 +4179,7 @@ decommissioning, reallocating resources toward higher-value celestial investment
                     milestoneNode.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
                     
                     milestoneNode.addEventListener('mouseenter', () => {
+                        playHoverSound3();
                         milestoneNode.style.transform = 'scale(1.03)';
                         milestoneNode.style.boxShadow = '0 10px 25px rgba(0, 128, 255, 0.2)';
                     });
@@ -3084,12 +4402,14 @@ decommissioning, reallocating resources toward higher-value celestial investment
                 nextArrow.style.transition = 'background-color 0.3s ease';
 
                 prevArrow.addEventListener('mouseenter', () => {
+                    playHoverSound2();
                     prevArrow.style.backgroundColor = 'rgba(0, 128, 255, 0.7)';
                 });
                 prevArrow.addEventListener('mouseleave', () => {
                     prevArrow.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
                 });
                 nextArrow.addEventListener('mouseenter', () => {
+                    playHoverSound2();
                     nextArrow.style.backgroundColor = 'rgba(0, 128, 255, 0.7)';
                 });
                 nextArrow.addEventListener('mouseleave', () => {
