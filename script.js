@@ -351,6 +351,22 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(sidebarStyle);
 
+    // animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes popupFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+                                
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
+            50% { box-shadow: 0 0 15px rgba(0, 128, 255, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
+        }
+    `;
+    document.head.appendChild(style);
+
     // main container
     const container = document.createElement('div');
     container.style.display = 'flex';
@@ -990,8 +1006,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         chartContainer.style.height = '600px';
                         chartContainer.style.backgroundColor = 'rgba(0, 128, 255, 0.07)';
                         chartContainer.style.borderRadius = '8px';
-                        chartContainer.style.border = '2px solid rgba(0, 128, 255, 0.8)';
-                        chartContainer.style.boxShadow = '0 0 15px rgba(0, 128, 255, 0.69)';
+                        chartContainer.style.border = '2px solid rgba(0, 128, 255, 0.4)';
+                        chartContainer.style.boxShadow = '0 0 15px rgba(0, 128, 255, 0.4)';
                         chartContainer.style.padding = '20px';
                         chartContainer.style.position = 'relative';
                         chartContainer.style.marginBottom = '2rem';
@@ -1638,10 +1654,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         // footer
                         const footer = document.createElement('div');
                         footer.style.textAlign = 'center';
-                        footer.style.marginTop = '4rem';
                         footer.style.paddingBottom = '2rem';
                         footer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
                         footer.style.paddingTop = '2rem';
+                        footer.style.maxWidth = '700px';
+                        footer.style.margin = '4rem auto 0rem auto';
                         
                         const footerText = document.createElement('p');
                         footerText.textContent = "© 2202 The Elysium Initiative. All rights reserved across the spacetime continuum.";
@@ -1669,7 +1686,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         catalogPage.style.height = '100%';
                         catalogPage.style.backgroundColor = 'black';
                         catalogPage.style.color = 'white';
-                        catalogPage.style.padding = '120px 2rem 2rem 2rem';
+                        catalogPage.style.padding = '120px 0 2rem 0';
                         catalogPage.style.display = 'flex';
                         catalogPage.style.justifyContent = 'center';
                         catalogPage.style.position = 'fixed';
@@ -1677,7 +1694,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         catalogPage.style.left = '0';
                         catalogPage.style.right = '0';
                         catalogPage.style.bottom = '0';
-                        catalogPage.style.overflowY = 'scroll';
+                        catalogPage.style.overflowY = 'auto';
                     
                         const content = document.createElement('div');
                         content.style.maxWidth = '1060px';
@@ -1782,21 +1799,6 @@ For detailed specifications, personalized quotes, or further information, contac
                             popup.style.position = 'relative';
                             popup.style.boxShadow = '0 0 30px rgba(0, 128, 255, 0.5)';
                             popup.style.animation = 'popupFadeIn 0.3s ease-out forwards';
-                            
-                            const style = document.createElement('style');
-                            style.textContent = `
-                                @keyframes popupFadeIn {
-                                    from { opacity: 0; transform: scale(0.9); }
-                                    to { opacity: 1; transform: scale(1); }
-                                }
-                                
-                                @keyframes glowPulse {
-                                    0% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
-                                    50% { box-shadow: 0 0 15px rgba(0, 128, 255, 0.8); }
-                                    100% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
-                                }
-                            `;
-                            document.head.appendChild(style);
                             
                             const closeButton = document.createElement('button');
                             closeButton.innerHTML = '&times;';
@@ -2116,7 +2118,11 @@ For detailed specifications, personalized quotes, or further information, contac
                             
                             // short preview description
                             const preview = document.createElement('p');
-                            preview.textContent = tech.description.split('.')[0] + '...'; // just the first sentence
+                            // truncate description if it's over 80 characters
+                            const truncatedDescription = tech.description.length > 80 ? 
+                                                        tech.description.substring(0, 80) + '...' :
+                                                        tech.description;
+                            preview.textContent = truncatedDescription;
                             preview.style.fontSize = '0.9rem';
                             preview.style.color = 'rgba(255, 255, 255, 0.8)';
                             preview.style.margin = '0';
@@ -2281,12 +2287,73 @@ For detailed specifications, personalized quotes, or further information, contac
                             specReadout.style.marginTop = '1.5rem';
                             specReadout.style.marginBottom = '0.5rem';
                             
-                            // spec indicators
-                            const specIndicators = [
-                                { label: 'POWER', value: Math.floor(Math.random() * 30) + 70 }, // 70-99%
-                                { label: 'EFFICIENCY', value: Math.floor(Math.random() * 15) + 85 }, // 85-99%
-                                { label: 'DURABILITY', value: Math.floor(Math.random() * 20) + 80 } // 80-99%
-                            ];
+                            // spec indicators - static values unique to each tech
+                            let specIndicators;
+                            
+                            switch(tech.id) {
+                                case 'aero-skimmers':
+                                    specIndicators = [
+                                        { label: 'POWER', value: 75 },
+                                        { label: 'EFFICIENCY', value: 97 },
+                                        { label: 'DURABILITY', value: 82 }
+                                    ];
+                                    break;
+                                case 'mining-swarms':
+                                    specIndicators = [
+                                        { label: 'POWER', value: 83 },
+                                        { label: 'EFFICIENCY', value: 89 },
+                                        { label: 'DURABILITY', value: 79 }
+                                    ];
+                                    break;
+                                case 'hydro-siphons':
+                                    specIndicators = [
+                                        { label: 'POWER', value: 90 },
+                                        { label: 'EFFICIENCY', value: 92 },
+                                        { label: 'DURABILITY', value: 85 }
+                                    ];
+                                    break;
+                                case 'frost-maws':
+                                    specIndicators = [
+                                        { label: 'POWER', value: 93 },
+                                        { label: 'EFFICIENCY', value: 78 },
+                                        { label: 'DURABILITY', value: 84 }
+                                    ];
+                                    break;
+                                case 'mantle-bores':
+                                    specIndicators = [
+                                        { label: 'POWER', value: 95 },
+                                        { label: 'EFFICIENCY', value: 87 },
+                                        { label: 'DURABILITY', value: 94 }
+                                    ];
+                                    break;
+                                case 'core-shredders':
+                                    specIndicators = [
+                                        { label: 'POWER', value: 99 },
+                                        { label: 'EFFICIENCY', value: 82 },
+                                        { label: 'DURABILITY', value: 88 }
+                                    ];
+                                    break;
+                                case 'vortex-converters':
+                                    specIndicators = [
+                                        { label: 'POWER', value: 100 },
+                                        { label: 'EFFICIENCY', value: 90 },
+                                        { label: 'DURABILITY', value: 83 }
+                                    ];
+                                    break;
+                                case 'quantum-nexus':
+                                    specIndicators = [
+                                        { label: 'POWER', value: 92 },
+                                        { label: 'EFFICIENCY', value: 100 },
+                                        { label: 'DURABILITY', value: 97 }
+                                    ];
+                                    break;
+                                default:
+                                    specIndicators = [
+                                        { label: 'POWER', value: 85 },
+                                        { label: 'EFFICIENCY', value: 85 },
+                                        { label: 'DURABILITY', value: 85 }
+                                    ];
+                            }
                             
                             specIndicators.forEach(spec => {
                                 const specItem = document.createElement('div');
@@ -2557,10 +2624,11 @@ of provided equipment.';
                         // footer
                         const footer = document.createElement('div');
                         footer.style.textAlign = 'center';
-                        footer.style.marginTop = '4rem';
                         footer.style.paddingBottom = '2rem';
                         footer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
                         footer.style.paddingTop = '2rem';
+                        footer.style.maxWidth = '700px';
+                        footer.style.margin = '4rem auto 0rem auto';
                         
                         const footerText = document.createElement('p');
                         footerText.textContent = "© 2202 The Elysium Initiative. All rights reserved across the spacetime continuum.";
@@ -2597,10 +2665,10 @@ of provided equipment.';
                         getawaysPage.style.height = '100%';
                         getawaysPage.style.backgroundColor = 'black';
                         getawaysPage.style.color = 'white';
-                        getawaysPage.style.padding = '120px 0 0 0';
+                        getawaysPage.style.padding = '120px 0 2rem 0';
                         getawaysPage.style.display = 'flex';
                         getawaysPage.style.flexDirection = 'column';
-                        getawaysPage.style.alignItems = 'center';
+                        getawaysPage.style.justifyContent = 'flex-start';
                         getawaysPage.style.position = 'fixed';
                         getawaysPage.style.top = '0';
                         getawaysPage.style.left = '0';
@@ -2734,84 +2802,180 @@ of provided equipment.';
                         const destinations = [
                             {
                                 name: "Elysium Prime",
-                                description: "[description]",
+                                description: "Experience the pinnacle of luxury space tourism at Elysium Prime, our flagship \
+synthetic planet. Enjoy a perfect year-round climate, stunning crystalline coastlines, and an endless number of parks, resorts, \
+and casinos on this masterpiece of indulgence.",
                                 image: "elysium_prime.jpg",
-                                price: 1200000,
+                                price: 1900000,
                                 rating: 5,
                                 categories: ["elite"],
-                                features: ["[features]"]
+                                features: [
+                                    "White-sand beaches",
+                                    "Shoreline villas",
+                                    "Five-star restaurants",
+                                    "Award-winning resorts and casinos",
+                                    "Ultra-luxury shopping districts",
+                                    "Worldwide hover transport",
+                                    "Freedom from insects, pests, and irritants",
+                                    "Wellness centers open day-round",
+                                    "Immersive tourist experiences",
+                                    "And more!"
+                                ]
                             },
                             {
                                 name: "Neochroma",
-                                description: "[description]",
+                                description: "Step into a vibrant, neon world and year-round nightlife with Neochroma. Perfect \
+for thrill-seekers, partygoers, and festival enthusiasts, this is a planet that never sleeps.",
                                 image: "neochroma.jpg",
                                 price: 750000,
                                 rating: 4.8,
                                 categories: ["dream"],
-                                features: ["[features]"]
+                                features: [
+                                    "Eternal night, illuminated by fluorescent cloud cover",
+                                    "Neon-lit megacities",
+                                    "Diverse entertainment districts",
+                                    "Party cruises",
+                                    "Neverending music festivals",
+                                    "Bioluminescent wildlife",
+                                    "Virtual reality arenas",
+                                    "Ultra-modern accommodations",
+                                    "And more!"
+                                ]
                             },
                             {
                                 name: "Cerula Polaris",
-                                description: "[description]",
+                                description: "Cerula Polaris is an escape to ultimate serenity. Tour our sprawling snowy forests, \
+climb the tallest mountain peaks, or soak up the auroras on this stunning arctic world.",
                                 image: "cerula_polaris.jpg",
                                 price: 680000,
                                 rating: 4.7,
                                 categories: ["dream"],
-                                features: ["[features]"]
+                                features: [
+                                    "Sightseeing tours",
+                                    "Crystalline caverns",
+                                    "Glass observation domes",
+                                    "Luxury thermal spas",
+                                    "Authentic chalet lodges",
+                                    "Guided glacier expeditions",
+                                    "And more!"
+                                ]
                             },
                             {
                                 name: "Syluna",
-                                description: "[description]",
+                                description: "Experience the ethereal beauty of Syluna. With its swirling skies and sprawling landscapes, \
+this dreamlike paradise offers a perfect balance of tranquility and visual wonder for the discerning traveler.",
                                 image: "syluna.jpg",
                                 price: 840000,
                                 rating: 4.6,
                                 categories: ["dream"],
-                                features: ["[features]"]
+                                features: [
+                                    "Floating observation platforms",
+                                    "Gravity-defying cloud villas",
+                                    "Resonance chamber concerts",
+                                    "Dream-enhancement spas",
+                                    "Meditative sky gardens",
+                                    "Panoramic celestial viewing domes",
+                                    "Gourmet cuisine",
+                                    "Climate-controlled suites",
+                                    "And more!"
+                                ]
                             },
                             {
                                 name: "Edenvale",
-                                description: "[description]",
+                                description: "Find your adventure in the lush rainforests of Edenvale, a world teeming with exotic \
+wildlife and vibrant foliage. From towering canopies to secluded groves, this paradise offers authentic wilderness expeditions for those \
+with an unrelenting thirst for discovery.",
                                 image: "edenvale.jpg",
                                 price: 1500000,
                                 rating: 5,
                                 categories: ["adventure", "elite"],
-                                features: ["[features]"]
+                                features: [
+                                    "Guided expeditions",
+                                    "Canopy walkway networks",
+                                    "Luxury treehouse accommodations",
+                                    "Waterfall rappelling adventures",
+                                    "Bioluminescent night tours",
+                                    "Immersive wildlife encounters",
+                                    "Exotic rainforest cuisine",
+                                    "Private river cruises",
+                                    "And more!"
+                                ]
                             },
                             {
                                 name: "Umbra Solace",
-                                description: "[description]",
+                                description: "Discover the mysterious beauty of Umbra Solace, a world kissed by eternal twilight. The \
+hauntingly beautiful world of Umbra Solace offers a rare escape for those seeking solitude, reflection, and respite from the stress of 23rd \
+century existence.",
                                 image: "umbra_solace.jpg",
                                 price: 590000,
                                 rating: 4.5,
                                 categories: ["dream"],
-                                features: ["[features]"]
+                                features: [
+                                    "Silent meditation chambers",
+                                    "Classic and contemporary art galleries",
+                                    "Starlight dining experiences",
+                                    "Sensory deprivation chambers",
+                                    "Custom isolation retreats",
+                                    "Twilight photography shoots",
+                                    "And more!"
+                                ]
                             },
                             {
                                 name: "Halios Deep",
-                                description: "[description]",
+                                description: "Venture into the mesmerizing depths of Halios Deep, a world whose shroud of darkness is broken \
+only by bioluminescent life. Perfect for courageous explorers drawn to the mysteries beneath the waves, this is a truly awe-inspiring journey \
+into the unknown.",
                                 image: "halios_deep.jpg",
-                                price: 2200000,
-                                rating: 4.9,
+                                price: 1600000,
+                                rating: 5,
                                 categories: ["adventure", "elite"],
-                                features: ["[features]"]
+                                features: [
+                                    "Transparent habitation domes",
+                                    "Deep sea exploration submarines",
+                                    "Enchanting bioluminescent wildlife",
+                                    "Oceanic cuisine",
+                                    "Pressure-adaptive luxury suites",
+                                    "Glowing marine life sanctuaries",
+                                    "Exclusive deep ocean research expeditions",
+                                    "And more!"
+                                ]
                             },
                             {
                                 name: "Seraph Vesa",
-                                description: "[description]",
+                                description: "The serene haven of Seraph Vesa provides a moving experience of spiritual renewal, \
+catering to those in pursuit of peace and introspection. Open your mind and feel lifted beyond corporeal existence.",
                                 image: "seraph_vesa.jpg",
                                 price: 480000,
                                 rating: 4.4,
                                 categories: ["dream"],
-                                features: ["[features]"]
+                                features: [
+                                    "Antigravity meditation gardens",
+                                    "Celestial music pavilions",
+                                    "Aerial dance platforms",
+                                    "Personalized spiritual experiences",
+                                    "Vapor bath rejuvenation centers",
+                                    "Light therapy sanctuaries",
+                                    "And more!"
+                                ]
                             },
                             {
                                 name: "Pyraxis",
-                                description: "[description]",
+                                description: "Embrace the primal power of Pyraxis, a world ablaze with molten rock and obsidian \
+marbling. This volcanic planet offers a plethora of extreme experiences for adventurers, thrill-seekers, and adrenaline junkies.",
                                 image: "pyraxis.jpg",
-                                price: 3500000,
-                                rating: 5,
-                                categories: ["elite"],
-                                features: ["[features]"]
+                                price: 620000,
+                                rating: 4.7,
+                                categories: ["dream"],
+                                features: [
+                                    "Thermal-resistant observation suites",
+                                    "Lava field expeditions",
+                                    "Heat-resistant expedition gear",
+                                    "Extreme sport centers",
+                                    "Geothermal spa treatments",
+                                    "Igneous art galleries",
+                                    "Volcanic island retreats",
+                                    "And more!"
+                                ]
                             }
                         ];
                         
@@ -2949,7 +3113,11 @@ of provided equipment.';
                             
                             // description
                             const description = document.createElement('p');
-                            description.textContent = dest.description;
+                            // truncate description if it's over 80 characters
+                            const truncatedDescription = dest.description.length > 80 ? 
+                                                        dest.description.substring(0, 80) + '...' : 
+                                                        dest.description;
+                            description.textContent = truncatedDescription;
                             description.style.margin = '0 0 1.5rem 0';
                             description.style.fontSize = '0.9rem';
                             description.style.lineHeight = '1.5';
@@ -3243,10 +3411,11 @@ of provided equipment.';
                         // footer
                         const footer = document.createElement('div');
                         footer.style.textAlign = 'center';
-                        footer.style.marginTop = '4rem';
                         footer.style.paddingBottom = '2rem';
                         footer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
                         footer.style.paddingTop = '2rem';
+                        footer.style.maxWidth = '700px';
+                        footer.style.margin = '4rem auto 0rem auto';
                         
                         const footerText = document.createElement('p');
                         footerText.textContent = "© 2202 The Elysium Initiative. All rights reserved across the spacetime continuum.";
@@ -3777,7 +3946,7 @@ of provided equipment.';
                         expeditionsPage.style.height = '100%';
                         expeditionsPage.style.backgroundColor = 'black';
                         expeditionsPage.style.color = 'white';
-                        expeditionsPage.style.padding = '120px 2rem 2rem 2rem';
+                        expeditionsPage.style.padding = '120px 0 2rem 0';
                         expeditionsPage.style.display = 'flex';
                         expeditionsPage.style.justifyContent = 'center';
                         expeditionsPage.style.position = 'fixed';
@@ -3785,78 +3954,1020 @@ of provided equipment.';
                         expeditionsPage.style.left = '0';
                         expeditionsPage.style.right = '0';
                         expeditionsPage.style.bottom = '0';
-                        expeditionsPage.style.overflowY = 'scroll';
-                
-                        const content = document.createElement('div');
-                        content.style.maxWidth = '1060px';
-                        content.style.width = '100%';
+                        expeditionsPage.style.overflowY = 'auto';
+
+                        // expeditions section
+                        const expeditionSection = document.createElement('div');
+                        expeditionSection.id = 'expedition-section';
                         
-                        const title = document.createElement('h1');
-                        title.textContent = "Research Expeditions";
-                        title.style.fontSize = '2.5rem';
-                        title.style.marginBottom = '2rem';
-                        title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
-                        title.style.color = 'white';
-                
-                        const text = document.createElement('p');
-                        text.style.fontSize = '1.25rem';
-                        text.style.marginBottom = '2rem';
-                        text.style.lineHeight = '1.75';
-                        text.style.fontFamily = 'Source Code Pro, sans-serif';
-                        text.style.color = 'rgb(209, 213, 219)';
-                        text.textContent = "[Placeholder]";
-                
-                        content.appendChild(title);
-                        content.appendChild(text);
-                        expeditionsPage.appendChild(content);
+                        const expeditionHeader = document.createElement('div');
+                        expeditionHeader.style.maxWidth = '1400px';
+                        expeditionHeader.style.margin = '0 auto 2rem auto';
+
+                        const expeditionTitle = document.createElement('h2');
+                        expeditionTitle.textContent = 'RESEARCH EXPEDITIONS';
+                        expeditionTitle.style.fontSize = '4rem';
+                        expeditionTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        expeditionTitle.style.color = 'white';
+                        expeditionTitle.style.textAlign = 'center';
+                        expeditionTitle.style.maxWidth = '1000px';
+                        expeditionTitle.style.margin = '3rem auto 2rem auto';
+                        
+                        const expeditionDivider = document.createElement('div');
+                        expeditionDivider.style.width = '160px';
+                        expeditionDivider.style.height = '4px';
+                        expeditionDivider.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                        expeditionDivider.style.margin = '2rem auto 2rem auto';
+
+                        const expeditionSubtitle = document.createElement('div');
+                        expeditionSubtitle.textContent = 'Join one of our exclusive research missions to explore the far reaches of our system and beyond.';
+                        expeditionSubtitle.style.fontSize = '1rem';
+                        expeditionSubtitle.style.fontFamily = 'Source Code Pro, sans-serif';
+                        expeditionSubtitle.style.color = 'rgb(209, 213, 219)';
+                        expeditionSubtitle.style.textAlign = 'center';
+                        expeditionSubtitle.style.maxWidth = '700px';
+                        expeditionSubtitle.style.margin = '3rem auto 1.5rem auto';
+                        
+                        expeditionHeader.appendChild(expeditionTitle);
+                        expeditionHeader.appendChild(expeditionDivider);
+                        expeditionHeader.appendChild(expeditionSubtitle);
+                        
+                        // ship class section
+                        const shipClassSection = document.createElement('div');
+                        shipClassSection.style.maxWidth = '1200px';
+                        shipClassSection.style.margin = '0 auto 6rem auto';
+                        shipClassSection.style.padding = '0 2rem';
+
+                        // stars
+                        const starDivider = document.createElement('div');
+                        starDivider.style.display = 'flex';
+                        starDivider.style.justifyContent = 'center';
+                        starDivider.style.gap = '36px';
+                        starDivider.style.margin = '3rem auto 3rem auto';
+
+                        // create 5
+                        for (let i = 0; i < 5; i++) {
+                        const star = document.createElement('div');
+                        
+                        // star SVG using innerHTML
+                        star.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="rgba(0, 128, 255, 0.9)">
+                            <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/>
+                            </svg>
+                        `;
+                        
+                        // animation
+                        star.style.transition = 'transform 0.3s ease';
+                        
+                        star.addEventListener('mouseenter', () => {
+                            star.style.transform = 'scale(1.3) rotate(144deg)';
+                        });
+                        
+                        star.addEventListener('mouseleave', () => {
+                            star.style.transform = 'scale(1) rotate(0deg)';
+                        });
+                        
+                        starDivider.appendChild(star);
+                        }
+                        
+                        // ship class title
+                        const shipClassTitle = document.createElement('h3');
+                        shipClassTitle.textContent = "TRANSPORT OPTIONS";
+                        shipClassTitle.style.fontSize = '2rem';
+                        shipClassTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        shipClassTitle.style.color = 'white';
+                        shipClassTitle.style.textAlign = 'center';
+                        shipClassTitle.style.margin = '0 auto 2rem auto';
+                        
+                        // ship classes
+                        const shipClassesContainer = document.createElement('div');
+                        shipClassesContainer.style.display = 'flex';
+                        shipClassesContainer.style.justifyContent = 'center';
+                        shipClassesContainer.style.flexWrap = 'wrap';
+                        shipClassesContainer.style.gap = '2rem';
+                        
+                        const shipClasses = [
+                            {
+                                name: "KESTREL CLASS",
+                                image: "kestrel.jpg",
+                                capacity: "24 passengers",
+                                crew: "6 crew members",
+                                duration: "1-3 months",
+                                amenities: [
+                                    "Advanced propulsion systems",
+                                    "Compact research stations",
+                                    "Radiation shielding",
+                                    "Shared living quarters",
+                                    "Emergency escape system"
+                                ],
+                                description: "Our Kestrel Class ships boast a nimble, lightweight frame, perfect for rapid deployment to nearby bodies."
+                            },
+                            {
+                                name: "EXPLORER CLASS",
+                                image: "explorer.jpg",
+                                capacity: "120 passengers",
+                                crew: "32 crew members",
+                                duration: "6-18 months",
+                                isPopular: true,
+                                amenities: [
+                                    "Research laboratories",
+                                    "Long-range sensor arrays",
+                                    "Reinforced hull",
+                                    "Quality lounge accommodations",
+                                    "Personal sleep pods"
+                                ],
+                                description: "The versatile workhorse of our fleet, Explorer Class vessels are designed for maximum adaptability during mid-range missions."
+                            },
+                            {
+                                name: "OLYMPUS CLASS",
+                                image: "olympus.jpg",
+                                capacity: "250 passengers",
+                                crew: "70 crew members",
+                                duration: "1-5 years",
+                                amenities: [
+                                    "Layered decks with luxury suites",
+                                    "Quantum computing research lab",
+                                    "Full zero-G recreation area",
+                                    "Sophisticated medical facilities",
+                                    "Private observation lounges"
+                                ],
+                                description: "As the gold standard of modern spacecraft, the Olympus Class vessel combines uncompromising luxury with state-of-the-art technology for extended deep space missions."
+                            }
+                        ];
+                        
+                        // create ship class cards
+                        shipClasses.forEach(shipClass => {
+                            const card = document.createElement('div');
+                            card.style.backgroundColor = 'rgba(16, 16, 16, 0.6)';
+                            card.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+                            card.style.borderRadius = '8px';
+                            card.style.overflow = 'hidden';
+                            card.style.width = '350px';
+                            card.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+                            card.style.position = 'relative';
+                            
+                            card.addEventListener('mouseenter', () => {
+                                playHoverSound3();
+                                card.style.transform = 'translateY(-10px)';
+                                card.style.boxShadow = '0 15px 30px rgba(0, 128, 255, 0.2)';
+                            });
+                            
+                            card.addEventListener('mouseleave', () => {
+                                card.style.transform = 'translateY(0)';
+                                card.style.boxShadow = 'none';
+                            });
+
+                            if (shipClass.isPopular) {
+                                const popularBadge = document.createElement('div');
+                                popularBadge.textContent = 'MOST POPULAR';
+                                popularBadge.style.position = 'absolute';
+                                popularBadge.style.top = '120px';
+                                popularBadge.style.right = '-28px';
+                                popularBadge.style.backgroundColor = 'rgba(255, 215, 0, 0.9)';
+                                popularBadge.style.color = '#000';
+                                popularBadge.style.padding = '6px 40px';
+                                popularBadge.style.fontSize = '0.8rem';
+                                popularBadge.style.fontWeight = 'bold';
+                                popularBadge.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                                popularBadge.style.transform = 'rotate(45deg)';
+                                popularBadge.style.transformOrigin = 'top right';
+                                popularBadge.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.5)';
+                                popularBadge.style.zIndex = '5';
+                                card.appendChild(popularBadge);
+                            }
+                            
+                            // image container
+                            const imageContainer = document.createElement('div');
+                            imageContainer.style.height = '220px';
+                            imageContainer.style.overflow = 'hidden';
+                            imageContainer.style.position = 'relative';
+                            
+                            const image = document.createElement('img');
+                            image.src = shipClass.image;
+                            image.alt = shipClass.name;
+                            image.style.width = '100%';
+                            image.style.height = '100%';
+                            image.style.objectFit = 'cover';
+                            image.style.transition = 'transform 0.5s ease';
+                            
+                            card.addEventListener('mouseenter', () => {
+                                image.style.transform = 'scale(1.1)';
+                            });
+                            
+                            card.addEventListener('mouseleave', () => {
+                                image.style.transform = 'scale(1)';
+                            });
+                            
+                            const overlay = document.createElement('div');
+                            overlay.style.position = 'absolute';
+                            overlay.style.top = '0';
+                            overlay.style.left = '0';
+                            overlay.style.width = '100%';
+                            overlay.style.height = '100%';
+                            overlay.style.background = 'linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%)';
+                            
+                            imageContainer.appendChild(image);
+                            imageContainer.appendChild(overlay);
+                            card.appendChild(imageContainer);
+                            
+                            // content
+                            const content = document.createElement('div');
+                            content.style.padding = '1.5rem';
+                            
+                            const name = document.createElement('h4');
+                            name.textContent = shipClass.name;
+                            name.style.fontSize = '1.5rem';
+                            name.style.marginBottom = '1rem';
+                            name.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            name.style.color = 'white';
+                            
+                            const description = document.createElement('p');
+                            description.textContent = shipClass.description;
+                            description.style.fontSize = '0.9rem';
+                            description.style.marginBottom = '1.5rem';
+                            description.style.lineHeight = '1.6';
+                            description.style.color = 'rgb(209, 213, 219)';
+                            description.style.fontFamily = 'Source Code Pro, sans-serif';
+                            
+                            // stats Grid
+                            const statsGrid = document.createElement('div');
+                            statsGrid.style.display = 'grid';
+                            statsGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                            statsGrid.style.gap = '1rem';
+                            statsGrid.style.marginBottom = '1.5rem';
+                            
+                            const stats = [
+                                { label: 'CAPACITY', value: shipClass.capacity },
+                                { label: 'CREW', value: shipClass.crew },
+                                { label: 'DURATION', value: shipClass.duration }
+                            ];
+                            
+                            stats.forEach(stat => {
+                                const statContainer = document.createElement('div');
+                                
+                                const statLabel = document.createElement('div');
+                                statLabel.textContent = stat.label;
+                                statLabel.style.fontSize = '0.7rem';
+                                statLabel.style.marginBottom = '0.25rem';
+                                statLabel.style.color = 'rgba(0, 128, 255, 0.9)';
+                                statLabel.style.fontFamily = 'Source Code Pro, sans-serif';
+                                statLabel.style.fontWeight = 'bold';
+                                
+                                const statValue = document.createElement('div');
+                                statValue.textContent = stat.value;
+                                statValue.style.fontSize = '0.9rem';
+                                statValue.style.color = 'white';
+                                statValue.style.fontFamily = 'Source Code Pro, sans-serif';
+                                
+                                statContainer.appendChild(statLabel);
+                                statContainer.appendChild(statValue);
+                                statsGrid.appendChild(statContainer);
+                            });
+                            
+                            // amenities
+                            const amenitiesTitle = document.createElement('div');
+                            amenitiesTitle.textContent = 'AMENITIES';
+                            amenitiesTitle.style.fontSize = '0.8rem';
+                            amenitiesTitle.style.marginBottom = '0.5rem';
+                            amenitiesTitle.style.color = 'rgba(0, 128, 255, 0.9)';
+                            amenitiesTitle.style.fontFamily = 'Source Code Pro, sans-serif';
+                            amenitiesTitle.style.fontWeight = 'bold';
+                            
+                            const amenitiesList = document.createElement('ul');
+                            amenitiesList.style.paddingLeft = '1.2rem';
+                            amenitiesList.style.fontSize = '0.8rem';
+                            amenitiesList.style.color = 'rgb(209, 213, 219)';
+                            amenitiesList.style.fontFamily = 'Source Code Pro, sans-serif';
+                            
+                            shipClass.amenities.forEach(amenity => {
+                                const item = document.createElement('li');
+                                item.textContent = amenity;
+                                item.style.marginBottom = '0.25rem';
+                                amenitiesList.appendChild(item);
+                            });
+                            
+                            content.appendChild(name);
+                            content.appendChild(description);
+                            content.appendChild(statsGrid);
+                            content.appendChild(amenitiesTitle);
+                            content.appendChild(amenitiesList);
+                            card.appendChild(content);
+                            
+                            shipClassesContainer.appendChild(card);
+                        });
+                        
+                        shipClassSection.appendChild(starDivider);
+                        shipClassSection.appendChild(shipClassTitle);
+                        shipClassSection.appendChild(shipClassesContainer);
+                        
+                        // traveler reviews section
+                        const travelerReviewsSection = document.createElement('div');
+                        travelerReviewsSection.style.maxWidth = '1200px';
+                        travelerReviewsSection.style.margin = '0 auto 6rem auto';
+                        travelerReviewsSection.style.padding = '0 2rem';
+
+                        const reviewsTitle = document.createElement('h3');
+                        reviewsTitle.textContent = "TRAVELER REVIEWS";
+                        reviewsTitle.style.fontSize = '2rem';
+                        reviewsTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        reviewsTitle.style.color = 'white';
+                        reviewsTitle.style.textAlign = 'center';
+                        reviewsTitle.style.margin = '3rem auto 4rem auto';
+
+                        // reviews carousel
+                        const reviewsCarousel = document.createElement('div');
+                        reviewsCarousel.style.position = 'relative';
+                        reviewsCarousel.style.width = '100%';
+                        reviewsCarousel.style.height = 'auto';
+                        reviewsCarousel.style.minHeight = '300px';
+                        reviewsCarousel.style.overflowY = 'visible';
+                        reviewsCarousel.style.overflowX = 'hidden';
+
+                        // sliding container for the cards
+                        const slidingContainer = document.createElement('div');
+                        slidingContainer.style.display = 'flex';
+                        slidingContainer.style.transition = 'transform 0.5s ease';
+                        slidingContainer.style.position = 'relative';
+                        reviewsCarousel.appendChild(slidingContainer);
+
+                        // reviews data
+                        const reviews = [
+                            {
+                                name: "Dr. Elena Vasquez",
+                                origin: "Former Lunar Colony",
+                                destination: "Enceladus Expedition",
+                                rating: 5,
+                                text: "The geysers of Enceladus were even more magnificent than I imagined. Our guide allowed us to collect water samples that contained complex organic molecules—a truly once-in-a-lifetime scientific opportunity. The radiation shielding was impeccable and the hibernation chambers made the journey feel instantaneous."
+                            },
+                            {
+                                name: "Marcus Chen",
+                                origin: "Mars Orbital Station",
+                                destination: "Europa Subsurface Exploration",
+                                rating: 4,
+                                text: "Descending through 15 kilometers of ice into Europa's subsurface ocean was an experience I'll never forget. The bioluminescent organisms we encountered were unlike anything in our database. My only complaint is that the quantum communication system was occasionally unreliable when transmitting research data back home."
+                            },
+                            {
+                                name: "Aria Nasser",
+                                origin: "Saturn Ring Habitat",
+                                destination: "Titan Atmospheric Analysis",
+                                rating: 5,
+                                text: "As someone who has lived their entire life in space habitats, standing on Titan's surface and seeing hydrocarbons raining from orange skies was indescribable. The atmospheric suit technology developed by The Elysium Initiative surpassed all my expectations. I'm already planning my next expedition to Neptune."
+                            },
+                            {
+                                name: "Commander Jackson Powell",
+                                origin: "Earth Remnant Conservation Zone",
+                                destination: "Mercury Polar Ice Deposits",
+                                rating: 4,
+                                text: "The expedition to Mercury's permanently shadowed craters proved invaluable for our water reclamation research. The extreme temperature variations were challenging even for our advanced equipment, but the discovery of ancient ice deposits containing Earth-origin isotope signatures made the journey worthwhile. Will definitely book through The Elysium Initiative again."
+                            },
+                            {
+                                name: "Dr. Sarah Nakamura",
+                                origin: "Jupiter Orbital Research Base",
+                                destination: "Deep Field Survey: Jupiter's Magnetosphere",
+                                rating: 5,
+                                text: "Having studied Jupiter's magnetosphere for decades, actually experiencing it firsthand was the pinnacle of my career. The Elysium Initiative's specialized instruments allowed us to record magnetic anomalies that would have been impossible to detect remotely. The ship's quantum shielding kept radiation exposure well below safety thresholds."
+                            }
+                        ];
+                        slidingContainer.style.width = `${reviews.length * 100}%`; // set width AFTER cards are created
+
+                        // reviews cards
+                        reviews.forEach((review, index) => {
+                            const reviewCard = document.createElement('div');
+                            reviewCard.className = 'review-card';
+                            reviewCard.style.position = 'relative';
+                            reviewCard.style.width = `${100 / reviews.length}%`;
+                            reviewCard.style.padding = '2rem';
+                            reviewCard.style.boxSizing = 'border-box';
+                            reviewCard.style.backgroundColor = 'rgba(16, 16, 16, 0.7)';
+                            reviewCard.style.borderRadius = '8px';
+                            reviewCard.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+                            reviewCard.style.margin = '0 10px';
+                            reviewCard.style.display = 'flex';
+                            reviewCard.style.flexDirection = 'column';
+                            
+                            // header
+                            const reviewHeader = document.createElement('div');
+                            reviewHeader.style.display = 'flex';
+                            reviewHeader.style.justifyContent = 'space-between';
+                            reviewHeader.style.alignItems = 'flex-start';
+                            reviewHeader.style.marginTop = '0.5rem';
+                            reviewHeader.style.marginBottom = '1rem';
+                            
+                            const reviewerInfo = document.createElement('div');
+                            
+                            const reviewerName = document.createElement('h4');
+                            reviewerName.textContent = review.name;
+                            reviewerName.style.fontSize = '1.5rem';
+                            reviewerName.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            reviewerName.style.color = 'white';
+                            reviewerName.style.margin = '0 0 0.25rem 0';
+                            
+                            const reviewerOrigin = document.createElement('div');
+                            reviewerOrigin.textContent = review.origin;
+                            reviewerOrigin.style.fontSize = '1rem';
+                            reviewerOrigin.style.fontFamily = 'Source Code Pro, sans-serif';
+                            reviewerOrigin.style.color = 'rgba(255, 255, 255, 0.7)';
+                            
+                            reviewerInfo.appendChild(reviewerName);
+                            reviewerInfo.appendChild(reviewerOrigin);
+                            
+                            const ratingContainer = document.createElement('div');
+                            ratingContainer.style.display = 'flex';
+                            
+                            // rating stars
+                            for (let i = 0; i < 5; i++) {
+                                const star = document.createElement('span');
+                                if (i < review.rating) {
+                                    star.innerHTML = '★'; // full star
+                                    star.style.color = 'rgba(255, 215, 0, 0.9)';
+                                } else {
+                                    star.innerHTML = '☆'; // empty star
+                                    star.style.color = 'rgba(255, 255, 255, 0.3)';
+                                }
+                                star.style.fontSize = '1.5rem';
+                                star.style.marginLeft = '0.25rem';
+                                ratingContainer.appendChild(star);
+                            }
+                            
+                            reviewHeader.appendChild(reviewerInfo);
+                            reviewHeader.appendChild(ratingContainer);
+                            
+                            // destination badge
+                            const destinationBadge = document.createElement('div');
+                            destinationBadge.textContent = review.destination;
+                            destinationBadge.style.alignSelf = 'flex-start';
+                            destinationBadge.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                            destinationBadge.style.color = 'white';
+                            destinationBadge.style.padding = '0.5rem 1rem';
+                            destinationBadge.style.borderRadius = '4px';
+                            destinationBadge.style.marginBottom = '1.5rem';
+                            destinationBadge.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            destinationBadge.style.fontSize = '0.9rem';
+                            
+                            // review text
+                            const reviewText = document.createElement('p');
+                            reviewText.textContent = review.text;
+                            reviewText.style.fontSize = '1.1rem';
+                            reviewText.style.lineHeight = '1.6';
+                            reviewText.style.fontFamily = 'Source Code Pro, sans-serif';
+                            reviewText.style.color = 'white';
+                            reviewText.style.flex = '1';
+                            reviewText.style.textAlign = 'center';
+                            reviewText.style.maxWidth = '92%';
+                            reviewText.style.margin = '0 auto';
+                            
+                            // verification seal
+                            const verificationSeal = document.createElement('div');
+                            verificationSeal.style.display = 'flex';
+                            verificationSeal.style.alignItems = 'center';
+                            verificationSeal.style.justifyContent = 'flex-end';
+                            verificationSeal.style.marginTop = '1rem';
+                            
+                            const sealIcon = document.createElement('div');
+                            sealIcon.innerHTML = `
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0, 128, 255, 0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                            `;
+                            
+                            const sealText = document.createElement('span');
+                            sealText.textContent = "Neural Verification Complete";
+                            sealText.style.fontSize = '0.9rem';
+                            sealText.style.fontFamily = 'Source Code Pro, sans-serif';
+                            sealText.style.color = 'rgba(0, 128, 255, 0.9)';
+                            sealText.style.marginLeft = '0.5rem';
+                            
+                            verificationSeal.appendChild(sealIcon);
+                            verificationSeal.appendChild(sealText);
+                            
+                            reviewCard.appendChild(reviewHeader);
+                            reviewCard.appendChild(destinationBadge);
+                            reviewCard.appendChild(reviewText);
+                            reviewCard.appendChild(verificationSeal);
+                            
+                            slidingContainer.appendChild(reviewCard);
+                        });
+
+                        // navigation arrows
+                        const prevArrow = document.createElement('button');
+                        prevArrow.innerHTML = '&#10094;';
+                        prevArrow.style.position = 'absolute';
+                        prevArrow.style.top = '60%';
+                        prevArrow.style.left = '20px';
+                        prevArrow.style.transform = 'translateY(-50%)';
+                        prevArrow.style.zIndex = '2';
+                        prevArrow.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                        prevArrow.style.color = 'white';
+                        prevArrow.style.border = 'none';
+                        prevArrow.style.borderRadius = '50%';
+                        prevArrow.style.width = '40px';
+                        prevArrow.style.height = '40px';
+                        prevArrow.style.fontSize = '20px';
+                        prevArrow.style.cursor = 'pointer';
+                        prevArrow.style.transition = 'background-color 0.3s ease';
+                        prevArrow.style.display = 'flex';
+                        prevArrow.style.justifyContent = 'center';
+                        prevArrow.style.alignItems = 'center';
+
+                        const nextArrow = document.createElement('button');
+                        nextArrow.innerHTML = '&#10095;';
+                        nextArrow.style.position = 'absolute';
+                        nextArrow.style.top = '60%';
+                        nextArrow.style.right = '20px';
+                        nextArrow.style.transform = 'translateY(-50%)';
+                        nextArrow.style.zIndex = '2';
+                        nextArrow.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                        nextArrow.style.color = 'white';
+                        nextArrow.style.border = 'none';
+                        nextArrow.style.borderRadius = '50%';
+                        nextArrow.style.width = '40px';
+                        nextArrow.style.height = '40px';
+                        nextArrow.style.fontSize = '20px';
+                        nextArrow.style.cursor = 'pointer';
+                        nextArrow.style.transition = 'background-color 0.3s ease';
+                        nextArrow.style.display = 'flex';
+                        nextArrow.style.justifyContent = 'center';
+                        nextArrow.style.alignItems = 'center';
+
+                        let currentReview = 0;
+
+                        prevArrow.addEventListener('mouseenter', () => {
+                            playHoverSound2();
+                            prevArrow.style.backgroundColor = 'rgba(0, 128, 255, 0.7)';
+                        });
+                        prevArrow.addEventListener('mouseleave', () => {
+                            prevArrow.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                        });
+                        nextArrow.addEventListener('mouseenter', () => {
+                            playHoverSound2();
+                            nextArrow.style.backgroundColor = 'rgba(0, 128, 255, 0.7)';
+                        });
+                        nextArrow.addEventListener('mouseleave', () => {
+                            nextArrow.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                        });
+
+                        prevArrow.addEventListener('click', () => {
+                            playHoverSound();
+                            if (currentReview > 0) {
+                                currentReview--;
+                                updateReviewsSlider();
+                                updateDots();
+                            }
+                        });
+
+                        nextArrow.addEventListener('click', () => {
+                            playHoverSound();
+                            if (currentReview < reviews.length - 1) {
+                                currentReview++;
+                                updateReviewsSlider();
+                                updateDots();
+                            }
+                        });
+
+                        function updateReviewsSlider() {
+                            slidingContainer.style.transform = `translateX(-${currentReview * (100 / reviews.length)}%)`;
+                        }
+
+                        // pagination dots
+                        const paginationContainer = document.createElement('div');
+                        paginationContainer.style.display = 'flex';
+                        paginationContainer.style.justifyContent = 'center';
+                        paginationContainer.style.marginTop = '2rem';
+                        paginationContainer.style.gap = '10px';
+
+                        reviews.forEach((_, index) => {
+                            const dot = document.createElement('div');
+                            dot.style.width = '12px';
+                            dot.style.height = '12px';
+                            dot.style.borderRadius = '50%';
+                            dot.style.backgroundColor = index === 0 ? 'rgba(0, 128, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
+                            dot.style.cursor = 'pointer';
+                            dot.style.transition = 'all 0.3s ease';
+                            
+                            dot.addEventListener('mouseenter', () => {
+                                playHoverSound2();
+                                if (index !== currentReview) {
+                                    dot.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                                }
+                            });
+                            
+                            dot.addEventListener('mouseleave', () => {
+                                if (index !== currentReview) {
+                                    dot.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                                }
+                            });
+                            
+                            dot.addEventListener('click', () => {
+                                playHoverSound();
+                                currentReview = index;
+                                updateReviewsSlider();
+                                updateDots();
+                            });
+                            
+                            paginationContainer.appendChild(dot);
+                        });
+
+                        function updateDots() {
+                            const dots = paginationContainer.querySelectorAll('div');
+                            dots.forEach((dot, index) => {
+                                dot.style.backgroundColor = index === currentReview ? 
+                                    'rgba(0, 128, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
+                            });
+                        }
+
+                        reviewsCarousel.appendChild(prevArrow);
+                        reviewsCarousel.appendChild(nextArrow);
+
+                        travelerReviewsSection.appendChild(reviewsTitle);
+                        travelerReviewsSection.appendChild(reviewsCarousel);
+                        travelerReviewsSection.appendChild(paginationContainer);
+
+                        // upcoming events calendar
+                        const eventsCalendarSection = document.createElement('div');
+                        eventsCalendarSection.style.maxWidth = '1200px';
+                        eventsCalendarSection.style.margin = '0 auto 3rem auto';
+                        eventsCalendarSection.style.padding = '3rem 2rem';
+                        eventsCalendarSection.style.backgroundColor = 'rgba(0, 28, 55, 0.5)';
+                        eventsCalendarSection.style.borderRadius = '12px';
+                        eventsCalendarSection.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+
+                        const calendarTitle = document.createElement('h3');
+                        calendarTitle.textContent = "UPCOMING EXPEDITIONS";
+                        calendarTitle.style.fontSize = '2rem';
+                        calendarTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                        calendarTitle.style.color = 'white';
+                        calendarTitle.style.textAlign = 'center';
+                        calendarTitle.style.margin = '0 auto 2.5rem auto';
+
+                        // calendar intro
+                        const calendarIntro = document.createElement('p');
+                        calendarIntro.textContent = "Find your next adventure from our list of extraordinary interplanetary and interstellar expeditions.";
+                        calendarIntro.style.fontSize = '1.1rem';
+                        calendarIntro.style.lineHeight = '1.7';
+                        calendarIntro.style.fontFamily = 'Source Code Pro, sans-serif';
+                        calendarIntro.style.color = 'rgb(209, 213, 219)';
+                        calendarIntro.style.textAlign = 'center';
+                        calendarIntro.style.maxWidth = '800px';
+                        calendarIntro.style.margin = '0 auto 3rem auto';
+
+                        // calendar grid
+                        const calendarGrid = document.createElement('div');
+                        calendarGrid.style.display = 'grid';
+                        calendarGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(350px, 1fr))';
+                        calendarGrid.style.gap = '2rem';
+
+                        // events data
+                        const events = [
+                            {
+                                title: "Io Volcanic System Tour",
+                                date: "April 2204",
+                                location: "Jupiter System",
+                                description: "Experience the incredible power of our solar system's most active volcanic moon. \
+Collect rare mineral samples formed under extreme conditions and take a tour of Loki Patera, the largest volcanic depression in the solar system.",
+                            },
+                            {
+                                title: "Saturn Rings Excursion",
+                                date: "October 2204",
+                                location: "Saturn System",
+                                description: "Navigate the breathtaking views of Saturn's rings. Participants will explore the mysterious \
+Cassini Division, have the opportunity to collect pristine ring material dating back to the formation of the solar system, and spacewalk \
+among the glittering ice crystals.",
+                            },
+                            {
+                                title: "Pluto Ice Cavern Adventure",
+                                date: "June-July 2205",
+                                location: "Outer Solar System",
+                                description: "Descend into the breathtaking caverns beneath Pluto's heart: Tombaugh Regio.\
+ Our expedition will explore vast nitrogen ice formations, ancient methane deposits, and unique mineral structures found nowhere \
+ else in the solar system.",
+                            },
+                            {
+                                title: "Proxima Centauri Survey",
+                                date: "August 2206",
+                                location: "Alpha Centauri System",
+                                description: "Join humanity's journey to our nearest stellar neighbor. Survey the habitable \
+exoplanet Proxima b, study the unique radiation environment, and witness the stunning alien sunrise. Recent developments in quantum \
+technology have made this journey possible.",
+                            },
+                            {
+                                title: "Sirius Star System Pilgrimage",
+                                date: "September 2209",
+                                location: "Sirius System",
+                                description: "Witness the brilliance of Sirius A, the brightest star in Earth's night sky, and its \
+white dwarf companion, Sirius B. Study the gravitational relationships between binary stars and conduct unique experiments in this \
+complex environment.",
+                            },
+                            {
+                                title: "Andromeda Frontier Expedition",
+                                date: "October 2210",
+                                location: "Intergalactic Space",
+                                description: "Embark on one of humanity's most ambitious journeys yet: a pioneer mission toward \
+the Andromeda Galaxy. Set foot farther than any humans before, establish deep-space monitoring stations, push the boundaries of \
+interstellar space.",
+                            }
+                        ];
+
+                        // event cards
+                        events.forEach(event => {
+                            const eventCard = document.createElement('div');
+                            eventCard.style.backgroundColor = 'rgba(0, 128, 255, 0.075)';
+                            eventCard.style.border = '1px solid rgba(0, 128, 255, 0.5)';
+                            eventCard.style.borderRadius = '8px';
+                            eventCard.style.overflow = 'hidden';
+                            eventCard.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+                            
+                            eventCard.addEventListener('mouseenter', () => {
+                                playHoverSound3();
+                                eventCard.style.transform = 'translateY(-5px)';
+                                eventCard.style.boxShadow = '0 10px 25px rgba(0, 128, 255, 0.3)';
+                            });
+                            
+                            eventCard.addEventListener('mouseleave', () => {
+                                eventCard.style.transform = 'translateY(0)';
+                                eventCard.style.boxShadow = 'none';
+                            });
+
+                            // header
+                            const cardHeader = document.createElement('div');
+                            cardHeader.style.padding = '0.5rem 1.5rem 0.5rem 1.5rem';
+                            cardHeader.style.borderBottom = eventCard.style.border;
+                            
+                            // event title
+                            const eventTitle = document.createElement('h4');
+                            eventTitle.textContent = event.title;
+                            eventTitle.style.fontSize = '1.3rem';
+                            eventTitle.style.marginBottom = '0.5rem';
+                            eventTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            eventTitle.style.color = 'white';
+                            
+                            // date and location
+                            const eventMeta = document.createElement('div');
+                            eventMeta.style.display = 'flex';
+                            eventMeta.style.justifyContent = 'space-between';
+                            eventMeta.style.marginBottom = '1rem';
+                            
+                            const eventDate = document.createElement('div');
+                            eventDate.textContent = event.date;
+                            eventDate.style.fontSize = '1rem';
+                            eventDate.style.fontFamily = 'Source Code Pro, sans-serif';
+                            eventDate.style.color = 'rgba(255, 255, 255, 0.7)';
+                            
+                            const eventLocation = document.createElement('div');
+                            eventLocation.textContent = event.location;
+                            eventLocation.style.fontSize = '0.9rem';
+                            eventLocation.style.fontFamily = 'Source Code Pro, sans-serif';
+                            eventLocation.style.color = 'rgba(255, 255, 255, 0.5)';
+                            
+                            eventMeta.appendChild(eventDate);
+                            eventMeta.appendChild(eventLocation);
+                            
+                            cardHeader.appendChild(eventTitle);
+                            cardHeader.appendChild(eventMeta);
+                            
+                            // card content
+                            const cardContent = document.createElement('div');
+                            cardContent.style.padding = '1.5rem';
+                            
+                            // event description
+                            const eventDescription = document.createElement('p');
+                            eventDescription.textContent = event.description;
+                            eventDescription.style.fontSize = '1rem';
+                            eventDescription.style.lineHeight = '1.6';
+                            eventDescription.style.fontFamily = 'Source Code Pro, sans-serif';
+                            eventDescription.style.color = 'rgb(209, 213, 219)';
+                            eventDescription.style.marginBottom = '1.5rem';
+                            
+                            // book button
+                            const bookButton = document.createElement('button');
+                            bookButton.textContent = 'RESERVE EXPEDITION';
+                            bookButton.style.width = '100%';
+                            bookButton.style.padding = '0.75rem';
+                            bookButton.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                            bookButton.style.color = 'white';
+                            bookButton.style.border = 'none';
+                            bookButton.style.borderRadius = '4px';
+                            bookButton.style.fontSize = '0.9rem';
+                            bookButton.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                            bookButton.style.cursor = 'pointer';
+                            bookButton.style.transition = 'all 0.3s ease';
+                            
+                            bookButton.addEventListener('mouseenter', (e) => {
+                                e.stopPropagation();
+                                playHoverSound2();
+                                bookButton.style.backgroundColor = 'rgba(0, 160, 255, 1)';
+                            });
+                            
+                            bookButton.addEventListener('mouseleave', (e) => {
+                                e.stopPropagation();
+                                bookButton.style.backgroundColor = 'rgba(0, 128, 255, 0.8)';
+                            });
+                            
+                            bookButton.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                playClickSound();
+                                const overlay = document.createElement('div');
+                                overlay.style.position = 'fixed';
+                                overlay.style.top = '0';
+                                overlay.style.left = '0';
+                                overlay.style.width = '100%';
+                                overlay.style.height = '100%';
+                                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                                overlay.style.backdropFilter = 'blur(8px)';
+                                overlay.style.zIndex = '1000';
+                                overlay.style.display = 'flex';
+                                overlay.style.justifyContent = 'center';
+                                overlay.style.alignItems = 'center';
+                                
+                                const popup = document.createElement('div');
+                                popup.style.backgroundColor = 'rgba(10, 15, 30, 0.95)';
+                                popup.style.border = '2px solid rgba(0, 128, 255, 0.7)';
+                                popup.style.borderRadius = '12px';
+                                popup.style.padding = '40px';
+                                popup.style.width = '90%';
+                                popup.style.maxWidth = '500px';
+                                popup.style.position = 'relative';
+                                popup.style.boxShadow = '0 0 30px rgba(0, 128, 255, 0.5)';
+                                popup.style.animation = 'popupFadeIn 0.3s ease-out forwards';
+                                
+                                const style = document.createElement('style');
+                                style.textContent = `
+                                    @keyframes popupFadeIn {
+                                        from { opacity: 0; transform: scale(0.9); }
+                                        to { opacity: 1; transform: scale(1); }
+                                    }
+                                    
+                                    @keyframes glowPulse {
+                                        0% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
+                                        50% { box-shadow: 0 0 15px rgba(0, 128, 255, 0.8); }
+                                        100% { box-shadow: 0 0 5px rgba(0, 128, 255, 0.5); }
+                                    }
+                                `;
+                                document.head.appendChild(style);
+                                
+                                const closeButton = document.createElement('button');
+                                closeButton.innerHTML = '&times;';
+                                closeButton.style.position = 'absolute';
+                                closeButton.style.top = '15px';
+                                closeButton.style.right = '15px';
+                                closeButton.style.backgroundColor = 'transparent';
+                                closeButton.style.border = 'none';
+                                closeButton.style.color = 'rgba(0, 128, 255, 0.9)';
+                                closeButton.style.fontSize = '28px';
+                                closeButton.style.cursor = 'pointer';
+                                closeButton.style.width = '40px';
+                                closeButton.style.height = '40px';
+                                closeButton.style.lineHeight = '40px';
+                                closeButton.style.padding = '0';
+                                closeButton.style.borderRadius = '50%';
+                                closeButton.style.transition = 'all 0.2s ease';
+                                
+                                closeButton.addEventListener('mouseenter', () => {
+                                    closeButton.style.backgroundColor = 'rgba(0, 128, 255, 0.2)';
+                                    closeButton.style.transform = 'scale(1.1)';
+                                });
+                                
+                                closeButton.addEventListener('mouseleave', () => {
+                                    closeButton.style.backgroundColor = 'transparent';
+                                    closeButton.style.transform = 'scale(1)';
+                                });
+                                
+                                closeButton.addEventListener('click', () => {
+                                    playCloseSound();
+                                    overlay.style.opacity = '0';
+                                    popup.style.transform = 'scale(0.9)';
+                                    popup.style.opacity = '0';
+                                    setTimeout(() => {
+                                        document.body.removeChild(overlay);
+                                    }, 300);
+                                });
+                                
+                                const popupTitle = document.createElement('h2');
+                                popupTitle.textContent = 'BOOKING PORTAL';
+                                popupTitle.style.color = 'white';
+                                popupTitle.style.fontSize = '2rem';
+                                popupTitle.style.textAlign = 'center';
+                                popupTitle.style.marginBottom = '20px';
+                                popupTitle.style.fontFamily = 'Havelock Titling Medium, sans-serif';
+                                
+                                const eventTitle = document.createElement('h3');
+                                eventTitle.textContent = event.title;
+                                eventTitle.style.color = 'rgba(0, 128, 255, 0.9)';
+                                eventTitle.style.fontSize = '1.2rem';
+                                eventTitle.style.textAlign = 'center';
+                                eventTitle.style.marginBottom = '30px';
+                                eventTitle.style.fontFamily = 'Source Code Pro, sans-serif';
+                                
+                                const emailIcon = document.createElement('div');
+                                emailIcon.innerHTML = `
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="rgba(0, 128, 255, 0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
+                                `;
+                                emailIcon.style.display = 'flex';
+                                emailIcon.style.justifyContent = 'center';
+                                emailIcon.style.marginBottom = '20px';
+                                
+                                const messageText = document.createElement('p');
+                                messageText.textContent = 'Please forward your expedition request to our customer support for details:';
+                                messageText.style.color = 'rgb(209, 213, 219)';
+                                messageText.style.fontSize = '1.1rem';
+                                messageText.style.textAlign = 'center';
+                                messageText.style.lineHeight = '1.6';
+                                messageText.style.marginBottom = '20px';
+                                messageText.style.fontFamily = 'Source Code Pro, sans-serif';
+                                
+                                const emailAddress = document.createElement('div');
+                                emailAddress.textContent = 'support@elysiuminitiative.com';
+                                emailAddress.style.color = 'rgba(0, 128, 255, 0.9)';
+                                emailAddress.style.fontSize = '1.2rem';
+                                emailAddress.style.fontWeight = 'bold';
+                                emailAddress.style.textAlign = 'center';
+                                emailAddress.style.padding = '15px';
+                                emailAddress.style.margin = '0 auto 25px auto';
+                                emailAddress.style.backgroundColor = 'rgba(0, 128, 255, 0.1)';
+                                emailAddress.style.border = '1px solid rgba(0, 128, 255, 0.3)';
+                                emailAddress.style.borderRadius = '6px';
+                                emailAddress.style.maxWidth = '350px';
+                                emailAddress.style.fontFamily = 'Source Code Pro, monospace';
+                                emailAddress.style.animation = 'glowPulse 4s infinite';
+                                
+                                const disclaimerText = document.createElement('p');
+                                disclaimerText.textContent = 'By booking an expedition, you acknowledge The Elysium Initiative\'s right to neural data collection and waive all claims to anonymity upon acceptance.';
+                                disclaimerText.style.color = 'rgba(209, 213, 219, 0.6)';
+                                disclaimerText.style.fontSize = '0.8rem';
+                                disclaimerText.style.textAlign = 'center';
+                                disclaimerText.style.marginTop = '20px';
+                                disclaimerText.style.fontStyle = 'italic';
+                                disclaimerText.style.fontFamily = 'Source Code Pro, sans-serif';
+                                
+                                popup.appendChild(closeButton);
+                                popup.appendChild(popupTitle);
+                                popup.appendChild(eventTitle);
+                                popup.appendChild(emailIcon);
+                                popup.appendChild(messageText);
+                                popup.appendChild(emailAddress);
+                                popup.appendChild(disclaimerText);
+                                overlay.appendChild(popup);
+                                document.body.appendChild(overlay);
+                            });
+                            
+                            cardContent.appendChild(eventDescription);
+                            cardContent.appendChild(bookButton);
+                            
+                            eventCard.appendChild(cardHeader);
+                            eventCard.appendChild(cardContent);
+                            
+                            calendarGrid.appendChild(eventCard);
+                        });
+
+                        eventsCalendarSection.appendChild(calendarTitle);
+                        eventsCalendarSection.appendChild(calendarIntro);
+                        eventsCalendarSection.appendChild(calendarGrid);
+
+                        const disclaimerText = document.createElement('p');
+                        disclaimerText.innerHTML = '<style="height: 1.4rem; vertical-align: middle; margin-right: 12px; \
+position: relative; top: -3px; opacity: 0.6;"><span style="font-size: 1.2rem; font-weight: bold; font-style:normal;">Important:</span>\n \
+Subjective time dilation resulting from interstellar travel may cause discrepancies.';
+                        disclaimerText.style.whiteSpace = 'pre-wrap'
+                        disclaimerText.style.lineHeight = '2';
+                        disclaimerText.style.color = 'rgba(255, 255, 255, 0.6)';
+                        disclaimerText.style.fontSize = '1.2rem';
+                        disclaimerText.style.textAlign = 'center';
+                        disclaimerText.style.fontStyle = 'italic';
+                        disclaimerText.style.fontFamily = 'Source Code Pro, sans-serif';
+                        disclaimerText.style.padding = '2rem';
+                        disclaimerText.style.maxWidth = '1000px';
+                        disclaimerText.style.margin = '3rem auto';
+                        
+                        // footer
+                        const footer = document.createElement('div');
+                        footer.style.textAlign = 'center';
+                        footer.style.paddingBottom = '2rem';
+                        footer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
+                        footer.style.paddingTop = '2rem';
+                        footer.style.maxWidth = '700px';
+                        footer.style.margin = '4rem auto 0rem auto';
+                        
+                        const footerText = document.createElement('p');
+                        footerText.textContent = "© 2202 The Elysium Initiative. All rights reserved across the spacetime continuum.";
+                        footerText.style.fontSize = '0.9rem';
+                        footerText.style.fontFamily = 'Source Code Pro, sans-serif';
+                        footerText.style.color = 'rgba(209, 213, 219, 0.6)';
+                        footerText.style.marginBottom = '200px';
+                        
+                        footer.appendChild(footerText);
+                        
+                        expeditionSection.appendChild(expeditionHeader);
+                        expeditionSection.appendChild(shipClassSection);
+                        expeditionSection.appendChild(travelerReviewsSection);
+                        expeditionSection.appendChild(eventsCalendarSection);
+                        expeditionSection.appendChild(disclaimerText);
+                        expeditionSection.appendChild(footer);
+                        
+                        expeditionsPage.appendChild(expeditionSection);
                         document.body.appendChild(expeditionsPage);
-                    }
-                },
-                { 
-                    name: 'Charters',
-                    action: () => {
-                        sidebar.classList.remove('active');
-                        container.style.display = 'none';
-                        
-                        const chartersPage = document.createElement('div');
-                        chartersPage.id = 'charters-page';
-                        chartersPage.style.minHeight = '100vh';
-                        chartersPage.style.height = '100%';
-                        chartersPage.style.backgroundColor = 'black';
-                        chartersPage.style.color = 'white';
-                        chartersPage.style.padding = '120px 2rem 2rem 2rem';
-                        chartersPage.style.display = 'flex';
-                        chartersPage.style.justifyContent = 'center';
-                        chartersPage.style.position = 'fixed';
-                        chartersPage.style.top = '0';
-                        chartersPage.style.left = '0';
-                        chartersPage.style.right = '0';
-                        chartersPage.style.bottom = '0';
-                        chartersPage.style.overflowY = 'scroll';
-                
-                        const content = document.createElement('div');
-                        content.style.maxWidth = '1060px';
-                        content.style.width = '100%';
-                        
-                        const title = document.createElement('h1');
-                        title.textContent = "Private Charters";
-                        title.style.fontSize = '2.5rem';
-                        title.style.marginBottom = '2rem';
-                        title.style.fontFamily = 'Havelock Titling Medium, sans-serif';
-                        title.style.color = 'white';
-                
-                        const text = document.createElement('p');
-                        text.style.fontSize = '1.25rem';
-                        text.style.marginBottom = '2rem';
-                        text.style.lineHeight = '1.75';
-                        text.style.fontFamily = 'Source Code Pro, sans-serif';
-                        text.style.color = 'rgb(209, 213, 219)';
-                        text.textContent = "[Placeholder]";
-                
-                        content.appendChild(title);
-                        content.appendChild(text);
-                        chartersPage.appendChild(content);
-                        document.body.appendChild(chartersPage);
                     }
                 }
             ]
@@ -3874,7 +4985,7 @@ of provided equipment.';
                 aboutPage.style.height = '100%';
                 aboutPage.style.backgroundColor = 'black';
                 aboutPage.style.color = 'white';
-                aboutPage.style.padding = '120px 2rem 2rem 2rem';
+                aboutPage.style.padding = '120px 0 2rem 0';
                 aboutPage.style.display = 'flex';
                 aboutPage.style.justifyContent = 'center';
                 aboutPage.style.position = 'fixed';
@@ -3882,7 +4993,7 @@ of provided equipment.';
                 aboutPage.style.left = '0';
                 aboutPage.style.right = '0';
                 aboutPage.style.bottom = '0';
-                aboutPage.style.overflowY = 'scroll';
+                aboutPage.style.overflowY = 'auto';
         
                 const content = document.createElement('div');
                 content.style.maxWidth = '1060px';
@@ -4286,7 +5397,8 @@ decommissioning, reallocating resources toward higher-value celestial investment
                 const testimonialSlider = document.createElement('div');
                 testimonialSlider.style.position = 'relative';
                 testimonialSlider.style.overflow = 'hidden';
-                testimonialSlider.style.height = '250px';
+                testimonialSlider.style.minHeight = '350px';
+                testimonialSlider.style.height = 'auto';
 
                 const testimonialContainer = document.createElement('div');
                 testimonialContainer.className = 'testimonial-container';
@@ -4325,7 +5437,7 @@ decommissioning, reallocating resources toward higher-value celestial investment
                     testimonialCard.style.border = '1px solid rgba(0, 128, 255, 0.2)';
                     testimonialCard.style.transform = `translateX(${index * 100}%)`;
                     testimonialCard.style.transition = 'transform 0.5s ease';
-                    testimonialCard.style.height = '200px';
+                    testimonialCard.style.minHeight = '200px';
                     testimonialCard.style.display = 'flex';
                     testimonialCard.style.flexDirection = 'column';
                     testimonialCard.style.justifyContent = 'center';
@@ -4363,7 +5475,7 @@ decommissioning, reallocating resources toward higher-value celestial investment
                     testimonialCard.appendChild(quoteText);
                     testimonialCard.appendChild(authorText);
                     
-                    testimonialContainer.appendChild(testimonialCard); // Append to container instead
+                    testimonialContainer.appendChild(testimonialCard);
                 });
 
                 // navigation arrows
@@ -4647,10 +5759,11 @@ a place for you in humanity's greatest endeavor.";
                 // footer
                 const footer = document.createElement('div');
                 footer.style.textAlign = 'center';
-                footer.style.marginTop = '4rem';
                 footer.style.paddingBottom = '2rem';
                 footer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
                 footer.style.paddingTop = '2rem';
+                footer.style.maxWidth = '700px';
+                footer.style.margin = '4rem auto 0rem auto';
                 
                 const footerText = document.createElement('p');
                 footerText.textContent = "© 2202 The Elysium Initiative. All rights reserved across the spacetime continuum.";
@@ -5816,8 +6929,11 @@ a place for you in humanity's greatest endeavor.";
     const zoomIndicator = document.createElement('div');
     zoomIndicator.className = 'control-indicator ui-element';
     zoomIndicator.style.left = '20px';
-    zoomIndicator.style.bottom = '182px';
+    zoomIndicator.style.bottom = '187px';
     zoomIndicator.style.width = '100px';
+    zoomIndicator.style.border = '1px solid rgba(0, 128, 255, 0.5)';
+    zoomIndicator.style.borderRadius = '10px';
+    zoomIndicator.style.animation = 'glowPulse 4s infinite ease-in-out';
     
     const zoomIcon = document.createElement('img');
     zoomIcon.src = 'scroll_icon.png';
@@ -5834,8 +6950,11 @@ a place for you in humanity's greatest endeavor.";
     const panIndicator = document.createElement('div');
     panIndicator.className = 'control-indicator ui-element';
     panIndicator.style.left = '20px';
-    panIndicator.style.bottom = '60px';
+    panIndicator.style.bottom = '65px';
     panIndicator.style.width = '100px';
+    panIndicator.style.border = '1px solid rgba(0, 128, 255, 0.5)';
+    panIndicator.style.borderRadius = '10px';
+    panIndicator.style.animation = 'glowPulse 4s infinite ease-in-out';
     
     const panIcon = document.createElement('img');
     panIcon.src = 'pan_icon.png';
